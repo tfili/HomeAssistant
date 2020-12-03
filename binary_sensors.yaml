@@ -1,0 +1,8 @@
+- platform: template
+  sensors:
+  
+    # On if a garage door is open at night
+    garage_open_at_night:
+      friendly_name: "Garage Doors"
+      value_template: >-
+        {{ is_state("sun.sun", "below_horizon") and (is_state("cover.left_garage_door", "open") or is_state("cover.right_garage_door", "open")) }}

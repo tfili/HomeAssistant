@@ -1,0 +1,6 @@
+doors:
+  name: Doors
+  entities:
+    - binary_sensor.morning_room_door
+    - binary_sensor.front_door
+    - binary_sensor.mud_room_door

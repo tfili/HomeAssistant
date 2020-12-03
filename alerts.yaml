@@ -1,0 +1,46 @@
+morning_room_door: &door_alert_anchor
+  name: Morning Room Door Ajar
+  message: >
+    {{ states.binary_sensor.morning_room_door.name }} has been open for {{ ((as_timestamp(now())-as_timestamp(states.binary_sensor.morning_room_door.last_changed)) / 60) | round }} minutes
+  done_message: >
+    {{ states.binary_sensor.morning_room_door.name }} is closed
+  entity_id: binary_sensor.morning_room_door
+  state: 'on'
+  repeat:
+    - 5
+    - 10
+    - 15
+    - 30
+  can_acknowledge: true
+  skip_first: true
+  notifiers:
+    - mobile_app_iphone
+    - mobile_app_theresas_iphone
+    
+front_door:
+  <<: *door_alert_anchor
+  name: Front Door Ajar
+  message: >
+    {{ states.binary_sensor.front_door.name }} has been open for {{ ((as_timestamp(now())-as_timestamp(states.binary_sensor.front_door.last_changed)) / 60) | round }} minutes
+  done_message: >
+    {{ states.binary_sensor.front_door.name }} is closed
+  entity_id: binary_sensor.front_door
+
+mud_room_door:
+  <<: *door_alert_anchor
+  name: Mud Room Door Ajar
+  message: >
+    {{ states.binary_sensor.mud_room_door.name }} has been open for {{ ((as_timestamp(now())-as_timestamp(states.binary_sensor.mud_room_door.last_changed)) / 60) | round }} minutes
+  done_message: >
+    {{ states.binary_sensor.mud_room_door.name }} is closed
+  entity_id: binary_sensor.mud_room_door
+
+garage_doors:
+  <<: *door_alert_anchor
+  name: Garage Door Ajar
+  message: >
+    {{ states.binary_sensor.garage_open_at_night.name }} have been open for {{ ((as_timestamp(now())-as_timestamp(states.binary_sensor.garage_open_at_night.last_changed)) / 60) | round }} minutes
+  done_message: >
+    {{ states.binary_sensor.garage_open_at_night.name }} are closed
+  entity_id: binary_sensor.garage_open_at_night
+  repeat: 30

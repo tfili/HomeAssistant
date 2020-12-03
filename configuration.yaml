@@ -1,0 +1,59 @@
+
+homeassistant:
+  customize: !include customize.yaml
+  packages: !include_dir_named packages
+
+# Configure a default setup of Home Assistant (frontend, api, etc)
+default_config:
+
+# Text to speech
+tts:
+  - platform: google_translate
+  
+mqtt:
+  discovery: true
+  discovery_prefix: homeassistant
+
+group: !include groups.yaml
+automation: !include automations.yaml
+script: !include scripts.yaml
+scene: !include scenes.yaml
+alert: !include alerts.yaml
+binary_sensor: !include binary_sensors.yaml
+
+
+nest:
+  client_id: 879361770558-0770q57sep12u3tn4pp0k1ve73g1kofj.apps.googleusercontent.com
+  client_secret: 3ZsdCFIne_5XknFr1eblrtHf
+  project_id: d8608965-6f68-48ea-8a17-49a5b7fe0be8
+  subscriber_id: projects/sdm-prod/topics/enterprise-d8608965-6f68-48ea-8a17-49a5b7fe0be8
+
+media_player:  
+  - platform: samsungtv_tizen
+    host: 192.168.0.181
+    mac: "BC:7E:8B:02:A8:61"
+    update_method: "smartthings"
+    app_list: '{"YouTubeTV": "PvWgqxV3Xa.YouTubeTV", "Netflix": "RN1MCdNq8t.Netflix"}'
+    api_key: "29d9c01d-4949-490f-9ac9-63ba666c27ce"
+    device_id: "4b65e900-c02e-4a84-8ca7-bde8cfe4e485"
+
+sensor:
+  - platform: template
+    sensors:
+      # Abode battery sensors
+      garage_keypad_battery:
+        device_class: battery
+        friendly_name_template: >-
+          {{ state_attr("binary_sensor.garage_keypad", "friendly_name") }} Battery
+        value_template: >-
+          {% if state_attr("binary_sensor.garage_keypad", "battery_low") %}
+            Low
+          {% else %}
+            Full
+          {% endif %}
+        icon_template: >-
+          {% if state_attr("binary_sensor.garage_keypad", "battery_low") %}
+            mdi:battery-alert
+          {% else %}
+            mdi:battery
+          {% endif %}
