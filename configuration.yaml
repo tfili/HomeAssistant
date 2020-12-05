@@ -2,6 +2,8 @@
 homeassistant:
   customize: !include customize.yaml
   packages: !include_dir_named packages
+  auth_mfa_modules:
+    - type: totp
 
 # Configure a default setup of Home Assistant (frontend, api, etc)
 default_config:
@@ -13,6 +15,10 @@ tts:
 mqtt:
   discovery: true
   discovery_prefix: homeassistant
+  
+wake_on_lan:
+
+discovery:
 
 group: !include groups.yaml
 automation: !include automations.yaml
@@ -20,6 +26,7 @@ script: !include scripts.yaml
 scene: !include scenes.yaml
 alert: !include alerts.yaml
 binary_sensor: !include binary_sensors.yaml
+sensor: !include sensors.yaml
 
 
 nest:
@@ -33,27 +40,7 @@ media_player:
     host: 192.168.0.181
     mac: "BC:7E:8B:02:A8:61"
     update_method: "smartthings"
-    app_list: '{"YouTubeTV": "PvWgqxV3Xa.YouTubeTV", "Netflix": "RN1MCdNq8t.Netflix"}'
+    app_list: '{"YouTubeTV": "PvWgqxV3Xa.YouTubeTV", "Netflix": "RN1MCdNq8t.Netflix", "Disney+": "MCmYXNxgcu.DisneyPlus", "Prime Video": "evKhCgZelL.AmazonIgnitionLauncher2", "Hulu": "LBUAQX1exg.Hulu", "AppleTV": "com.samsung.tv.aria-video", "YouTube": "9Ur5IzDKqV.TizenYouTube"}'
     api_key: "29d9c01d-4949-490f-9ac9-63ba666c27ce"
     device_id: "4b65e900-c02e-4a84-8ca7-bde8cfe4e485"
-
-sensor:
-  - platform: template
-    sensors:
-      # Abode battery sensors
-      garage_keypad_battery:
-        device_class: battery
-        friendly_name_template: >-
-          {{ state_attr("binary_sensor.garage_keypad", "friendly_name") }} Battery
-        value_template: >-
-          {% if state_attr("binary_sensor.garage_keypad", "battery_low") %}
-            Low
-          {% else %}
-            Full
-          {% endif %}
-        icon_template: >-
-          {% if state_attr("binary_sensor.garage_keypad", "battery_low") %}
-            mdi:battery-alert
-          {% else %}
-            mdi:battery
-          {% endif %}
+    broadcast_address: "192.168.0.255"

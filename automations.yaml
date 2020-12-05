@@ -24,10 +24,10 @@
   action:
   - service: media_player.turn_off
     data: {}
-    entity_id: media_player.great_room_tv
+    entity_id: media_player.samsung_tv_remote
   - device_id: 49c47010dfc55acbbdf71af225bedec8
     domain: lock
-    entity_id: lock.garage_lock
+    entity_id: lock.mud_room_lock
     type: lock
   - device_id: 785c6be41c4f044832af48da1a4914aa
     domain: cover
@@ -51,7 +51,7 @@
   action:
   - device_id: 49c47010dfc55acbbdf71af225bedec8
     domain: lock
-    entity_id: lock.garage_lock
+    entity_id: lock.mud_room_lock
     type: unlock
   mode: single
 - id: '1606674668151'
