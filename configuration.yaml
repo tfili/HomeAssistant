@@ -5,6 +5,9 @@ homeassistant:
   auth_mfa_modules:
     - type: totp
 
+frontend:
+  themes: !include_dir_merge_named themes
+
 # Configure a default setup of Home Assistant (frontend, api, etc)
 default_config:
 
