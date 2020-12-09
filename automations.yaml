@@ -140,3 +140,45 @@
     type: set_preset_mode
     preset_mode: none
   mode: single
+- id: '1607443386474'
+  alias: Reset Motion Sensors
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - binary_sensor.front_door_motion_sensor
+    - binary_sensor.great_room_motion_sensor
+    - binary_sensor.kitchen_motion_sensor
+    to: 'on'
+    for: 00:10:00
+  condition: []
+  action:
+  - service: python_script.set_state
+    data:
+      entity_id: '{{ trigger.entity_id }}'
+      state: 'off'
+  mode: single
+- id: '1607449164931'
+  alias: Auto-Home
+  description: ''
+  trigger:
+  - platform: device
+    device_id: d7d5a15b61df46c3940375a105d98d11
+    domain: device_tracker
+    entity_id: device_tracker.toms_iphone
+    type: enters
+    zone: zone.home
+  - platform: device
+    device_id: 07abf403cb31b012a75b9b2210f815a1
+    domain: device_tracker
+    entity_id: device_tracker.theresas_iphone
+    type: enters
+    zone: zone.home
+  condition: []
+  action:
+  - device_id: 6cf7de2f629dae59e6d3a0b6f78c1881
+    domain: alarm_control_panel
+    entity_id: alarm_control_panel.abode_alarm
+    type: disarm
+    code: '0000'
+  mode: single

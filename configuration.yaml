@@ -1,3 +1,5 @@
+# Configure a default setup of Home Assistant (frontend, api, etc)
+default_config:
 
 homeassistant:
   customize: !include customize.yaml
@@ -8,20 +10,23 @@ homeassistant:
 frontend:
   themes: !include_dir_merge_named themes
 
-# Configure a default setup of Home Assistant (frontend, api, etc)
-default_config:
-
 # Text to speech
 tts:
   - platform: google_translate
   
+# Enable discovery for mqtt
 mqtt:
   discovery: true
   discovery_prefix: homeassistant
   
+# Enable wake on lan
 wake_on_lan:
 
+# Enable discovery
 discovery:
+
+# Enable python scripts
+python_script:
 
 group: !include groups.yaml
 automation: !include automations.yaml
@@ -31,13 +36,14 @@ alert: !include alerts.yaml
 binary_sensor: !include binary_sensors.yaml
 sensor: !include sensors.yaml
 
-
+# Nest config
 nest:
   client_id: 879361770558-0770q57sep12u3tn4pp0k1ve73g1kofj.apps.googleusercontent.com
   client_secret: 3ZsdCFIne_5XknFr1eblrtHf
   project_id: d8608965-6f68-48ea-8a17-49a5b7fe0be8
   subscriber_id: projects/sdm-prod/topics/enterprise-d8608965-6f68-48ea-8a17-49a5b7fe0be8
 
+# Samsung TV cofig
 media_player:  
   - platform: samsungtv_tizen
     host: 192.168.0.181
