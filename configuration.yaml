@@ -42,7 +42,7 @@ python_script:
 # Nest config
 nest:
   client_id: 879361770558-0770q57sep12u3tn4pp0k1ve73g1kofj.apps.googleusercontent.com
-  client_secret: 3ZsdCFIne_5XknFr1eblrtHf
+  client_secret: !secret nest_client_secret
   project_id: d8608965-6f68-48ea-8a17-49a5b7fe0be8
   subscriber_id: projects/sdm-prod/topics/enterprise-d8608965-6f68-48ea-8a17-49a5b7fe0be8
 

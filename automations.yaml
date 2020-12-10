@@ -157,7 +157,8 @@
     data:
       entity_id: '{{ trigger.entity_id }}'
       state: 'off'
-  mode: single
+  mode: parallel
+  max: 10
 - id: '1607449164931'
   alias: Auto-Home
   description: ''

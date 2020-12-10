@@ -6,3 +6,4 @@ home-assistant_v2.db
 /custom_components/*
 /www/*
 /themes/*
+secrets.yaml

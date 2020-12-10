@@ -1,4 +1,4 @@
-morning_room_door: &door_alert_anchor
+morning_room_door:
   name: Morning Room Door Ajar
   message: >
     {{ states.binary_sensor.morning_room_door.name }} has been open for {{ ((as_timestamp(now())-as_timestamp(states.binary_sensor.morning_room_door.last_changed)) / 60) | round }} minutes
@@ -18,29 +18,54 @@ morning_room_door: &door_alert_anchor
     - mobile_app_theresas_iphone
     
 front_door:
-  <<: *door_alert_anchor
   name: Front Door Ajar
   message: >
     {{ states.binary_sensor.front_door.name }} has been open for {{ ((as_timestamp(now())-as_timestamp(states.binary_sensor.front_door.last_changed)) / 60) | round }} minutes
   done_message: >
     {{ states.binary_sensor.front_door.name }} is closed
   entity_id: binary_sensor.front_door
+  state: 'on'
+  repeat:
+    - 5
+    - 10
+    - 15
+    - 30
+  can_acknowledge: true
+  skip_first: true
+  notifiers:
+    - mobile_app_toms_iphone
+    - mobile_app_theresas_iphone
 
 mud_room_door:
-  <<: *door_alert_anchor
   name: Mud Room Door Ajar
   message: >
     {{ states.binary_sensor.mud_room_door.name }} has been open for {{ ((as_timestamp(now())-as_timestamp(states.binary_sensor.mud_room_door.last_changed)) / 60) | round }} minutes
   done_message: >
     {{ states.binary_sensor.mud_room_door.name }} is closed
   entity_id: binary_sensor.mud_room_door
+  state: 'on'
+  repeat:
+    - 5
+    - 10
+    - 15
+    - 30
+  can_acknowledge: true
+  skip_first: true
+  notifiers:
+    - mobile_app_toms_iphone
+    - mobile_app_theresas_iphone
 
 garage_doors:
-  <<: *door_alert_anchor
   name: Garage Door Ajar
   message: >
     {{ states.binary_sensor.garage_open_at_night.name }} have been open for {{ ((as_timestamp(now())-as_timestamp(states.binary_sensor.garage_open_at_night.last_changed)) / 60) | round }} minutes
   done_message: >
     {{ states.binary_sensor.garage_open_at_night.name }} are closed
   entity_id: binary_sensor.garage_open_at_night
+  state: 'on'
   repeat: 30
+  can_acknowledge: true
+  skip_first: true
+  notifiers:
+    - mobile_app_toms_iphone
+    - mobile_app_theresas_iphone
