@@ -6,6 +6,9 @@ homeassistant:
   packages: !include_dir_named packages
   auth_mfa_modules:
     - type: totp
+  customize_domain:
+    automation:
+      initial_state: 'on'
 
 frontend:
   themes: !include_dir_merge_named themes
@@ -25,9 +28,6 @@ wake_on_lan:
 # Enable discovery
 discovery:
 
-# Enable python scripts
-python_script:
-
 group: !include groups.yaml
 automation: !include automations.yaml
 script: !include scripts.yaml
@@ -35,6 +35,9 @@ scene: !include scenes.yaml
 alert: !include alerts.yaml
 binary_sensor: !include binary_sensors.yaml
 sensor: !include sensors.yaml
+
+# Enable python scripts
+python_script:
 
 # Nest config
 nest:

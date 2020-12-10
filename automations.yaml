@@ -145,12 +145,12 @@
   description: ''
   trigger:
   - platform: state
+    to: 'on'
+    for: 00:10:00
     entity_id:
     - binary_sensor.front_door_motion_sensor
     - binary_sensor.great_room_motion_sensor
     - binary_sensor.kitchen_motion_sensor
-    to: 'on'
-    for: 00:10:00
   condition: []
   action:
   - service: python_script.set_state

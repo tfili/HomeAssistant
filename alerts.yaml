@@ -14,7 +14,7 @@ morning_room_door: &door_alert_anchor
   can_acknowledge: true
   skip_first: true
   notifiers:
-    - mobile_app_iphone
+    - mobile_app_toms_iphone
     - mobile_app_theresas_iphone
     
 front_door:

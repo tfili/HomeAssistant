@@ -1,5 +1,5 @@
 # Don't create an MQTT sensor for things that already have battery sensors
-device_tracker.iphone:
+device_tracker.toms_iphone:
   battery_sensor_creation_disabled: true
 device_tracker.theresas_iphone:
   battery_sensor_creation_disabled: true
@@ -9,7 +9,7 @@ vacuum.braava_jet:
   battery_sensor_creation_disabled: true
   
 # Ignore low batteries on phones
-sensor.iphone_battery_level:
+sensor.toms_iphone_battery_level:
   battery_alert_disabled: true
 sensor.theresas_iphone_battery_level:
   battery_alert_disabled: true
