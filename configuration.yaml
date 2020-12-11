@@ -10,6 +10,12 @@ homeassistant:
     automation:
       initial_state: 'on'
 
+logger:
+  default: warning
+  logs:
+    # log level for automation
+    homeassistant.components.automation.reset_motion_sensors: debug
+
 frontend:
   themes: !include_dir_merge_named themes
 
@@ -28,6 +34,15 @@ wake_on_lan:
 # Enable discovery
 discovery:
 
+# Enable proximity sensors for all iphones
+proximity:
+  home:
+    devices:
+      - device_tracker.toms_iphone
+      - device_tracker.theresas_iphone
+    tolerance: 50
+    unit_of_measurement: mi
+
 group: !include groups.yaml
 automation: !include automations.yaml
 script: !include scripts.yaml
@@ -41,18 +56,18 @@ python_script:
 
 # Nest config
 nest:
-  client_id: 879361770558-0770q57sep12u3tn4pp0k1ve73g1kofj.apps.googleusercontent.com
+  client_id: !secret nest_client_id
   client_secret: !secret nest_client_secret
-  project_id: d8608965-6f68-48ea-8a17-49a5b7fe0be8
-  subscriber_id: projects/sdm-prod/topics/enterprise-d8608965-6f68-48ea-8a17-49a5b7fe0be8
+  project_id: !secret nest_project_id
+  subscriber_id: !secret nest_subscriber_id
 
 # Samsung TV cofig
 media_player:  
   - platform: samsungtv_tizen
     host: 192.168.0.181
-    mac: "BC:7E:8B:02:A8:61"
+    mac: !secret samsung_mac
     update_method: "smartthings"
     app_list: '{"YouTubeTV": "PvWgqxV3Xa.YouTubeTV", "Netflix": "RN1MCdNq8t.Netflix", "Disney+": "MCmYXNxgcu.DisneyPlus", "Prime Video": "evKhCgZelL.AmazonIgnitionLauncher2", "Hulu": "LBUAQX1exg.Hulu", "AppleTV": "com.samsung.tv.aria-video", "YouTube": "9Ur5IzDKqV.TizenYouTube"}'
-    api_key: "29d9c01d-4949-490f-9ac9-63ba666c27ce"
-    device_id: "4b65e900-c02e-4a84-8ca7-bde8cfe4e485"
+    api_key: !secret samsung_api_key
+    device_id: !secret samsung_device_id
     broadcast_address: "192.168.0.255"

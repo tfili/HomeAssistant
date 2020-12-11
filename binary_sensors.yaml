@@ -6,3 +6,9 @@
       friendly_name: "Garage Doors"
       value_template: >-
         {{ is_state("sun.sun", "below_horizon") and (is_state("cover.left_garage_door", "open") or is_state("cover.right_garage_door", "open")) }}
+
+    # On if the alarm isn't set and we are 20 miles from home
+    alarm_not_set:
+      friendly_name: "Alarm Not Set"
+      value_template: >-
+        {{ states("proximity.home")|int > 20 and is_state("alarm_control_panel.abode_alarm", "disarmed") }}

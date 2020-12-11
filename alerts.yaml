@@ -69,3 +69,17 @@ garage_doors:
   notifiers:
     - mobile_app_toms_iphone
     - mobile_app_theresas_iphone
+
+alarm_not_set:
+  name: Alarm Not Set
+  message: >
+    Alarm has not been set for {{ ((as_timestamp(now())-as_timestamp(states.binary_sensor.alarm_not_set.last_changed)) / 60) | round }} minutes
+  done_message: "Alarm has been set"
+  entity_id: binary_sensor.alarm_not_set
+  state: 'on'
+  repeat: 30
+  can_acknowledge: true
+  skip_first: true
+  notifiers:
+    - mobile_app_toms_iphone
+    - mobile_app_theresas_iphone

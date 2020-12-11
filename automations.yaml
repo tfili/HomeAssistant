@@ -89,18 +89,18 @@
     domain: switch
   mode: single
 - id: '1606676673191'
-  alias: Alarm Armed - Thermostats
-  description: Set thermostats to Eco if before 8PM
+  alias: Thermostats (20 miles moving away)
+  description: Set thermostats to Eco if more than 20 miles away and traveling away
+    from home.
   trigger:
-  - platform: device
-    device_id: 6cf7de2f629dae59e6d3a0b6f78c1881
-    domain: alarm_control_panel
-    entity_id: alarm_control_panel.abode_alarm
-    type: armed_away
+  - platform: numeric_state
+    entity_id: proximity.home
+    above: '20'
   condition:
-  - condition: time
-    after: '6:00'
-    before: '20:00'
+  - condition: state
+    entity_id: proximity.home
+    attribute: dir_of_travel
+    state: away_from
   action:
   - device_id: bcfa9d832e8fb3753b9c94cfa94e2536
     domain: climate
@@ -114,20 +114,18 @@
     preset_mode: eco
   mode: single
 - id: '1606676792936'
-  alias: Alarm Home/Disarmed - Thermostats
-  description: ''
+  alias: Thermostats (20 miles moving towards)
+  description: Set thermostats to Eco if more than 20 miles away and traveling towards
+    from home.
   trigger:
-  - platform: device
-    device_id: 6cf7de2f629dae59e6d3a0b6f78c1881
-    domain: alarm_control_panel
-    entity_id: alarm_control_panel.abode_alarm
-    type: disarmed
-  - platform: device
-    device_id: 6cf7de2f629dae59e6d3a0b6f78c1881
-    domain: alarm_control_panel
-    entity_id: alarm_control_panel.abode_alarm
-    type: armed_home
-  condition: []
+  - platform: numeric_state
+    entity_id: proximity.home
+    below: '20'
+  condition:
+  - condition: state
+    entity_id: proximity.home
+    state: towards
+    attribute: dir_of_travel
   action:
   - device_id: bcfa9d832e8fb3753b9c94cfa94e2536
     domain: climate
@@ -182,4 +180,26 @@
     entity_id: alarm_control_panel.abode_alarm
     type: disarm
     code: '0000'
+  mode: single
+- id: '1607638210964'
+  alias: Reset Motion Sensors (Startup)
+  description: ''
+  trigger:
+  - platform: homeassistant
+    event: start
+  condition: []
+  action:
+  - delay: 00:01:00
+  - service: python_script.set_state
+    data:
+      entity_id: binary_sensor.front_door_motion_sensor
+      state: 'off'
+  - service: python_script.set_state
+    data:
+      entity_id: binary_sensor.great_room_motion_sensor
+      state: 'off'
+  - service: python_script.set_state
+    data:
+      entity_id: binary_sensor.kitchen_motion_sensor
+      state: 'off'
   mode: single
