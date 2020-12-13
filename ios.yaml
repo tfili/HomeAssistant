@@ -1,0 +1,25 @@
+push:
+  categories:
+    - name: Vacuum
+      identifier: 'vacuum'
+      actions:
+        - identifier: 'VACUUM_MAIN_FLOOR'
+          title: 'Main Floor'
+          activationMode: 'background'
+          authenticationRequired: true
+          destructive: true
+          behavior: 'default'
+        - identifier: 'VACUUM_GREAT_ROOM'
+          title: 'Great Room Only'
+          activationMode: 'background'
+          authenticationRequired: true
+          destructive: false
+          behavior: 'default'
+        - identifier: 'VACUUM_NONE'
+          title: "Nothing"
+          activationMode: 'background'
+          authenticationRequired: false
+          destructive: false
+          behavior: 'textInput'
+          textInputButtonTitle: 'Silencio!'
+          textInputPlaceholder: 'Placeholder'

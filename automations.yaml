@@ -1,30 +1,12 @@
-- id: '1606617163805'
-  alias: Start Roomba when alarm is set
-  description: ''
-  trigger:
-  - platform: event
-    event_type: abode_arm
-  condition: []
-  action:
-  - domain: vacuum
-    entity_id: vacuum.roomba_greatroom
-    device_id: 7a59a5d027f48e71060ccf5febda4df3
-    type: clean
-  mode: single
 - id: '1606672479850'
   alias: Alarm Armed
   description: Shut garage doors, lock the door to garage and turn off TV
   trigger:
-  - platform: device
-    device_id: 6cf7de2f629dae59e6d3a0b6f78c1881
-    domain: alarm_control_panel
+  - platform: state
     entity_id: alarm_control_panel.abode_alarm
-    type: armed_away
+    to: armed_away
   condition: []
   action:
-  - service: media_player.turn_off
-    data: {}
-    entity_id: media_player.samsung_tv_remote
   - device_id: 49c47010dfc55acbbdf71af225bedec8
     domain: lock
     entity_id: lock.mud_room_lock
@@ -37,16 +19,30 @@
     domain: cover
     entity_id: cover.right_garage_door
     type: close
+  - service: notify.mobile_app_toms_iphone
+    data:
+      title: Alarm Armed
+      message: What do you want to do?
+      data:
+        push:
+          category: vacuum
+  - service: media_player.play_media
+    data:
+      media_content_id: KEY_HOME
+      media_content_type: send_key
+    entity_id: media_player.samsung_tv_remote
+  - delay: 00:00:03
+  - service: media_player.turn_off
+    data: {}
+    entity_id: media_player.samsung_tv_remote
   mode: single
 - id: '1606672828264'
   alias: Alarm Disarmed
   description: ''
   trigger:
-  - platform: device
-    device_id: 6cf7de2f629dae59e6d3a0b6f78c1881
-    domain: alarm_control_panel
+  - platform: state
     entity_id: alarm_control_panel.abode_alarm
-    type: disarmed
+    to: disarmed
   condition: []
   action:
   - device_id: 49c47010dfc55acbbdf71af225bedec8
@@ -202,4 +198,39 @@
     data:
       entity_id: binary_sensor.kitchen_motion_sensor
       state: 'off'
+  mode: single
+- id: '1607894409563'
+  alias: Notification Vacuum Main Floor
+  description: ''
+  trigger:
+  - platform: event
+    event_type: ios.notification_action_fired
+    event_data:
+      actionName: VACUUM_MAIN_FLOOR
+  condition: []
+  action:
+  - service: vacuum.start
+    entity_id: vacuum.greatroomroomba
+    data: {}
+  mode: single
+- id: '1607896379577'
+  alias: Notification Vacuum Great Room
+  description: ''
+  trigger:
+  - platform: event
+    event_type: ios.notification_action_fired
+    event_data:
+      actionName: VACUUM_GREAT_ROOM
+  condition: []
+  action:
+  - service: vacuum.send_command
+    data:
+      command: start
+      params:
+        pmap_id: NW0eUDwfSAmv9dqz0ttnjQ
+        user_pmapv_id: 201210T200858
+        regions:
+        - region_id: '9'
+          type: rid
+    entity_id: vacuum.greatroomroomba
   mode: single

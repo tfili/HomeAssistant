@@ -6,6 +6,12 @@ homeassistant:
   packages: !include_dir_named packages
   auth_mfa_modules:
     - type: totp
+  auth_providers:
+    - type: trusted_networks
+      trusted_networks:
+        - 192.168.0.0/24
+        - 172.16.0.0/12
+        - FE80::/10
   customize_domain:
     automation:
       initial_state: 'on'
@@ -50,6 +56,7 @@ scene: !include scenes.yaml
 alert: !include alerts.yaml
 binary_sensor: !include binary_sensors.yaml
 sensor: !include sensors.yaml
+ios: !include ios.yaml
 
 # Enable python scripts
 python_script:
