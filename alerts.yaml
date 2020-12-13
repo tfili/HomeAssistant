@@ -66,6 +66,9 @@ garage_doors:
   repeat: 30
   can_acknowledge: true
   skip_first: true
+  data:
+    push:
+      category: garage
   notifiers:
     - mobile_app_toms_iphone
     - mobile_app_theresas_iphone
@@ -80,6 +83,9 @@ alarm_not_set:
   repeat: 30
   can_acknowledge: true
   skip_first: true
+  data:
+    push:
+      category: alarm
   notifiers:
     - mobile_app_toms_iphone
     - mobile_app_theresas_iphone

@@ -234,3 +234,37 @@
           type: rid
     entity_id: vacuum.greatroomroomba
   mode: single
+- id: '1607900406169'
+  alias: Notification Close Garage
+  description: ''
+  trigger:
+  - platform: event
+    event_type: ios.notification_action_fired
+    event_data:
+      actionName: GARAGE_CLOSE
+  condition: []
+  action:
+  - device_id: 785c6be41c4f044832af48da1a4914aa
+    domain: cover
+    entity_id: cover.left_garage_door
+    type: close
+  - device_id: facd77083527751232d4ca17bb6e89a6
+    domain: cover
+    entity_id: cover.right_garage_door
+    type: close
+  mode: single
+- id: '1607901423295'
+  alias: Notification Alarm Arm
+  description: ''
+  trigger:
+  - platform: event
+    event_type: ios.notification_action_fired
+    event_data:
+      actionName: ALARM_ARM
+  condition: []
+  action:
+  - device_id: 6cf7de2f629dae59e6d3a0b6f78c1881
+    domain: alarm_control_panel
+    entity_id: alarm_control_panel.abode_alarm
+    type: arm_away
+  mode: single
