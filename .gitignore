@@ -2,7 +2,7 @@
 .HA_VERSION
 abodepy_cache.pickle
 home-assistant.log
-home-assistant_v2.db
+home-assistant_v2.db*
 /custom_components/*
 /www/*
 /themes/*

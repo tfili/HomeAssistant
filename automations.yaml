@@ -91,7 +91,7 @@
   trigger:
   - platform: numeric_state
     entity_id: proximity.home
-    above: '20'
+    above: 20
   condition:
   - condition: state
     entity_id: proximity.home
@@ -116,7 +116,7 @@
   trigger:
   - platform: numeric_state
     entity_id: proximity.home
-    below: '20'
+    below: 20
   condition:
   - condition: state
     entity_id: proximity.home
