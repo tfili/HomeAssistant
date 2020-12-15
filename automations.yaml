@@ -268,3 +268,46 @@
     entity_id: alarm_control_panel.abode_alarm
     type: arm_away
   mode: single
+- id: '1607968203974'
+  alias: Doorbell Ring
+  description: ''
+  trigger:
+  - platform: device
+    device_id: 2ba39f2b6232c724d55430e16de589af
+    domain: nest
+    type: doorbell_chime
+  condition: []
+  action:
+  - service: var.set
+    entity_id: var.previous_cabinet_light_state
+    data_template:
+      value: '{{ states("light.cabinet") }}'
+  - service: var.set
+    entity_id: var.previous_cabinet_light_brightness
+    data_template:
+      value: '{{ state_attr("light.cabinet", "brightness") }}'
+  - service: var.set
+    entity_id: var.previous_cabinet_light_hs_color
+    data_template:
+      value: '{{ state_attr("light.cabinet", "hs_color") }}'
+  - service: light.turn_on
+    data:
+      brightness: 255
+      transition: 0
+      hs_color:
+      - 360
+      - 100
+      flash: short
+    entity_id: light.cabinet
+  - delay: 00:00:05
+  - service_template: "{% if is_state('var.previous_cabinet_light_state', 'on') %}\n\
+      \  light.turn_on\n{% else %}\n  light.turn_off\n{% endif %}\n"
+    data_template:
+      brightness: '{{ states("var.previous_cabinet_light_brightness")|int }}
+
+        '
+      hs_color: '{{ states("var.previous_cabinet_light_hs_color") }}
+
+        '
+    entity_id: light.cabinet
+  mode: single

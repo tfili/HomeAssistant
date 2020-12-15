@@ -14,7 +14,7 @@ homeassistant:
         - FE80::/10
   customize_domain:
     automation:
-      initial_state: 'on'
+      initial_state: "on"
 
 logger:
   default: warning
@@ -28,12 +28,12 @@ frontend:
 # Text to speech
 tts:
   - platform: google_translate
-  
+
 # Enable discovery for mqtt
 mqtt:
   discovery: true
   discovery_prefix: homeassistant
-  
+
 # Enable wake on lan
 wake_on_lan:
 
@@ -57,6 +57,7 @@ alert: !include alerts.yaml
 binary_sensor: !include binary_sensors.yaml
 sensor: !include sensors.yaml
 ios: !include ios.yaml
+var: !include var.yaml
 
 # Enable python scripts
 python_script:
@@ -69,7 +70,7 @@ nest:
   subscriber_id: !secret nest_subscriber_id
 
 # Samsung TV cofig
-media_player:  
+media_player:
   - platform: samsungtv_tizen
     host: 192.168.0.181
     mac: !secret samsung_mac
