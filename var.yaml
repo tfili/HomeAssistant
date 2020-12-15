@@ -1,3 +1,4 @@
+# Variables to keep track of previous value of cabinet lights when flashing
 previous_cabinet_light_state:
   friendly_name: "Previous Cabinet Light State"
   initial_value: "off"
@@ -5,7 +6,7 @@ previous_cabinet_light_brightness:
   friendly_name: "Previous Cabinet Light Brightness"
   initial_value: 0
 previous_cabinet_light_hs_color:
-  friendly_name: "Previous Cabinet Light Brightness"
+  friendly_name: "Previous Cabinet Light Hue/Saturation"
   initial_value:
     - 0
     - 0

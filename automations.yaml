@@ -140,7 +140,7 @@
   trigger:
   - platform: state
     to: 'on'
-    for: 00:10:00
+    for: 00:05:00
     entity_id:
     - binary_sensor.front_door_motion_sensor
     - binary_sensor.great_room_motion_sensor
@@ -311,3 +311,35 @@
         '
     entity_id: light.cabinet
   mode: single
+- id: '1607999948442'
+  alias: Kitchen Motion Lights
+  description: ''
+  trigger:
+  - platform: state
+    entity_id: binary_sensor.kitchen_motion_sensor
+    from: 'off'
+    to: 'on'
+  condition:
+  - condition: or
+    conditions:
+    - condition: state
+      entity_id: light.cabinet
+      state: 'off'
+    - condition: numeric_state
+      entity_id: automation.kitchen_motion_lights
+      attribute: current
+      above: '0'
+  action:
+  - service: light.turn_on
+    data: {}
+    entity_id: light.cabinet
+  - wait_for_trigger:
+    - platform: state
+      entity_id: binary_sensor.kitchen_motion_sensor
+      from: 'on'
+      to: 'off'
+  - delay: 00:02:00
+  - service: light.turn_off
+    data: {}
+    entity_id: light.cabinet
+  mode: restart
