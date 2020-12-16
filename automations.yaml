@@ -147,8 +147,9 @@
     - binary_sensor.kitchen_motion_sensor
   condition: []
   action:
-  - service: python_script.set_state
+  - service: python_script.hass_entities
     data:
+      action: set_state
       entity_id: '{{ trigger.entity_id }}'
       state: 'off'
   mode: parallel
@@ -186,16 +187,19 @@
   condition: []
   action:
   - delay: 00:01:00
-  - service: python_script.set_state
+  - service: python_script.hass_entities
     data:
+      action: set_state
       entity_id: binary_sensor.front_door_motion_sensor
       state: 'off'
-  - service: python_script.set_state
+  - service: python_script.hass_entities
     data:
+      action: set_state
       entity_id: binary_sensor.great_room_motion_sensor
       state: 'off'
-  - service: python_script.set_state
+  - service: python_script.hass_entities
     data:
+      action: set_state
       entity_id: binary_sensor.kitchen_motion_sensor
       state: 'off'
   mode: single
