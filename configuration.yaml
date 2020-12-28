@@ -14,7 +14,7 @@ homeassistant:
         - FE80::/10
   customize_domain:
     automation:
-      initial_state: "on"
+      initial_state: true
 
 logger:
   default: warning
@@ -28,9 +28,13 @@ frontend:
 # Text to speech
 tts:
   - platform: google_translate
+    base_url: http://192.168.0.105:8123
 
 # Enable discovery for mqtt
 mqtt:
+  broker: !secret mqtt_broker
+  username: !secret mqtt_username
+  password: !secret mqtt_password
   discovery: true
   discovery_prefix: homeassistant
 
@@ -48,6 +52,15 @@ proximity:
       - device_tracker.theresas_iphone
     tolerance: 50
     unit_of_measurement: mi
+
+# Exclude history of switches and upload/download stats for devices
+recorder:
+  exclude:
+    domains:
+      - switch
+    entity_globs:
+      - sensor.*_rx
+      - sensor.*_tx
 
 group: !include groups.yaml
 automation: !include automations.yaml
@@ -79,3 +92,14 @@ media_player:
     api_key: !secret samsung_api_key
     device_id: !secret samsung_device_id
     broadcast_address: "192.168.0.255"
+
+# Owntracks
+owntracks:
+  max_gps_accuracy: 200
+  waypoints: true
+  mqtt_topic: "owntracks/#"
+  events_only: true
+  waypoint_whitelist:
+    - mqtt
+  region_mapping:
+    Kitchen: Kitchen
