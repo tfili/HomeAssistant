@@ -7,21 +7,31 @@ homeassistant:
   auth_mfa_modules:
     - type: totp
   auth_providers:
+    - type: homeassistant
     - type: trusted_networks
       trusted_networks:
         - 192.168.0.0/24
-        - 172.16.0.0/12
-        - FE80::/10
+        #- 172.16.0.0/12
+        #- fe80::/10
+      trusted_users:
+        192.168.0.0/24:
+          - 74a1a86c82c44c3db9e8263156846c35 # Kiosk
+        #"fe80::/10":
+        #  - group: system-users
   customize_domain:
     automation:
       initial_state: true
 
 logger:
   default: warning
-  logs:
-    # log level for automation
-    homeassistant.components.automation.reset_motion_sensors: debug
-
+  
+http:
+  use_x_forwarded_for: true
+  trusted_proxies:
+    - 172.30.33.0/24
+  ip_ban_enabled: true
+  login_attempts_threshold: 5
+  
 frontend:
   themes: !include_dir_merge_named themes
 
@@ -69,6 +79,7 @@ scene: !include scenes.yaml
 alert: !include alerts.yaml
 binary_sensor: !include binary_sensors.yaml
 sensor: !include sensors.yaml
+light: !include light.yaml
 ios: !include ios.yaml
 var: !include var.yaml
 
@@ -99,7 +110,4 @@ owntracks:
   waypoints: true
   mqtt_topic: "owntracks/#"
   events_only: true
-  waypoint_whitelist:
-    - mqtt
-  region_mapping:
-    Kitchen: Kitchen
+  #secret: !secret owntracks_secret

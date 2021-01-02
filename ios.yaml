@@ -1,28 +1,30 @@
 push:
   categories:
     - name: Vacuum
-      identifier: 'vacuum'
+      identifier: "vacuum"
       actions:
-        - identifier: 'VACUUM_MAIN_FLOOR'
-          title: 'Main Floor'
+        - identifier: "VACUUM_AND_MOP"
+          title: "Vacuum and Mop"
           authenticationRequired: true
-        - identifier: 'VACUUM_GREAT_ROOM'
-          title: 'Great Room Only'
+        - identifier: "VACUUM"
+          title: "Vacuum"
           authenticationRequired: true
-        - identifier: 'VACUUM_NONE'
+        - identifier: "VACUUM_GREAT_ROOM"
+          title: "Great Room Only"
+          authenticationRequired: true
+        - identifier: "NOTHING"
           title: "Nothing"
           authenticationRequired: false
     - name: Garage
-      identifier: 'garage'
+      identifier: "garage"
       actions:
-        - identifier: 'GARAGE_CLOSE'
-          title: 'Close Garage'
+        - identifier: "GARAGE_CLOSE"
+          title: "Close Garage"
           authenticationRequired: true
     - name: Alarm
-      identifier: 'alarm'
+      identifier: "alarm"
       actions:
-        - identifier: 'ALARM_ARM'
-          title: 'Set Alarm to Away'
+        - identifier: "ALARM_ARM"
+          title: "Set Alarm to Away"
           authenticationRequired: true
           destructive: true
-          

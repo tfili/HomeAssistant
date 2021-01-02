@@ -8,3 +8,5 @@ home-assistant_v2.db*
 /themes/*
 /tts/*
 secrets.yaml
+/node-red/node_modules/*
+/node-red/*.backup

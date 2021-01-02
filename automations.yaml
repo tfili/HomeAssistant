@@ -11,11 +11,11 @@
     domain: lock
     entity_id: lock.mud_room_lock
     type: lock
-  - device_id: 785c6be41c4f044832af48da1a4914aa
+  - device_id: fa0659c851465fa31dab8c05860cc895
     domain: cover
     entity_id: cover.left_garage_door
     type: close
-  - device_id: facd77083527751232d4ca17bb6e89a6
+  - device_id: f65020bcebb9e1a97728b22a47cba52d
     domain: cover
     entity_id: cover.right_garage_door
     type: close
@@ -359,21 +359,12 @@
   alias: Kitchen iBeacon Test
   description: ''
   trigger:
-  - platform: device
-    device_id: d7d5a15b61df46c3940375a105d98d11
-    domain: device_tracker
-    entity_id: device_tracker.toms_iphone
-    type: enters
-    zone: zone.kitchen
-  - platform: device
-    device_id: d7d5a15b61df46c3940375a105d98d11
-    domain: device_tracker
-    entity_id: device_tracker.toms_iphone
-    type: leaves
-    zone: zone.kitchen
+  - platform: state
+    entity_id: device_tracker.mqtt_60cbab37_8f46_4482_9b89_27781ac02af6
+    to: kitchen
   condition: []
   action:
   - service: notify.mobile_app_toms_iphone
     data:
-      message: Kitchen status changed
+      message: Entered kitchen
   mode: single
