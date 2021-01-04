@@ -277,11 +277,11 @@
   description: ''
   trigger:
   - platform: device
-    device_id: 328b03905d7da06af23d69829dcacdd3
+    device_id: 9d8105f724dc536601acaa2daf3cef79
     domain: nest
     type: camera_person
   - platform: device
-    device_id: 328b03905d7da06af23d69829dcacdd3
+    device_id: 9d8105f724dc536601acaa2daf3cef79
     domain: nest
     type: doorbell_chime
   condition: []
