@@ -1,0 +1,10 @@
+fili_security_task:
+  description: "Sends a fili_security event because custom-button-card can only call a service"
+  fields:
+    task:
+      description: "The security task to complete"
+      example: ready_for_bed
+  sequence:
+    - event: fili_security
+      event_data:
+        task: "{{ task }}"
