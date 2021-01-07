@@ -7,7 +7,11 @@ vacuum.greatroomroomba:
   battery_sensor_creation_disabled: true
 vacuum.braava_jet:
   battery_sensor_creation_disabled: true
-  
+sensor.remote_linkquality:
+  battery_sensor_creation_disabled: true
+sensor.remote_action:
+  battery_sensor_creation_disabled: true
+
 # Ignore low batteries on phones
 sensor.toms_iphone_battery_level:
   battery_alert_disabled: true
