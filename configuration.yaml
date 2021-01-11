@@ -11,9 +11,12 @@ homeassistant:
     - type: trusted_networks
       trusted_networks:
         - 192.168.0.0/24
+        #- 172.58.206.151
         #- 172.16.0.0/12
         #- fe80::/10
       trusted_users:
+        #172.58.206.151:
+        #  - 9c546e5ab33f47fcbd2103594668aaaf # tom
         192.168.0.55:
           - 9c546e5ab33f47fcbd2103594668aaaf # tom
         192.168.0.0/24:
@@ -124,3 +127,8 @@ influxdb:
   password: !secret influx_password
   max_retries: 3
   default_measurement: state
+
+# Google Calendar
+google:
+  client_id: !secret google_client_id
+  client_secret: !secret google_secret

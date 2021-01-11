@@ -3,6 +3,7 @@
 abodepy_cache.pickle
 home-assistant.log
 home-assistant_v2.db*
+.google.token
 /custom_components/*
 /www/*
 /themes/*

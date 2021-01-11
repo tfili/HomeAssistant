@@ -159,7 +159,7 @@
   description: ''
   trigger:
   - platform: device
-    device_id: d7d5a15b61df46c3940375a105d98d11
+    device_id: db488a5a1e362e492547f7902a967194
     domain: device_tracker
     entity_id: device_tracker.toms_iphone
     type: enters
@@ -328,7 +328,7 @@
   description: ''
   trigger:
   - platform: state
-    entity_id: binary_sensor.kitchen_motion_sensor
+    entity_id: binary_sensor.sonoff_kitchen_motion_sensor_occupancy
     from: 'off'
     to: 'on'
   condition:
@@ -347,7 +347,7 @@
     entity_id: light.cabinet
   - wait_for_trigger:
     - platform: state
-      entity_id: binary_sensor.kitchen_motion_sensor
+      entity_id: binary_sensor.sonoff_kitchen_motion_sensor_occupancy
       from: 'on'
       to: 'off'
   - delay: 00:02:00
