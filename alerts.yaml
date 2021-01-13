@@ -5,7 +5,7 @@ morning_room_door:
   done_message: >
     {{ states.binary_sensor.morning_room_door.name }} is closed
   entity_id: binary_sensor.morning_room_door
-  state: 'on'
+  state: "on"
   repeat:
     - 5
     - 10
@@ -13,10 +13,15 @@ morning_room_door:
     - 30
   can_acknowledge: true
   skip_first: true
+  data:
+    push:
+      category: dismissible
+    action_data:
+      entity_id: alert.morning_room_door
   notifiers:
     - mobile_app_toms_iphone
     - mobile_app_theresas_iphone
-    
+
 front_door:
   name: Front Door Ajar
   message: >
@@ -24,7 +29,7 @@ front_door:
   done_message: >
     {{ states.binary_sensor.front_door.name }} is closed
   entity_id: binary_sensor.front_door
-  state: 'on'
+  state: "on"
   repeat:
     - 5
     - 10
@@ -32,6 +37,11 @@ front_door:
     - 30
   can_acknowledge: true
   skip_first: true
+  data:
+    push:
+      category: dismissible
+    action_data:
+      entity_id: alert.front_door
   notifiers:
     - mobile_app_toms_iphone
     - mobile_app_theresas_iphone
@@ -43,7 +53,7 @@ mud_room_door:
   done_message: >
     {{ states.binary_sensor.mud_room_door.name }} is closed
   entity_id: binary_sensor.mud_room_door
-  state: 'on'
+  state: "on"
   repeat:
     - 5
     - 10
@@ -51,6 +61,11 @@ mud_room_door:
     - 30
   can_acknowledge: true
   skip_first: true
+  data:
+    push:
+      category: dismissible
+    action_data:
+      entity_id: alert.mud_room_door
   notifiers:
     - mobile_app_toms_iphone
     - mobile_app_theresas_iphone
@@ -62,13 +77,15 @@ garage_doors:
   done_message: >
     {{ states.binary_sensor.garage_open_at_night.name }} are closed
   entity_id: binary_sensor.garage_open_at_night
-  state: 'on'
+  state: "on"
   repeat: 30
   can_acknowledge: true
   skip_first: true
   data:
     push:
       category: garage
+    action_data:
+      entity_id: alert.garage
   notifiers:
     - mobile_app_toms_iphone
     - mobile_app_theresas_iphone
@@ -79,13 +96,15 @@ alarm_not_set:
     Alarm has not been set for {{ ((as_timestamp(now())-as_timestamp(states.binary_sensor.alarm_not_set.last_changed)) / 60) | round }} minutes
   done_message: "Alarm has been set"
   entity_id: binary_sensor.alarm_not_set
-  state: 'on'
+  state: "on"
   repeat: 30
   can_acknowledge: true
   skip_first: true
   data:
     push:
       category: alarm
+    action_data:
+      entity_id: alert.alarm_not_set
   notifiers:
     - mobile_app_toms_iphone
     - mobile_app_theresas_iphone

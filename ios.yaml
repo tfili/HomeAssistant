@@ -21,10 +21,25 @@ push:
         - identifier: "GARAGE_CLOSE"
           title: "Close Garage"
           authenticationRequired: true
+        - identifier: "DISMISS_ALERT"
+          title: "Dismiss Alert"
+          authenticationRequired: true
+          destructive: true
     - name: Alarm
       identifier: "alarm"
       actions:
         - identifier: "ALARM_ARM"
           title: "Set Alarm to Away"
+          authenticationRequired: true
+          destructive: true
+        - identifier: "DISMISS_ALERT"
+          title: "Dismiss Alert"
+          authenticationRequired: true
+          destructive: true
+    - name: Dismissible
+      identifier: "dismissible"
+      actions:
+        - identifier: "DISMISS_ALERT"
+          title: "Dismiss Alert"
           authenticationRequired: true
           destructive: true
