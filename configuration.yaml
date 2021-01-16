@@ -15,14 +15,12 @@ homeassistant:
         #- 172.16.0.0/12
         #- fe80::/10
       trusted_users:
-        #172.58.206.151:
-        #  - 9c546e5ab33f47fcbd2103594668aaaf # tom
         192.168.0.55:
           - 9c546e5ab33f47fcbd2103594668aaaf # tom
+        192.168.0.88:
+          - 7e537ada4de44808a33c00cbf425c4e0 # jami
         192.168.0.0/24:
           - 74a1a86c82c44c3db9e8263156846c35 # Kiosk
-        #"fe80::/10":
-        #  - group: system-users
   customize_domain:
     automation:
       initial_state: true

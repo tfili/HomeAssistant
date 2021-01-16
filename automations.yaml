@@ -91,21 +91,21 @@
   trigger:
   - platform: numeric_state
     entity_id: proximity.home
-    above: 20
+    above: '20'
   condition:
   - condition: state
     entity_id: proximity.home
     attribute: dir_of_travel
     state: away_from
   action:
-  - device_id: bcfa9d832e8fb3753b9c94cfa94e2536
-    domain: climate
-    entity_id: climate.bedroom
-    type: set_preset_mode
-    preset_mode: eco
-  - device_id: f36a7d2c6689e95bf27b497e70af797f
+  - device_id: 08a6dd4b35b484d1b40a2ecd10030df2
     domain: climate
     entity_id: climate.flex_room
+    type: set_preset_mode
+    preset_mode: eco
+  - device_id: 015b691a363ef213cfde9c91ad3cab1e
+    domain: climate
+    entity_id: climate.bedroom
     type: set_preset_mode
     preset_mode: eco
   mode: single
@@ -116,19 +116,19 @@
   trigger:
   - platform: numeric_state
     entity_id: proximity.home
-    below: 20
+    below: '20'
   condition:
   - condition: state
     entity_id: proximity.home
     state: towards
     attribute: dir_of_travel
   action:
-  - device_id: bcfa9d832e8fb3753b9c94cfa94e2536
+  - device_id: 015b691a363ef213cfde9c91ad3cab1e
     domain: climate
     entity_id: climate.bedroom
     type: set_preset_mode
     preset_mode: none
-  - device_id: f36a7d2c6689e95bf27b497e70af797f
+  - device_id: 08a6dd4b35b484d1b40a2ecd10030df2
     domain: climate
     entity_id: climate.flex_room
     type: set_preset_mode

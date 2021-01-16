@@ -1,28 +1,62 @@
+#
 # Don't create an MQTT sensor for things that already have battery sensors
+#
+
+# Phones
 device_tracker.toms_iphone:
   battery_sensor_creation_disabled: true
 device_tracker.theresas_iphone:
   battery_sensor_creation_disabled: true
+
+# Roomba/Braava
 vacuum.greatroomroomba:
   battery_sensor_creation_disabled: true
 vacuum.braava_jet:
   battery_sensor_creation_disabled: true
+
+# Hue Remote
 sensor.remote_linkquality:
   battery_sensor_creation_disabled: true
 sensor.remote_action:
   battery_sensor_creation_disabled: true
+sensor.remote_update_state:
+  battery_sensor_creation_disabled: true
+binary_sensor.remote_update_available:
+  battery_sensor_creation_disabled: true
+
+# Sonoff Kitchen Motion Sensor
 binary_sensor.sonoff_kitchen_motion_sensor_occupancy:
   battery_sensor_creation_disabled: true
 binary_sensor.sonoff_kitchen_motion_sensor_tamper:
   battery_sensor_creation_disabled: true
 sensor.sonoff_kitchen_motion_sensor_linkquality:
   battery_sensor_creation_disabled: true
+
+# Bedroom Buttons
 sensor.tom_bedroom_button_action:
+  battery_sensor_creation_disabled: true
+sensor.tom_bedroom_button_linkquality:
   battery_sensor_creation_disabled: true
 sensor.jami_bedroom_button_action:
   battery_sensor_creation_disabled: true
+sensor.jami_bedroom_button_linkquality:
+  battery_sensor_creation_disabled: true
 
-# Ignore low batteries on phones
+# Refrigerator/Freezer Temperature/Humity Sensors
+sensor.refrigerator_temperature:
+  battery_sensor_creation_disabled: true
+sensor.refrigerator_humidity:
+  battery_sensor_creation_disabled: true
+sensor.freezer_temperature:
+  battery_sensor_creation_disabled: true
+sensor.freezer_humidity:
+  battery_sensor_creation_disabled: true
+
+#
+# Ignore low batteries alerts
+#
+
+# Phones
 sensor.toms_iphone_battery_level:
   battery_alert_disabled: true
 sensor.theresas_iphone_battery_level:
