@@ -47,9 +47,13 @@ sensor.refrigerator_temperature:
   battery_sensor_creation_disabled: true
 sensor.refrigerator_humidity:
   battery_sensor_creation_disabled: true
+sensor.refrigerator_linkquality:
+  battery_sensor_creation_disabled: true
 sensor.freezer_temperature:
   battery_sensor_creation_disabled: true
 sensor.freezer_humidity:
+  battery_sensor_creation_disabled: true
+sensor.freezer_linkquality:
   battery_sensor_creation_disabled: true
 
 #

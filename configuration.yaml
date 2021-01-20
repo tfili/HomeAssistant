@@ -76,15 +76,18 @@ recorder:
       - sensor.*_rx
       - sensor.*_tx
 
-group: !include groups.yaml
-automation: !include automations.yaml
-script: !include scripts.yaml
-scene: !include scenes.yaml
+
 alert: !include alerts.yaml
+automation: !include automations.yaml
 binary_sensor: !include binary_sensors.yaml
-sensor: !include sensors.yaml
-light: !include light.yaml
+group: !include groups.yaml
+input_boolean: !include input_boolean.yaml
 ios: !include ios.yaml
+light: !include light.yaml
+scene: !include scenes.yaml
+script: !include scripts.yaml
+sensor: !include sensors.yaml
+timer: !include timer.yaml
 var: !include var.yaml
 
 # Enable python scripts
