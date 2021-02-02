@@ -322,6 +322,7 @@
 
         '
     entity_id: light.cabinet
+  - delay: 00:00:10
   mode: single
 - id: '1607999948442'
   alias: Kitchen Motion Lights
@@ -368,3 +369,13 @@
     data:
       message: Entered kitchen
   mode: single
+- alias: Set Default Theme
+  description: ''
+  trigger:
+  - event: start
+    platform: homeassistant
+  condition: []
+  action:
+  - data:
+      name: kibibit
+    service: frontend.set_theme
