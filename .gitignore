@@ -1,15 +1,41 @@
-/.storage/*
 .HA_VERSION
 abodepy_cache.pickle
-home-assistant.log
-home-assistant_v2.db*
-.google.token
+
+# Custom integrations from HACS
 /custom_components/*
-/www/*
-/themes/*
+
+# Text To Speech Cache
 /tts/*
-secrets.yaml
+
+# Themes from HACS
+/themes/*
+
+# Google Calendar token
+.google.token
+
+# Node Red modules and backup files
 /node-red/node_modules/*
 /node-red/*.backup
-/images/mail_and_packages
-/.cloud
+
+# NabuCasa files
+/.cloud/*
+
+# UI configured integrations
+/.storage/*
+
+# Never save secrets in git
+secrets.yaml
+
+# Recorder Database
+home-assistant.log
+home-assistant_v2.db*
+
+# Lovelace cards from HACS
+/www/community/*
+
+# Daily mail delivery gif
+/www/mail_and_packages/*
+/images/mail_and_packages/*
+
+# Roomba and Braava point files
+/irobot/*.log

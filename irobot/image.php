@@ -5,13 +5,10 @@ $overlay_walls = false; # Allows overlaying of walls, used in fill mode to cover
 $walls_image = 'walls.png'; # Walls Image must contain transparent floor
 $show_stuck_positions = true; 
 $line_thickness = 2; # Default 2, Set to ~60 for Fill Mode
-$map_width = 1050; # Ensure overlay and wall images match this size
-$map_height = 900; # Ensure overlay and wall images match this size
-$x_offset = 220;
-$y_offset = 220;
+$map_width = 1800; # Ensure overlay and wall images match this size
+$map_height = 1200; # Ensure overlay and wall images match this size
 $flip_vertical = false;
 $flip_horizontal = false;
-$rotate_angle = 0; # Allows rotating of the roomba lines
 $x_scale=1.00; # Allows scaling of roomba x lines
 $y_scale=1.00; # Allows scaling of roomba y lines
 $ha_token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiI0OWQzNTQ0NWM2YzU0ZTE3YThhNDMyYmIyMjQ2NzcyOCIsImlhdCI6MTYxNDcxOTUwMSwiZXhwIjoxOTMwMDc5NTAxfQ.Nu6VTrADbZqoxNUun_J6TGhEWyZhNV4w3lr9opt-iNk';
@@ -120,13 +117,15 @@ foreach($coords as $i => $coord) {
   $blue = ($color_blue === -1 ? $part : $color_blue);
   
   $color = imagecolorallocate($image, $red, $green, $blue);
-  $tmpx = $split[1]+$x_offset;
-  $tmpy = $split[0]+$y_offset;
+//   $tmpx = $split[1]+$x_offset;
+//   $tmpy = $split[0]+$y_offset;
+  $tmpx = $split[1];
+  $tmpy = $split[0];
   $theta = $split[2];
   
   // Rotate Calculations
-  $x=($tmpx*cos(deg2rad($rotate_angle))+$tmpy*sin(deg2rad($rotate_angle)))*$x_scale;
-  $y=(-1*$tmpx*sin(deg2rad($rotate_angle))+$tmpy*cos(deg2rad($rotate_angle)))*$y_scale;
+  $x=($tmpx*cos(deg2rad($rotate_angle))+$tmpy*sin(deg2rad($rotate_angle)))*$x_scale+$x_offset;
+  $y=(-1*$tmpx*sin(deg2rad($rotate_angle))+$tmpy*cos(deg2rad($rotate_angle)))*$y_scale+$y_offset;
   
   $boxsize=4;
   $shift_y = 2;

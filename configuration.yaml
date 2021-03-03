@@ -67,7 +67,10 @@ proximity:
     tolerance: 50
     unit_of_measurement: mi
 
-# Exclude history of switches and upload/download stats for devices
+# Exclude history for
+#  - Switches
+#  - Upload/download stats for devices
+#  - Extra vacuum and mop stats
 recorder:
   exclude:
     domains:
@@ -75,6 +78,15 @@ recorder:
     entity_globs:
       - sensor.*_rx
       - sensor.*_tx
+      - sensor.vacuum_*
+      - automation.vacuum_*
+      - sensor.mop_*
+      - automation.mop_*
+    entities:
+      - sensor.rest980
+      - sensor.rest980mop
+      - camera.roomba
+      - camera.braava
 
 alert: !include alerts.yaml
 automation: !include automations.yaml
