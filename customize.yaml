@@ -56,6 +56,12 @@ sensor.freezer_humidity:
 sensor.freezer_linkquality:
   battery_sensor_creation_disabled: true
 
+# Mailbox Contact
+sensor.mailbox_contact:
+  battery_sensor_creation_disabled: true
+sensor.mailbox_linkquality:
+  battery_sensor_creation_disabled: true
+
 #
 # Ignore low batteries alerts
 #

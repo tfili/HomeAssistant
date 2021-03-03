@@ -290,6 +290,13 @@
     data:
       entity_id: media_player.office_display
       message: Someone is at the front door
+  - service: notify.alexa_media
+    data:
+      message: Someone is at the front door
+      data:
+        type: tts
+      target:
+      - media_player.kitchen_alexa
   - service: var.set
     entity_id: var.previous_cabinet_light_state
     data_template:

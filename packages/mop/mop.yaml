@@ -1,0 +1,657 @@
+###################################
+# iRobot Mop Package
+###################################
+
+irobot_mop:
+  ###################################
+  # Sensor
+  ###################################
+
+  sensor:
+    # Braava via Rest980 Docker Image
+    - platform: rest
+      name: rest980mop
+      json_attributes:
+        - batPct
+        - bin
+        - cleanMissionStatus
+        - dock
+        - pose
+        - signal
+        - bbmssn
+        - bbrun
+        - name
+        - pmaps
+      resource: !secret mop_state
+      value_template: "OK"
+      scan_interval: 10
+    - platform: template
+      sensors:
+        mop:
+          friendly_name_template: >-
+            {{ state_attr('sensor.rest980mop', 'name') }}
+          value_template: >-
+            {% if state_attr('sensor.rest980mop', 'cleanMissionStatus')['cycle'] == 'none' and state_attr('sensor.rest980mop', 'cleanMissionStatus')['notReady'] == 39 %}
+              Pending
+            {% elif state_attr('sensor.rest980mop', 'cleanMissionStatus')['notReady'] > 0 %}
+              Not Ready
+            {% else %}
+            {% set mapper =  {
+              'clean' : 'Clean',
+              'quick' : 'Clean',
+              'spot' : 'Spot',
+              'evac' : 'Empty',
+              'dock' : 'Dock',
+              'train' : 'Train',
+              'none' : 'Ready' } %}
+            {% set state =  state_attr('sensor.rest980mop', 'cleanMissionStatus')['cycle'] %}
+            {{ mapper[state] if state in mapper else state }}
+            {% endif %}
+          icon_template: mdi:robot-vacuum
+          attribute_templates:
+            message: >-
+              {% set mapper =  {
+                0 : 'n-a',
+                2 : 'Uneven Ground',
+                15 : 'Low Battery',
+                39 : 'Pending',
+                48 : 'Path Blocked' } %}
+              {% set state =  state_attr('sensor.rest980mop', 'cleanMissionStatus')['notReady'] %}
+              {{ mapper[state] if state in mapper else state }}
+            battery: >-
+              {{ state_attr('sensor.rest980mop', 'batPct') }} %
+            phase: >-
+              {% if state_attr('sensor.rest980mop', 'cleanMissionStatus')['phase'] == 'charge' and state_attr('sensor.rest980mop', 'batPct') == 100 %}
+                Idle
+              {% elif state_attr('sensor.rest980mop', 'cleanMissionStatus')['cycle'] == 'none' and state_attr('sensor.rest980mop', 'cleanMissionStatus')['phase'] == 'stop' %}
+                Stopped
+              {% else %}
+              {% set mapper =  {
+                'charge' : 'Charge',
+                'run' : 'Run',
+                'evac' : 'Empty',
+                'stop' : 'Paused',
+                'stuck' : 'Stuck',
+                'hmUsrDock' : 'Sent Home',
+                'hmMidMsn' : 'Mid Dock',
+                'hmPostMsn' : 'Final Dock' } %}
+              {% set state =  state_attr('sensor.rest980mop', 'cleanMissionStatus')['phase'] %}
+              {{ mapper[state] if state in mapper else state }}
+              {% endif %}
+            bin: >-
+              {% set mapper =  {
+                true : 'Full',
+                false : 'Not Full' } %}
+              {% set state =  state_attr('sensor.rest980mop', 'bin')['full'] %}
+              {{ mapper[state] if state in mapper else state }}
+            bin_present: >-
+              {% set mapper =  {
+                true : 'Yes',
+                false : 'No' } %}
+              {% set state =  state_attr('sensor.rest980mop', 'bin')['present'] %}
+              {{ mapper[state] if state in mapper else state }}
+            clean_base: >-
+              {% if state_attr('sensor.rest980mop', 'dock')['state'] is defined %}
+                {% set mapper =  {
+                  300 : 'Ready',
+                  301 : 'Ready',
+                  302 : 'Empty',
+                  303 : 'Empty',
+                  350 : 'Bag Missing',
+                  351 : 'Clogged',
+                  352 : 'Sealing Problem',
+                  353 : 'Bag Full',
+                  360 : 'Comms Problem' } %}
+                {% set state =  state_attr('sensor.rest980mop', 'dock')['state'] %}
+                {{ mapper[state] if state in mapper else state }}
+              {% else %}
+                n-a
+              {% endif %}
+            location: >-
+              {% if state_attr('sensor.rest980mop', 'pose')['theta'] is defined %}
+                ({{ state_attr('sensor.rest980mop', 'pose')['point']['x'] }}, {{ state_attr('sensor.rest980mop', 'pose')['point']['y'] }}, {{ state_attr('sensor.rest980mop', 'pose')['theta'] }})
+              {% else %}
+                n-a
+              {% endif %}
+            rssi: >-
+              {% if state_attr('sensor.rest980mop', 'signal')['rssi'] is defined %}
+                {{ state_attr('sensor.rest980mop', 'signal')['rssi'] }}
+              {% else %}
+                n-a
+              {% endif %}
+            total_area: >-
+              {% if state_attr('sensor.rest980mop', 'bbrun')['sqft'] is defined %}
+                {{ (state_attr('sensor.rest980mop', 'bbrun')['sqft'] / 10.764 * 100)| round() }}m²
+              {% else %}
+                n-a
+              {% endif %}
+            #   {{ (state_attr('sensor.rest980mop', 'bbrun')['sqft'] }}ft²
+            total_time: >-
+              {% if state_attr('sensor.rest980mop', 'bbrun')['hr'] is defined %}
+                {{ state_attr('sensor.rest980mop', 'bbrun')['hr'] }}h {{ state_attr('sensor.rest980mop', 'bbrun')['min'] }}m
+              {% else %}
+                n-a
+              {% endif %}
+            total_jobs: >-
+              {% if state_attr('sensor.rest980mop', 'bbmssn')['nMssn'] is defined %}
+                {{ state_attr('sensor.rest980mop', 'bbmssn')['nMssn'] }}
+              {% else %}
+                n-a
+              {% endif %}
+            dirt_events: >-
+              {% if state_attr('sensor.rest980mop', 'bbrun')['nScrubs'] is defined %}
+                {{ state_attr('sensor.rest980mop', 'bbrun')['nScrubs'] }}
+              {% else %}
+                n-a
+              {% endif %}
+            # evac_events I7+/S9+ Models (Clean Base)
+            evac_events: >-
+              {% if state_attr('sensor.rest980mop', 'bbrun')['nEvacs'] is defined %}
+                {{ state_attr('sensor.rest980mop', 'bbrun')['nEvacs'] }}  
+              {% else %}
+                n-a
+              {% endif %}
+            job_initiator: >-
+              {% set mapper =  {
+                'schedule' : 'Scheduler',
+                'rmtApp' : 'App',
+                'manual' : 'Robot',
+                'localApp' : 'HA' } %}
+              {% set state =  state_attr('sensor.rest980mop', 'cleanMissionStatus')['initiator'] %}
+              {{ mapper[state] if state in mapper else state }}
+            job_time: >-
+              {% if state_attr('sensor.rest980mop', 'cleanMissionStatus')['mssnM'] is defined %}
+                {% set time = state_attr('sensor.rest980mop', 'cleanMissionStatus')['mssnM'] | int %}
+                {% if time > 60 %}
+                  {{ time // 60 }}h {{ '{:0>2d}'.format(time%60) }}m
+                {% else %}
+                  {{time}}m
+                {% endif %}
+              {% else %}
+                n-a
+              {% endif %}
+            job_recharge: >-
+              {% if state_attr('sensor.rest980mop', 'cleanMissionStatus')['rechrgM'] is defined %}
+                {% set time = state_attr('sensor.rest980mop', 'cleanMissionStatus')['rechrgM'] | int %}
+                {% if time > 60 %}
+                  {{ time // 60 }}h {{ '{:0>2d}'.format(time%60) }}m
+                {% else %}
+                  {{time}}m
+                {% endif %}
+              {% else %}
+                n-a
+              {% endif %}
+            job_area: >-
+              {% if state_attr('sensor.rest980mop', 'cleanMissionStatus')['sqft'] is defined %}
+                {{ (state_attr('sensor.rest980mop', 'cleanMissionStatus')['sqft'] / 10.764)| round() }}m²  
+              {% else %}
+                n-a
+              {% endif %}
+            #   {{ (state_attr('sensor.rest980mop', 'cleanMissionStatus')['sqft'] }}ft²
+            clean_passes: >-
+              {% if state_attr('sensor.rest980mop', 'noAutoPasses') is defined %}
+                {% if state_attr('sensor.rest980mop', 'noAutoPasses') == 'true' and state_attr('sensor.rest980mop', 'twoPass') == 'false' %}
+                  One
+                {% elif state_attr('sensor.rest980mop', 'noAutoPasses') == 'true' and state_attr('sensor.rest980mop', 'twoPass') == 'true' %}
+                  Two
+                {% else %}
+                  Auto
+                {% endif %} 
+              {% else %}
+                n-a
+              {% endif %}
+            carpet_boost: >-
+              {% if state_attr('sensor.rest980mop', 'vacHigh') is defined %}
+                {% if state_attr('sensor.rest980mop', 'vacHigh') == 'false' and state_attr('sensor.rest980mop', 'carpetBoost') == 'false' %}
+                  Eco
+                {% elif state_attr('sensor.rest980mop', 'vacHigh') == 'true' and state_attr('sensor.rest980mop', 'carpetBoost') == 'false' %}
+                  Performance
+                {% else %}
+                  Auto
+                {% endif %}
+              {% else %}
+                n-a
+              {% endif %}
+            clean_edges: >-
+              {% if state_attr('sensor.rest980mop', 'openOnly') is defined %}
+                {% if state_attr('sensor.rest980mop', 'openOnly') == 'true' %}
+                  False
+                {% else %}
+                  True
+                {% endif %}
+              {% else %}
+                n-a
+              {% endif %}
+            maint_due: >-
+              {% if is_state('input_boolean.mop_maint_due', 'on') %}
+                True
+              {% else %}
+                False
+              {% endif %}
+            # pmap0_id I7/S9 Models
+            pmap0_id: >-
+              {% if state_attr('sensor.rest980mop', 'pmaps')[0] is defined %}
+                {{ state_attr('sensor.rest980mop', 'pmaps')[0] | regex_findall_index("{'([\w\-]+)': '\w+'}") }}
+              {% else %}
+                n-a
+              {% endif %}
+        mop_location:
+          friendly_name_template: >-
+            {{ state_attr('sensor.rest980mop', 'name') }} Location
+          value_template: >-
+            {{ state_attr('sensor.mop', 'location') }}
+          icon_template: mdi:home-map-marker
+
+  ###################################
+  # Rest Command
+  ###################################
+
+  rest_command:
+    mop_action:
+      url: >-
+        {{ states('input_text.mop_action') }}{{ command }}
+      verify_ssl: !secret mop_verify_ssl
+      method: "get"
+      timeout: 20
+    mop_clean:
+      url: >-
+        {{ states('input_text.mop_action') }}cleanRoom
+      verify_ssl: !secret mop_verify_ssl
+      method: POST
+      content_type: "application/json"
+      payload: "{{ payload }}"
+
+  ###################################
+  # Input Boolean
+  ###################################
+
+  input_boolean:
+    mop_clean_kitchen:
+      name: Kitchen
+      icon: mdi:silverware-fork-knife
+    mop_clean_morning_room:
+      name: Morning Room
+      icon: mdi:coat-rack
+    mop_clean_hallway:
+      name: Hallway
+      icon: mdi:ceiling-light
+    mop_clean_bathroom:
+      name: Bathroom
+      icon: mdi:shower
+    mop_maint_due:
+      name: Mop Maintenance
+      icon: mdi:wrench
+    # mop_schedule_1:
+    #   name: Mop Schedule 1
+    #   icon: mdi:timetable
+
+  ###################################
+  # Input Text
+  ###################################
+
+  input_text:
+    mop_action:
+      name: Mop Action URL
+      initial: !secret mop_action
+    mop_map:
+      name: Mop Map URL
+      initial: !secret mop_map
+    mop_log:
+      name: Mop Log Path
+      initial: !secret mop_log
+    mop_dir:
+      name: Mop Dir Path
+      initial: !secret mop_dir
+    mop_rooms:
+      name: Mop Rooms
+      max: 255
+
+    mop_clean_kitchen:
+      name: Kitchen
+      initial: !secret mop_kitchen
+    mop_clean_morning_room:
+      name: Bedroom
+      initial: !secret mop_morning_room
+    mop_clean_hallway:
+      name: Hallway
+      initial: !secret mop_hallway
+    mop_clean_bathroom:
+      name: Bathroom
+      initial: !secret mop_bathroom
+
+  ###################################
+  # Group
+  ###################################
+
+  group:
+    mop_rooms:
+      entities:
+        - input_boolean.mop_clean_kitchen
+        - input_boolean.mop_clean_morning_room
+        - input_boolean.mop_clean_hallway
+        - input_boolean.mop_clean_bathroom
+
+  ###################################
+  # Automation
+  ###################################
+
+  automation:
+    # Initiate Selective Room Clean
+    - alias: Mop Clean Rooms
+      trigger:
+        - platform: event
+          event_type: initiate_mop_clean
+      action:
+        - service: rest_command.mop_clean
+          data_template:
+            payload: >
+              {% set rooms = states('input_text.mop_rooms') %}
+              {% if rooms[-1:] == ',' %}
+              {% set rooms = rooms[:-1] %}
+              {% endif %}
+              {% set rooms = rooms.split(",") %}
+              {
+                "ordered": 1,
+                "pmap_id": "{{ state_attr('sensor.mop', 'pmap0_id') | string }}",
+                "regions": [{% for id in rooms %}
+                  {% set room = 'input_text.mop_clean_' + id %} {{ states(room) | string }} {%- if not loop.last %},{%- endif %}
+                  {%- endfor %}
+                ]
+              }
+        - service: input_text.set_value
+          data:
+            entity_id: input_text.mop_rooms
+            value: ""
+        - service: input_boolean.turn_off
+          data:
+            entity_id: group.mop_rooms
+
+    # Update Mop REST Sensor for Location Details
+    - alias: Mop Update Location
+      initial_state: true
+      trigger:
+        - platform: time_pattern
+          seconds: /2
+        - platform: event
+          event_type: call_service
+          event_data:
+            domain: rest_command
+            service: mop_clean
+      condition:
+        condition: or
+        conditions:
+          - condition: template
+            value_template: "{{ is_state_attr('sensor.mop', 'phase', 'Run') }}"
+          - condition: template
+            value_template: "{{ is_state_attr('sensor.mop', 'phase', 'Sent Home') }}"
+          - condition: template
+            value_template: "{{ is_state_attr('sensor.mop', 'phase', 'Mid Dock') }}"
+          - condition: template
+            value_template: "{{ is_state_attr('sensor.mop', 'phase', 'Final Dock') }}"
+      action:
+        - service: homeassistant.update_entity
+          entity_id: sensor.rest980mop
+
+    # Log Mop Location to File
+    - alias: Mop Log Position
+      initial_state: true
+      trigger:
+        platform: state
+        entity_id: sensor.mop_location
+      condition:
+        condition: or
+        conditions:
+          - condition: state
+            entity_id: sensor.mop
+            state: "Clean"
+          - condition: state
+            entity_id: sensor.mop
+            state: "Train"
+      action:
+        - service: notify.mopfile
+          data_template:
+            message: "{{ states('sensor.mop_location') }}"
+
+    # Initialize Blank Mop Log File
+    - alias: Mop Clean Log
+      initial_state: true
+      trigger:
+        - platform: state
+          entity_id: sensor.mop
+          from: "Ready"
+          to: "Clean"
+        - platform: state
+          entity_id: sensor.mop
+          from: "Ready"
+          to: "Train"
+      action:
+        - service: shell_command.mop_clear_log
+        - service: shell_command.mop_clear_image
+
+    # Update Mop Log File with Finished Status
+    - alias: Mop Notify on Finished Cleaning
+      initial_state: true
+      trigger:
+        - platform: state
+          entity_id: sensor.mop
+          from: "Clean"
+          to: "Ready"
+        - platform: state
+          entity_id: sensor.mop
+          from: "Train"
+          to: "Ready"
+        - platform: state
+          entity_id: sensor.mop
+          from: "Pending"
+          to: "Ready"
+      action:
+        - service: notify.mopfile
+          data_template:
+            message: "Finished"
+
+    # Update Mop Log File with Stuck Status
+    - alias: Mop Notify on Stuck Status
+      initial_state: true
+      trigger:
+        platform: template
+        value_template: "{{ is_state_attr('sensor.mop', 'phase', 'Stuck') }}"
+      action:
+        - service: notify.mopfile
+          data_template:
+            message: "Stuck"
+        # DELETE BELOW SECTION IF YOU DONT WANT NOTIFICATIONS
+        - delay: 5
+        - service: !secret mop_notify
+          data_template:
+            title: "{{ state_attr('sensor.rest980mop', 'name') }} requires your attention"
+            message: "{{ state_attr('sensor.rest980mop', 'name') }} is stuck."
+            # =============
+            # NOTICE THIS SECTION IS VALID FOR IOS USERS ONLY!
+            data:
+              attachment:
+                content-type: jpeg
+              push:
+                category: camera
+              entity_id: camera.braava
+            # =============
+
+    # Generate Complete Mop Map
+    - alias: Mop Generate Image after Cleaning
+      initial_state: true
+      trigger:
+        - platform: state
+          entity_id: sensor.mop
+          from: "Clean"
+          to: "Ready"
+          for:
+            seconds: 10
+        - platform: state
+          entity_id: sensor.mop
+          from: "Train"
+          to: "Ready"
+          for:
+            seconds: 10
+        - platform: state
+          entity_id: sensor.mop
+          from: "Pending"
+          to: "Ready"
+          for:
+            seconds: 10
+      action:
+        - service: shell_command.mop_generate_image
+        # DELETE BELOW SECTION IF YOU DONT WANT NOTIFICATIONS
+        - delay: 5
+        - service: !secret mop_notify
+          data_template:
+            title: "{{ state_attr('sensor.rest980mop', 'name') }}"
+            message: "{{ state_attr('sensor.rest980mop', 'name') }} successfully completed a job!"
+            # =============
+            # NOTICE THIS SECTION IS VALID FOR IOS USERS ONLY!
+            data:
+              attachment:
+                content-type: jpeg
+              push:
+                category: camera
+              entity_id: camera.braava
+            # =============
+
+    # Maintence Check
+    - alias: Mop Maintenance Check
+      initial_state: true
+      trigger:
+        - platform: time_pattern
+          minutes: /15
+        - platform: state
+          entity_id:
+            [
+              "sensor.mop_maint_clean_pad",
+              "sensor.mop_maint_clean_contacts",
+              "sensor.mop_maint_clean_wheel",
+              "sensor.mop_maint_replace_pad",
+              "sensor.mop_maint_replace_filter",
+              "sensor.mop_maint_replace_wheel",
+            ]
+      action:
+        - service: >-
+            {% set ns = namespace(count = 0) %}
+            {% for item in states.sensor if 'sensor.mop_maint' in item.entity_id and (state_attr(item.entity_id, 'timeout_timestamp') < as_timestamp(now())) %}
+              {% set ns.count = loop.index %}
+            {% endfor %}
+            {% if ns.count > 0 %}
+              input_boolean.turn_on
+            {% else %}
+              input_boolean.turn_off
+            {% endif %}
+          entity_id: input_boolean.mop_maint_due
+
+    # Add Rooms for Ordered Cleaning
+    - alias: Mop Add Rooms for Cleaning
+      initial_state: true
+      trigger:
+        platform: state
+        entity_id:
+          [
+            "input_boolean.mop_clean_kitchen",
+            "input_boolean.mop_clean_morning_room",
+            "input_boolean.mop_clean_hallway",
+            "input_boolean.mop_clean_bathroom",
+          ]
+        to: "on"
+      action:
+        service: input_text.set_value
+        data_template:
+          entity_id: input_text.mop_rooms
+          value: |
+            {% set room = trigger.entity_id %}
+            {% set room = room.replace("input_boolean.mop_clean_","") %}
+            {% if ((states('input_text.mop_rooms') == "unknown") or (states('input_text.mop_rooms') == "")) %}
+              {{ room }},
+            {% else %}
+              {{ states('input_text.mop_rooms') }}{{ room }},
+            {% endif %}
+
+    # Remove Rooms for Ordered Cleaning
+    - alias: Mop Remove Rooms for Cleaning
+      initial_state: true
+      trigger:
+        platform: state
+        entity_id:
+          [
+            "input_boolean.mop_clean_kitchen",
+            "input_boolean.mop_clean_morning_room",
+            "input_boolean.mop_clean_hallway",
+            "input_boolean.mop_clean_bathroom",
+          ]
+        to: "off"
+      action:
+        service: input_text.set_value
+        data_template:
+          entity_id: input_text.mop_rooms
+          value: |
+            {% set room = trigger.entity_id %}
+            {% set room = room.replace("input_boolean.mop_clean_","") %}
+            {% set result = states('input_text.mop_rooms') %}
+            {% set result = result.replace(room + ",","") %}
+            {{ result }}
+
+    # Mop Cleaning Schedule 1
+    # - alias: Mop Cleaning Schedule 1
+    #   initial_state: true
+    #   trigger:
+    #     platform: time_pattern
+    #     hours: "6"
+    #   condition:
+    #     condition: and
+    #     conditions:
+    #       - condition: state
+    #         entity_id: input_boolean.mop_schedule_1
+    #         state: 'on'
+    #       - condition: state
+    #         entity_id: input_boolean.vacation
+    #         state: 'off'
+    #   action:
+    #     - service: input_text.set_value
+    #       entity_id: input_text.mop_rooms
+    #       data_template:
+    #         entity_id: input_text.mop_rooms
+    #         value: "kitchen"
+    #     - service: automation.trigger
+    #       entity_id: automation.mop_clean_rooms
+
+    # Delete Old Mop Image Files
+    - alias: Mop Delete Images
+      initial_state: true
+      trigger:
+        platform: time_pattern
+        hours: "00"
+      action:
+        - service: shell_command.mop_delete_images
+
+  ###################################
+  # Notify
+  ###################################
+
+  notify:
+    - name: MopFile
+      platform: file
+      filename: !secret mop_log
+
+  ###################################
+  # Camera
+  ###################################
+
+  camera:
+    - platform: generic
+      still_image_url: !secret mop_map
+      content_type: image/png
+      name: Braava
+
+  ###################################
+  # Shell Command
+  ###################################
+
+  shell_command:
+    mop_clear_log: cp /dev/null {{ states('input_text.mop_log') }}
+    mop_clear_image: curl -X GET -s -O /dev/null '{{ states("input_text.mop_map") }}?clear=true'
+    mop_generate_image: curl -X GET -s -O /dev/null '{{ states("input_text.mop_map") }}?last=true'
+    mop_delete_images: find {{ states('input_text.mop_dir') }} -regex ".*[0-9]\.png" -type f -mtime +20 -exec rm -f {} \;

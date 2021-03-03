@@ -3,7 +3,7 @@ default_config:
 
 homeassistant:
   customize: !include customize.yaml
-  packages: !include_dir_named packages
+  packages: !include_dir_merge_named packages
   auth_mfa_modules:
     - type: totp
   auth_providers:
@@ -33,8 +33,8 @@ http:
   use_x_forwarded_for: true
   trusted_proxies:
     - 172.30.33.0/24
-  ip_ban_enabled: true
-  login_attempts_threshold: 5
+  #ip_ban_enabled: true
+  #login_attempts_threshold: 5
 
 frontend:
   themes: !include_dir_merge_named themes
@@ -75,7 +75,6 @@ recorder:
     entity_globs:
       - sensor.*_rx
       - sensor.*_tx
-
 
 alert: !include alerts.yaml
 automation: !include automations.yaml

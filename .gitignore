@@ -11,3 +11,5 @@ home-assistant_v2.db*
 secrets.yaml
 /node-red/node_modules/*
 /node-red/*.backup
+/images/mail_and_packages
+/.cloud

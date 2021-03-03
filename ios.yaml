@@ -9,8 +9,8 @@ push:
         - identifier: "VACUUM"
           title: "Vacuum"
           authenticationRequired: true
-        - identifier: "VACUUM_GREAT_ROOM"
-          title: "Great Room Only"
+        - identifier: "VACUUM_SELECTED"
+          title: "Vaccum Selected Rooms"
           authenticationRequired: true
         - identifier: "NOTHING"
           title: "Nothing"
