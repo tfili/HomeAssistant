@@ -37,5 +37,6 @@ home-assistant_v2.db*
 /www/mail_and_packages/*
 /images/mail_and_packages/*
 
-# Roomba and Braava point files
+# Roomba and Braava point and image files
 /irobot/*.log
+/irobot/latest*.png

@@ -1,6 +1,6 @@
 <?php
 $set_first_coordinate = 0; # Ability to skip initial coordinate(s) if incorrect data logged
-$overlay_image = 'floor.png'; # Background Layer
+$overlay_image = 'chatham.png'; # Background Layer
 $overlay_walls = false; # Allows overlaying of walls, used in fill mode to cover 'spray'
 $walls_image = 'walls.png'; # Walls Image must contain transparent floor
 $show_stuck_positions = true; 
@@ -88,6 +88,11 @@ $roomba = imagecreatefrompng('roomba.png');
 imagealphablending($roomba, false);
 imagesavealpha($roomba, true);
 
+$halfWidth = $map_width / 2;
+$halfHeight = $map_height / 2;
+$centerX = $halfWidth - $x_offset;
+$centerY = $halfHeight - $y_offset;
+
 foreach($coords as $i => $coord) {
   # Skip initial coordinates if needed
   if ($i < $set_first_coordinate) {
@@ -119,13 +124,13 @@ foreach($coords as $i => $coord) {
   $color = imagecolorallocate($image, $red, $green, $blue);
 //   $tmpx = $split[1]+$x_offset;
 //   $tmpy = $split[0]+$y_offset;
-  $tmpx = $split[1];
-  $tmpy = $split[0];
+  $tmpx = $split[1] - $centerX;
+  $tmpy = $split[0] - $centerY;
   $theta = $split[2];
   
   // Rotate Calculations
-  $x=($tmpx*cos(deg2rad($rotate_angle))+$tmpy*sin(deg2rad($rotate_angle)))*$x_scale+$x_offset;
-  $y=(-1*$tmpx*sin(deg2rad($rotate_angle))+$tmpy*cos(deg2rad($rotate_angle)))*$y_scale+$y_offset;
+  $x=($tmpx*cos(deg2rad($rotate_angle))+$tmpy*sin(deg2rad($rotate_angle)))*$x_scale+$halfWidth;
+  $y=(-1*$tmpx*sin(deg2rad($rotate_angle))+$tmpy*cos(deg2rad($rotate_angle)))*$y_scale+$halfHeight;
   
   $boxsize=4;
   $shift_y = 2;
