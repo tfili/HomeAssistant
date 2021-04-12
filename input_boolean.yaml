@@ -1,3 +1,23 @@
-alarm_arming:
-  name: Alarm is being armed
+motion_abels_room:
+  name: Motion in Abels Room
+  initial: false
+
+motion_backyard_camera:
+  name: Motion in backyard
+  initial: false
+
+motion_front_door:
+  name: Motion out front
+  initial: false
+
+motion_kitchen:
+  name: Motion in kitchen
+  initial: false
+
+motion_morning_room:
+  name: Motion in morning room
+  initial: false
+
+motion_nursery:
+  name: Motion in nursery
   initial: false

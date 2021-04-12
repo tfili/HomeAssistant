@@ -58,6 +58,9 @@ wake_on_lan:
 # Enable discovery
 discovery:
 
+# Enable camera mqtt_statestream:
+stream:
+
 # Enable proximity sensors for all iphones
 proximity:
   home:

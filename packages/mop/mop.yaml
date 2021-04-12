@@ -78,18 +78,19 @@ irobot_mop:
               {% set state =  state_attr('sensor.rest980mop', 'cleanMissionStatus')['phase'] %}
               {{ mapper[state] if state in mapper else state }}
               {% endif %}
-            bin: >-
-              {% set mapper =  {
-                true : 'Full',
-                false : 'Not Full' } %}
-              {% set state =  state_attr('sensor.rest980mop', 'bin')['full'] %}
-              {{ mapper[state] if state in mapper else state }}
-            bin_present: >-
-              {% set mapper =  {
-                true : 'Yes',
-                false : 'No' } %}
-              {% set state =  state_attr('sensor.rest980mop', 'bin')['present'] %}
-              {{ mapper[state] if state in mapper else state }}
+            # Not available for mop
+            # bin: >-
+            #   {% set mapper =  {
+            #     true : 'Full',
+            #     false : 'Not Full' } %}
+            #   {% set state =  state_attr('sensor.rest980mop', 'bin')['full'] %}
+            #   {{ mapper[state] if state in mapper else state }}
+            # bin_present: >-
+            #   {% set mapper =  {
+            #     true : 'Yes',
+            #     false : 'No' } %}
+            #   {% set state =  state_attr('sensor.rest980mop', 'bin')['present'] %}
+            #   {{ mapper[state] if state in mapper else state }}
             clean_base: >-
               {% if state_attr('sensor.rest980mop', 'dock')['state'] is defined %}
                 {% set mapper =  {

@@ -386,3 +386,65 @@
   - data:
       name: kibibit
     service: frontend.set_theme
+  id: 5338138641074509ac3d115c3132d868
+- id: '1617642446660'
+  alias: Set Nest Motion Entities
+  description: ''
+  trigger:
+  - platform: device
+    device_id: 79442c3198ce3df321db20b7874d6285
+    domain: nest
+    type: camera_motion
+  - platform: device
+    device_id: 9d8105f724dc536601acaa2daf3cef79
+    domain: nest
+    type: camera_motion
+  - platform: device
+    device_id: b8c655b88ad70bf5a8c4e92f4d7d5ffc
+    domain: nest
+    type: camera_motion
+  - platform: device
+    device_id: b2f4cef4c127ec8f30d445e39dd7add5
+    domain: nest
+    type: camera_motion
+  - platform: device
+    device_id: 631237edbf1b66bf10461c63d27d037a
+    domain: nest
+    type: camera_motion
+  - platform: device
+    device_id: f608a75804749b060fc4274bb4bd9939
+    domain: nest
+    type: camera_motion
+  condition: []
+  action:
+  - service: input_boolean.turn_on
+    data_template:
+      entity_id: '{% set deviceId = trigger.event|regex_findall_index("device_id=([0-9a-f]+?),")
+        %} {% if deviceId == "79442c3198ce3df321db20b7874d6285" %} input_boolean.motion_abels_room
+        {% elif deviceId == "f608a75804749b060fc4274bb4bd9939" %} input_boolean.motion_backyard_camera"
+        %} {% elif deviceId == "9d8105f724dc536601acaa2daf3cef79" %} input_boolean.motion_front_door
+        {% elif deviceId == "b8c655b88ad70bf5a8c4e92f4d7d5ffc" %} input_boolean.motion_kitchen
+        {% elif deviceId == "b2f4cef4c127ec8f30d445e39dd7add5" %} input_boolean.motion_morning_room
+        {% elif deviceId == "631237edbf1b66bf10461c63d27d037a" %} input_boolean.motion_nursery
+        {% endif %}
+
+        '
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 20
+      milliseconds: 0
+  - service: input_boolean.turn_off
+    data_template:
+      entity_id: '{% set deviceId = trigger.event|regex_findall_index("device_id=([0-9a-f]+?),")
+        %} {% if deviceId == "79442c3198ce3df321db20b7874d6285" %} input_boolean.motion_abels_room
+        {% elif deviceId == "f608a75804749b060fc4274bb4bd9939" %} input_boolean.motion_backyard_camera"
+        %} {% elif deviceId == "9d8105f724dc536601acaa2daf3cef79" %} input_boolean.motion_front_door
+        {% elif deviceId == "b8c655b88ad70bf5a8c4e92f4d7d5ffc" %} input_boolean.motion_kitchen
+        {% elif deviceId == "b2f4cef4c127ec8f30d445e39dd7add5" %} input_boolean.motion_morning_room
+        {% elif deviceId == "631237edbf1b66bf10461c63d27d037a" %} input_boolean.motion_nursery
+        {% endif %}
+
+        '
+  mode: restart
+  max: 10
