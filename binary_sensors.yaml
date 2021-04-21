@@ -1,6 +1,5 @@
 - platform: template
   sensors:
-  
     # On if a garage door is open at night
     garage_open_at_night:
       friendly_name: "Garage Doors"

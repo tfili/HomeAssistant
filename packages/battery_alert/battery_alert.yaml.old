@@ -481,6 +481,8 @@ battery_alert:
   automation:
     - alias: battery_persistent_notification
       initial_state: "on"
+      mode: queued
+      max: 10
       trigger:
         - platform: time_pattern
           minutes: "/15"
@@ -555,6 +557,8 @@ battery_alert:
 
     - alias: battery_persistent_notification_clear
       initial_state: "on"
+      mode: queued
+      max: 10
       trigger:
         - platform: time_pattern
           minutes: "/15"
@@ -601,6 +605,8 @@ battery_alert:
 
     - alias: battery_notification_default
       initial_state: "on"
+      mode: queued
+      max: 10
       trigger:
         - platform: time
           at: "10:00:00"
@@ -627,6 +633,8 @@ battery_alert:
 
     - alias: battery_notification_slack
       initial_state: "on"
+      mode: queued
+      max: 10
       trigger:
         - platform: time
           at: "10:00:00"
@@ -657,6 +665,8 @@ battery_alert:
 
     - alias: battery_sensor_from_attributes
       initial_state: "on"
+      mode: queued
+      max: 10
       trigger:
         - platform: event
           event_type: state_changed
@@ -825,6 +835,8 @@ battery_alert:
 
     - alias: update_battery_status_group_members
       initial_state: "on"
+      mode: queued
+      max: 10
       trigger:
         - platform: time_pattern
           minutes: "/1"
@@ -860,6 +872,8 @@ battery_alert:
 
     - alias: delete_battery_sensor
       initial_state: "on"
+      mode: queued
+      max: 10
       trigger:
         - platform: state
           entity_id:

@@ -28,6 +28,9 @@ homeassistant:
 logger:
   default: warning
 
+# lovelace:
+#   mode: yaml
+
 # Trust nginx and enable IP Banning
 http:
   use_x_forwarded_for: true
