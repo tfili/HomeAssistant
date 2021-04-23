@@ -64,6 +64,12 @@ discovery:
 # Enable camera mqtt_statestream:
 stream:
 
+# Browser-mod
+browser_mod:
+  devices:
+    28b5465d-e2fdeac4:
+      name: laptop_linux_chrome
+
 # Enable proximity sensors for all iphones
 proximity:
   home:
