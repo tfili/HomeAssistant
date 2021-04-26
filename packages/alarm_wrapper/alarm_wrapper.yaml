@@ -1,0 +1,79 @@
+alarm_wrapper:
+  homeassistant:
+    customize:
+      package.node_anchors:
+        customize: &customize
+          package: "alarm_wrapper"
+
+      alarm_control_panel.wrapped_alarm:
+        <<: *customize
+        code_format: null
+        icon: 'mdi:security'
+
+      input_boolean.alarm_arming:
+        <<: *customize
+
+      input_text.alarm_previous_state:
+        <<: *customize
+
+  alarm_control_panel:
+    - platform: template
+      panels:
+        wrapped_alarm:
+          name: Alarm
+          code_arm_required: false
+          value_template: "{{ 'arming' if is_state('input_boolean.alarm_arming', 'on') else states('alarm_control_panel.abode_alarm') }}"
+          arm_away:
+            - service: input_boolean.turn_on
+              target:
+                entity_id: input_boolean.alarm_arming
+            - service: input_text.set_value
+              target:
+                entity_id: input_text.alarm_previous_state
+              data:
+                value: "{{ states('alarm_control_panel.abode_alarm') }}"
+            - service: alarm_control_panel.alarm_arm_away
+              target:
+                entity_id: alarm_control_panel.abode_alarm
+            - service: input_boolean.turn_on
+              target:
+                entity_id: input_boolean.alarm_arming
+            - wait_template: >
+                {{ (states('alarm_control_panel.abode_alarm') != states('input_text.alarm_previous_state')) or is_state('input_boolean.alarm_arming', 'off')}}
+            - service: input_boolean.turn_off
+              target:
+                entity_id: input_boolean.alarm_arming
+          arm_home:
+            - service: input_boolean.turn_on
+              target:
+                entity_id: input_boolean.alarm_arming
+            - service: input_text.set_value
+              target:
+                entity_id: input_text.alarm_previous_state
+              data:
+                value: "{{ states('alarm_control_panel.abode_alarm') }}"
+            - service: alarm_control_panel.alarm_arm_home
+              target:
+                entity_id: alarm_control_panel.abode_alarm
+            - wait_template: >
+                {{ (states('alarm_control_panel.abode_alarm') != states('input_text.alarm_previous_state')) or is_state('input_boolean.alarm_arming', 'off')}}
+            - service: input_boolean.turn_off
+              target:
+                entity_id: input_boolean.alarm_arming
+          disarm:
+            - service: input_boolean.turn_off
+              target:
+                entity_id: input_boolean.alarm_arming
+            - service: alarm_control_panel.alarm_disarm
+              target:
+                entity_id: alarm_control_panel.abode_alarm
+
+  input_boolean:
+    alarm_arming:
+      name: Alarm Arming
+      initial: false
+
+  input_text:
+    alarm_previous_state:
+      name: Alarm State (Previous Value)
+      initial: Unknown
