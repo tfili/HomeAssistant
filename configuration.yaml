@@ -107,6 +107,7 @@ group: !include groups.yaml
 input_boolean: !include input_boolean.yaml
 ios: !include ios.yaml
 light: !include light.yaml
+notify: !include notify.yaml
 scene: !include scenes.yaml
 script: !include scripts.yaml
 sensor: !include sensors.yaml

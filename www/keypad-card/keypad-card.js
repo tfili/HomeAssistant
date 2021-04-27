@@ -14,12 +14,16 @@ customElements.whenDefined("card-tools").then(() => {
         card: { type: Object },
         timeout: { type: Number },
         exemptions: { type: Array },
-        _unlocked: { type: Boolean },
+        _unlocked: { type: Boolean, reflect: true },
       };
     }
 
     static get styles() {
       return css`
+        :host {
+          background-color: transparent
+        }
+
         paper-input {
           margin: 0 auto 8px;
           max-width: 150px;
@@ -44,6 +48,10 @@ customElements.whenDefined("card-tools").then(() => {
         mwc-button.numberkey {
           --mdc-typography-button-font-size: var(--keypad-font-size, 0.875rem);
         }
+
+        #unlocked-card {
+          background-color: transparent
+        }
       `;
     }
 
@@ -67,7 +75,7 @@ customElements.whenDefined("card-tools").then(() => {
       });
       if (exempt || this._unlocked) {
         return html`
-          <ha-card>
+          <ha-card id="unlocked-card">
             <card-maker .config=${this.card} .hass=${this.hass}></card-maker>
           </ha-card>
         `;

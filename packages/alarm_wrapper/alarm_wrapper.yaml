@@ -15,6 +15,9 @@ alarm_wrapper:
 
       input_text.alarm_previous_state:
         <<: *customize
+      
+      script.alarm_tasks_no_arm:
+        <<: *customize
 
   alarm_control_panel:
     - platform: template
@@ -35,11 +38,10 @@ alarm_wrapper:
             - service: alarm_control_panel.alarm_arm_away
               target:
                 entity_id: alarm_control_panel.abode_alarm
-            - service: input_boolean.turn_on
-              target:
-                entity_id: input_boolean.alarm_arming
             - wait_template: >
                 {{ (states('alarm_control_panel.abode_alarm') != states('input_text.alarm_previous_state')) or is_state('input_boolean.alarm_arming', 'off')}}
+              continue_on_timeout: true
+              timeout: '00:00:35'
             - service: input_boolean.turn_off
               target:
                 entity_id: input_boolean.alarm_arming
@@ -57,6 +59,8 @@ alarm_wrapper:
                 entity_id: alarm_control_panel.abode_alarm
             - wait_template: >
                 {{ (states('alarm_control_panel.abode_alarm') != states('input_text.alarm_previous_state')) or is_state('input_boolean.alarm_arming', 'off')}}
+              continue_on_timeout: true
+              timeout: '00:00:35'
             - service: input_boolean.turn_off
               target:
                 entity_id: input_boolean.alarm_arming
@@ -77,3 +81,11 @@ alarm_wrapper:
     alarm_previous_state:
       name: Alarm State (Previous Value)
       initial: Unknown
+
+  script:
+    alarm_tasks_no_arm:
+      sequence:
+        - alias: "Do alarm tasks"
+          event: alarm_tasks_no_arm
+          event_data:
+            entity_id: alarm_control_panel.abode_alarm

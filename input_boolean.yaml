@@ -21,3 +21,7 @@ motion_morning_room:
 motion_nursery:
   name: Motion in nursery
   initial: false
+
+mail_delivered:
+  name: Mail delivered
+  initial: false
