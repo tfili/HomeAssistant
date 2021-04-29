@@ -84,6 +84,7 @@ proximity:
 #  - Upload/download stats for devices
 #  - Extra vacuum and mop stats
 recorder:
+  db_url: mysql://homeassistant:vcQh9QYWaWqexC86FyqYechwKgHS9mqr@core-mariadb/homeassistant?charset=utf8mb4
   exclude:
     domains:
       - switch

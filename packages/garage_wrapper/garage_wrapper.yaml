@@ -8,6 +8,9 @@ garage_wrapper:
       cover.wrapped_left_garage:
         <<: *customize
 
+      cover.wrapped_right_garage:
+        <<: *customize
+
       input_boolean.left_garage_moving:
         <<: *customize
 
@@ -20,14 +23,12 @@ garage_wrapper:
         wrapped_left_garage:
           device_class: garage
           friendly_name: Left Garage Door
-            # Need to wait for 2021.5 for this to work
-            # {% if is_state("input_boolean.left_garage_moving", "on") %} 
-            #   {{ "closing" if is_state("cover.left_garage_door", "open") else "opening" }}
-            # {% else %}
-            #   {{ states("cover.left_garage_door")  }}
-            # {% endif %}
           value_template: >
-            {{ states("cover.left_garage_door")  }}
+            {% if is_state("input_boolean.left_garage_moving", "on") %} 
+              {{ "closing" if is_state("cover.left_garage_door", "open") else "opening" }}
+            {% else %}
+              {{ states("cover.left_garage_door")  }}
+            {% endif %}
           open_cover:
             - service: input_boolean.turn_on
               target:
@@ -35,8 +36,14 @@ garage_wrapper:
             - service: cover.open_cover
               target:
                 entity_id: cover.left_garage_door
-            - wait_template: >
-                {{ is_state("cover.left_garage_door", "open") or is_state("input_boolean.left_garage_moving", "off")}}
+            - wait_for_trigger:
+              - platform: state
+                entity_id: cover.left_garage_door
+                to: open
+                for: '00:00:10' # Anything not closed is open, so wait for the closing to finish
+              - platform: state
+                entity_id: input_boolean.left_garage_moving
+                to: 'off'
               continue_on_timeout: true
               timeout: "00:01:00"
             - service: input_boolean.turn_off
@@ -49,8 +56,13 @@ garage_wrapper:
             - service: cover.close_cover
               target:
                 entity_id: cover.left_garage_door
-            - wait_template: >
-                {{ is_state("cover.left_garage_door", "closed") or is_state("input_boolean.left_garage_moving", "off")}}
+            - wait_for_trigger:
+              - platform: state
+                entity_id: cover.left_garage_door
+                to: closed
+              - platform: state
+                entity_id: input_boolean.left_garage_moving
+                to: 'off'
               continue_on_timeout: true
               timeout: "00:01:00"
             - service: input_boolean.turn_off
@@ -63,6 +75,62 @@ garage_wrapper:
             - service: cover.stop_cover
               target:
                 entity_id: cover.left_garage_door
+
+        wrapped_right_garage:
+          device_class: garage
+          friendly_name: Right Garage Door
+          value_template: >
+            {% if is_state("input_boolean.right_garage_moving", "on") %} 
+              {{ "closing" if is_state("cover.right_garage_door", "open") else "opening" }}
+            {% else %}
+              {{ states("cover.right_garage_door")  }}
+            {% endif %}
+          open_cover:
+            - service: input_boolean.turn_on
+              target:
+                entity_id: input_boolean.right_garage_moving
+            - service: cover.open_cover
+              target:
+                entity_id: cover.right_garage_door
+            - wait_for_trigger:
+              - platform: state
+                entity_id: cover.right_garage_door
+                to: open
+                for: '00:00:10' # Anything not closed is open, so wait for the closing to finish
+              - platform: state
+                entity_id: input_boolean.right_garage_moving
+                to: 'off'
+              continue_on_timeout: true
+              timeout: "00:01:00"
+            - service: input_boolean.turn_off
+              target:
+                entity_id: input_boolean.right_garage_moving
+          close_cover:
+            - service: input_boolean.turn_on
+              target:
+                entity_id: input_boolean.right_garage_moving
+            - service: cover.close_cover
+              target:
+                entity_id: cover.right_garage_door
+            - wait_for_trigger:
+              - platform: state
+                entity_id: cover.right_garage_door
+                to: closed
+              - platform: state
+                entity_id: input_boolean.right_garage_moving
+                to: 'off'
+              continue_on_timeout: true
+              timeout: "00:01:00"
+            - service: input_boolean.turn_off
+              target:
+                entity_id: input_boolean.right_garage_moving
+          stop_cover:
+            - service: input_boolean.turn_off
+              target:
+                entity_id: input_boolean.right_garage_moving
+            - service: cover.stop_cover
+              target:
+                entity_id: cover.right_garage_door
 
   input_boolean:
     left_garage_moving:
