@@ -70,6 +70,30 @@ mud_room_door:
     - mobile_app_toms_iphone
     - mobile_app_theresas_iphone
 
+mailbox:
+  name: Mailbox Ajar
+  message: >
+    {{ states.binary_sensor.mailbox_contact.name }} has been open for {{ ((as_timestamp(now())-as_timestamp(states.binary_sensor.mailbox_contact.last_changed)) / 60) | round }} minutes
+  done_message: >
+    {{ states.binary_sensor.mailbox_contact.name }} is closed
+  entity_id: binary_sensor.mailbox_contact
+  state: "on"
+  repeat:
+    - 5
+    - 10
+    - 15
+    - 30
+  can_acknowledge: true
+  skip_first: true
+  data:
+    push:
+      category: dismissible
+    action_data:
+      entity_id: binary_sensor.mailbox_contact
+  notifiers:
+    - mobile_app_toms_iphone
+    - mobile_app_theresas_iphone
+
 garage_doors:
   name: Garage Door Ajar
   message: >

@@ -72,6 +72,16 @@ browser_mod:
 
 # Enable proximity sensors for all iphones
 proximity:
+  home_tom:
+    devices:
+      - device_tracker.toms_iphone
+    tolerance: 50
+    unit_of_measurement: mi
+  home_jami:
+    devices:
+      - device_tracker.theresas_iphone
+    tolerance: 50
+    unit_of_measurement: mi
   home:
     devices:
       - device_tracker.toms_iphone
@@ -79,27 +89,55 @@ proximity:
     tolerance: 50
     unit_of_measurement: mi
 
-# Exclude history for
-#  - Switches
-#  - Upload/download stats for devices
-#  - Extra vacuum and mop stats
+# Recorder
 recorder:
+  # MariaDB
   db_url: mysql://homeassistant:vcQh9QYWaWqexC86FyqYechwKgHS9mqr@core-mariadb/homeassistant?charset=utf8mb4
+  # Exclude history some entities
   exclude:
     domains:
-      - switch
+      - calendar
+      - group
+      - remote
     entity_globs:
+      # AdGuard
+      - sensor.adguard_*
+      - switch.adguard_*
+      # Alexa Media Player
+      - media_player.*_alexa_*
+      - sensor.*_alexa_*
+      - switch.*_alexa_*
+      # iRobot
+      - automation.mop_*
+      - input_boolean.vacuum_*
+      - input_text.vacuum_*
+      - sensor.mop_*
+      - automation.vacuum_*
+      - input_boolean.mop_*
+      - input_text.mop_*
+      - sensor.vacuum_*
+      # Supervisor & Zigbee2MQTT
+      - binary_sensor.*_update_available
+      - sensor.*_version
+      # Ubiquity Unifi
       - sensor.*_rx
       - sensor.*_tx
-      - sensor.vacuum_*
-      - automation.vacuum_*
-      - sensor.mop_*
-      - automation.mop_*
+      - sensor.rx_*
+      - sensor.tx_*
     entities:
+      # Feed Parser
+      - sensor.iron_cross_athletics
+      # iRobot
       - sensor.rest980
       - sensor.rest980mop
       - camera.roomba
       - camera.braava
+      # Sun
+      - sun.sun
+      # Ubiquity Unifi
+      - sensor.rx
+      - sensor.tx
+
 
 alert: !include alerts.yaml
 automation: !include automations.yaml
@@ -113,7 +151,6 @@ scene: !include scenes.yaml
 script: !include scripts.yaml
 sensor: !include sensors.yaml
 timer: !include timer.yaml
-var: !include var.yaml
 
 # Enable python scripts
 python_script:
