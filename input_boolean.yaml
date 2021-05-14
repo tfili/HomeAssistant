@@ -24,4 +24,3 @@ motion_nursery:
 
 mail_delivered:
   name: Mail delivered
-  initial: false

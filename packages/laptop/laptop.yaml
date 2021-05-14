@@ -1,0 +1,26 @@
+laptop:
+  homeassistant:
+    customize:
+      package.node_anchors:
+        customize: &customize
+          package: "laptop"
+
+      binary_sensor.laptop_camera:
+        <<: *customize
+
+      binary_sensor.laptop_microphone:
+        <<: *customize
+
+  binary_sensor:
+    - platform: mqtt
+      name: "Laptop Camera"
+      state_topic: "laptop/camera"
+      payload_on: true
+      payload_off: false
+      value_template: "{{ value_json.active }}"
+    - platform: mqtt
+      name: "Laptop Microphone"
+      state_topic: "laptop/microphone"
+      payload_on: true
+      payload_off: false
+      value_template: "{{ value_json.active }}"

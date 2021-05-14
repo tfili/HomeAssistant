@@ -144,7 +144,6 @@ automation: !include automations.yaml
 binary_sensor: !include binary_sensors.yaml
 group: !include groups.yaml
 input_boolean: !include input_boolean.yaml
-ios: !include ios.yaml
 light: !include light.yaml
 notify: !include notify.yaml
 scene: !include scenes.yaml
