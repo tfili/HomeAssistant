@@ -40,3 +40,6 @@ home-assistant_v2.db*
 # Roomba and Braava point and image files
 /irobot/*.log
 /irobot/latest*.png
+
+# HomeAssistant log files
+home-assistant.log.*

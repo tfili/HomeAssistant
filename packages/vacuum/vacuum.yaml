@@ -22,6 +22,11 @@ irobot_vacuum:
         - bbrun
         - name
         - pmaps
+        - vacHigh
+        - openOnly
+        - twoPass
+        - noAutoPasses
+        - softwareVer
       resource: !secret vacuum_state
       value_template: "OK"
       scan_interval: 10
@@ -49,7 +54,7 @@ irobot_vacuum:
             {% endif %}
           icon_template: mdi:robot-vacuum
           attribute_templates:
-            message: >-
+            notready_msg: >-
               {% set mapper =  {
                 0 : 'n-a',
                 2 : 'Uneven Ground',
@@ -58,8 +63,22 @@ irobot_vacuum:
                 48 : 'Path Blocked' } %}
               {% set state =  state_attr('sensor.rest980', 'cleanMissionStatus')['notReady'] %}
               {{ mapper[state] if state in mapper else state }}
+            error_msg: >-
+              {% set mapper =  {
+                0 : 'n-a',
+                15 : 'Reboot Required',
+                18 : 'Docking Issue'} %}
+              {% set state =  state_attr('sensor.rest980', 'cleanMissionStatus')['error'] %}
+              {{ mapper[state] if state in mapper else state }}
             battery: >-
               {{ state_attr('sensor.rest980', 'batPct') }} %
+            software_ver: >-
+              {% if state_attr('sensor.rest980', 'softwareVer') is defined %}
+              {% set version = state_attr('sensor.rest980', 'softwareVer') %}
+                {{ version.split('+')[1] }} 
+              {% else %}
+                n-a
+              {% endif %}
             phase: >-
               {% if state_attr('sensor.rest980', 'cleanMissionStatus')['phase'] == 'charge' and state_attr('sensor.rest980', 'batPct') == 100 %}
                 Idle
@@ -160,39 +179,58 @@ irobot_vacuum:
               {% set state =  state_attr('sensor.rest980', 'cleanMissionStatus')['initiator'] %}
               {{ mapper[state] if state in mapper else state }}
             job_time: >-
-              {% if state_attr('sensor.rest980', 'cleanMissionStatus')['mssnM'] is defined %}
-                {% set time = state_attr('sensor.rest980', 'cleanMissionStatus')['mssnM'] | int %}
-                {% if time > 60 %}
-                  {{ time // 60 }}h {{ '{:0>2d}'.format(time%60) }}m
+              {% if state_attr('sensor.rest980', 'cleanMissionStatus')['mssnStrtTm'] is defined %}
+                {% if state_attr('sensor.rest980', 'cleanMissionStatus')['mssnStrtTm'] != 0 %}
+                  {% set time = state_attr('sensor.rest980', 'cleanMissionStatus')['mssnStrtTm'] | timestamp_local %}
+                  {% set elapsed = ((as_timestamp(now()) - as_timestamp(time)) / 60) | round(0) %}
+                  {% if elapsed > 60 %}
+                    {{ elapsed // 60 }}h {{ '{:0>2d}'.format(elapsed%60) }}m
+                  {% else %}
+                    {{elapsed}}m
+                  {% endif %}
                 {% else %}
-                  {{time}}m
+                  n-a
                 {% endif %}
               {% else %}
                 n-a
               {% endif %}
             job_recharge: >-
-              {% if state_attr('sensor.rest980', 'cleanMissionStatus')['rechrgM'] is defined %}
-                {% set time = state_attr('sensor.rest980', 'cleanMissionStatus')['rechrgM'] | int %}
-                {% if time > 60 %}
-                  {{ time // 60 }}h {{ '{:0>2d}'.format(time%60) }}m
+              {% if state_attr('sensor.rest980', 'cleanMissionStatus')['rechrgTm'] is defined %}
+                {% if state_attr('sensor.rest980', 'cleanMissionStatus')['rechrgTm'] != 0 %}
+                  {% set time = state_attr('sensor.rest980', 'cleanMissionStatus')['rechrgTm'] | timestamp_local %}
+                  {% set resume = ((as_timestamp(time) - as_timestamp(now())) / 60) | round(0) %}
+                  {% if resume > 60 %}
+                    {{ resume // 60 }}h {{ '{:0>2d}'.format(resume%60) }}m
+                  {% else %}
+                    {{resume}}m
+                  {% endif %}
                 {% else %}
-                  {{time}}m
+                  n-a
                 {% endif %}
               {% else %}
                 n-a
               {% endif %}
-            job_area: >-
-              {% if state_attr('sensor.rest980', 'cleanMissionStatus')['sqft'] is defined %}
-                {{ (state_attr('sensor.rest980', 'cleanMissionStatus')['sqft'] / 10.764)| round() }}m²  
+            job_expires: >-
+              {% if state_attr('sensor.rest980', 'cleanMissionStatus')['expireTm'] is defined %}
+                {% if state_attr('sensor.rest980', 'cleanMissionStatus')['expireTm'] != 0 %}
+                  {% set time = state_attr('sensor.rest980', 'cleanMissionStatus')['expireTm'] | timestamp_local %}
+                  {% set resume = ((as_timestamp(time) - as_timestamp(now())) / 60) | round(0) %}
+                  {% if resume > 60 %}
+                    {{ resume // 60 }}h {{ '{:0>2d}'.format(resume%60) }}m
+                  {% else %}
+                    {{resume}}m
+                  {% endif %}
+                {% else %}
+                  n-a
+                {% endif %}
               {% else %}
                 n-a
               {% endif %}
-            #   {{ (state_attr('sensor.rest980', 'cleanMissionStatus')['sqft'] }}ft²
-            clean_passes: >-
-              {% if state_attr('sensor.rest980', 'noAutoPasses') is defined %}
-                {% if state_attr('sensor.rest980', 'noAutoPasses') == 'true' and state_attr('sensor.rest980', 'twoPass') == 'false' %}
+            clean_mode: >-
+              {% if state_attr('sensor.rest980', 'noAutoPasses') is defined and state_attr('sensor.rest980', 'twoPass') is defined %}
+                {% if state_attr('sensor.rest980', 'noAutoPasses') == true and state_attr('sensor.rest980', 'twoPass') == false %}
                   One
-                {% elif state_attr('sensor.rest980', 'noAutoPasses') == 'true' and state_attr('sensor.rest980', 'twoPass') == 'true' %}
+                {% elif state_attr('sensor.rest980', 'noAutoPasses') == true and state_attr('sensor.rest980', 'twoPass') == true %}
                   Two
                 {% else %}
                   Auto
@@ -202,9 +240,9 @@ irobot_vacuum:
               {% endif %}
             carpet_boost: >-
               {% if state_attr('sensor.rest980', 'vacHigh') is defined %}
-                {% if state_attr('sensor.rest980', 'vacHigh') == 'false' and state_attr('sensor.rest980', 'carpetBoost') == 'false' %}
+                {% if state_attr('sensor.rest980', 'vacHigh') == false and state_attr('sensor.rest980', 'carpetBoost') == false %}
                   Eco
-                {% elif state_attr('sensor.rest980', 'vacHigh') == 'true' and state_attr('sensor.rest980', 'carpetBoost') == 'false' %}
+                {% elif state_attr('sensor.rest980', 'vacHigh') == true and state_attr('sensor.rest980', 'carpetBoost') == false %}
                   Performance
                 {% else %}
                   Auto
@@ -214,7 +252,7 @@ irobot_vacuum:
               {% endif %}
             clean_edges: >-
               {% if state_attr('sensor.rest980', 'openOnly') is defined %}
-                {% if state_attr('sensor.rest980', 'openOnly') == 'true' %}
+                {% if state_attr('sensor.rest980', 'openOnly') == true %}
                   False
                 {% else %}
                   True
@@ -355,6 +393,12 @@ irobot_vacuum:
       trigger:
         - platform: event
           event_type: initiate_vacuum_clean
+      condition:
+        condition: not
+        conditions:
+          - condition: state
+            entity_id: input_text.vacuum_rooms
+            state: ""
       action:
         - service: rest_command.vacuum_clean
           data_template:
@@ -550,7 +594,7 @@ irobot_vacuum:
       action:
         - service: >-
             {% set ns = namespace(count = 0) %}
-            {% for item in states.sensor if 'sensor.vacuum_maint' in item.entity_id and (state_attr(item.entity_id, 'timeout_timestamp') < as_timestamp(now())) %}
+            {% for item in states.sensor if 'sensor.vacuum_maint' in item.entity_id and state_attr(item.entity_id, 'timeout_timestamp') != None and (state_attr(item.entity_id, 'timeout_timestamp') < as_timestamp(now())) %}
               {% set ns.count = loop.index %}
             {% endfor %}
             {% if ns.count > 0 %}

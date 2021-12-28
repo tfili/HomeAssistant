@@ -26,6 +26,8 @@ garage_wrapper:
           value_template: >
             {% if is_state("input_boolean.left_garage_moving", "on") %} 
               {{ "closing" if is_state("cover.left_garage_door", "open") else "opening" }}
+            {% elif is_state("cover.left_garage_door", "unavailable") %}
+              open
             {% else %}
               {{ states("cover.left_garage_door")  }}
             {% endif %}
@@ -82,6 +84,8 @@ garage_wrapper:
           value_template: >
             {% if is_state("input_boolean.right_garage_moving", "on") %} 
               {{ "closing" if is_state("cover.right_garage_door", "open") else "opening" }}
+            {% elif is_state("cover.right_garage_door", "unavailable") %}
+              open
             {% else %}
               {{ states("cover.right_garage_door")  }}
             {% endif %}

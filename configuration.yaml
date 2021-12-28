@@ -64,12 +64,6 @@ discovery:
 # Enable camera mqtt_statestream:
 stream:
 
-# Browser-mod
-browser_mod:
-  devices:
-    28b5465d-e2fdeac4:
-      name: laptop_linux_chrome
-
 # Enable proximity sensors for all iphones
 proximity:
   home_tom:
@@ -162,15 +156,15 @@ nest:
   subscriber_id: !secret nest_subscriber_id
 
 # Samsung TV cofig
-media_player:
-  - platform: samsungtv_tizen
-    host: 192.168.0.181
-    mac: !secret samsung_mac
-    update_method: "smartthings"
-    app_list: '{"YouTubeTV": "PvWgqxV3Xa.YouTubeTV", "Netflix": "RN1MCdNq8t.Netflix", "Disney+": "MCmYXNxgcu.DisneyPlus", "Prime Video": "evKhCgZelL.AmazonIgnitionLauncher2", "Hulu": "LBUAQX1exg.Hulu", "AppleTV": "com.samsung.tv.aria-video", "YouTube": "9Ur5IzDKqV.TizenYouTube"}'
-    api_key: !secret samsung_api_key
-    device_id: !secret samsung_device_id
-    broadcast_address: "192.168.0.255"
+# media_player:
+#   - platform: samsungtv_tizen
+#     host: 192.168.0.181
+#     mac: !secret samsung_mac
+#     update_method: "smartthings"
+#     app_list: '{"YouTubeTV": "PvWgqxV3Xa.YouTubeTV", "Netflix": "RN1MCdNq8t.Netflix", "Disney+": "MCmYXNxgcu.DisneyPlus", "Prime Video": "evKhCgZelL.AmazonIgnitionLauncher2", "Hulu": "LBUAQX1exg.Hulu", "AppleTV": "com.samsung.tv.aria-video", "YouTube": "9Ur5IzDKqV.TizenYouTube"}'
+#     api_key: !secret samsung_api_key
+#     device_id: !secret samsung_device_id
+#     broadcast_address: "192.168.0.255"
 
 # Owntracks
 owntracks:
