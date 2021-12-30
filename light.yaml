@@ -1,8 +1,5 @@
-- platform: mqtt
-  schema: json
-  name: Cabinet
-  command_topic: "zigbee2mqtt/Cabinet/set"
-  state_topic: "zigbee2mqtt/Cabinet"
-  color_temp: true
-  brightness: true
-  rgb: true
+- platform: group
+  name: Basement Lights
+  entities:
+    - light.basement_hallway
+    - light.basement_main

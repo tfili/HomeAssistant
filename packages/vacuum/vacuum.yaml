@@ -140,7 +140,7 @@ irobot_vacuum:
               {% endif %}
             total_area: >-
               {% if state_attr('sensor.rest980', 'bbrun')['sqft'] is defined %}
-                {{ (state_attr('sensor.rest980', 'bbrun')['sqft'] / 10.764 * 100)| round() }}m²
+                {{ (state_attr('sensor.rest980', 'bbrun')['sqft'])| round() }}ft²
               {% else %}
                 n-a
               {% endif %}

@@ -1,6 +1,6 @@
-# ###################################
-# # iRobot Mop Package
-# ###################################
+###################################
+# iRobot Mop Package
+###################################
 
 irobot_mop:
   ###################################
@@ -32,7 +32,7 @@ irobot_mop:
       scan_interval: 10
     - platform: template
       sensors:
-        vacuum:
+        mop:
           friendly_name_template: >-
             {{ state_attr('sensor.rest980mop', 'name') }}
           value_template: >-
@@ -97,7 +97,7 @@ irobot_mop:
               {% set state =  state_attr('sensor.rest980mop', 'cleanMissionStatus')['phase'] %}
               {{ mapper[state] if state in mapper else state }}
               {% endif %}
-            # Not availabile for mop
+            # Not available for mop
             # bin: >-
             #   {% set mapper =  {
             #     true : 'Full',
@@ -141,7 +141,7 @@ irobot_mop:
               {% endif %}
             total_area: >-
               {% if state_attr('sensor.rest980mop', 'bbrun')['sqft'] is defined %}
-                {{ (state_attr('sensor.rest980mop', 'bbrun')['sqft'] / 10.764 * 100)| round() }}m²
+                {{ (state_attr('sensor.rest980mop', 'bbrun')['sqft'])| round() }}ft²
               {% else %}
                 n-a
               {% endif %}
@@ -262,7 +262,7 @@ irobot_mop:
                 n-a
               {% endif %}
             maint_due: >-
-              {% if is_state('input_boolean.vacuum_maint_due', 'on') %}
+              {% if is_state('input_boolean.mop_maint_due', 'on') %}
                 True
               {% else %}
                 False
@@ -274,11 +274,11 @@ irobot_mop:
               {% else %}
                 n-a
               {% endif %}
-        vacuum_location:
+        mop_location:
           friendly_name_template: >-
             {{ state_attr('sensor.rest980mop', 'name') }} Location
           value_template: >-
-            {{ state_attr('sensor.vacuum', 'location') }}
+            {{ state_attr('sensor.mop', 'location') }}
           icon_template: mdi:home-map-marker
 
   ###################################
