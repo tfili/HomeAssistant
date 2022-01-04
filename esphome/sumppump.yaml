@@ -1,0 +1,39 @@
+esphome:
+  name: sumppump
+  platform: ESP8266
+  board: nodemcuv2
+    
+wifi:
+  ssid: "Not Your Wifi"
+  password: "LuluAgnes"
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "Sumppump Fallback Hotspot"
+    password: "zZjZueMt4r74"
+
+captive_portal:
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+  password: "34sU^7WyEJWMGTnJ7r8wf7ckK!ubzNXz"
+
+ota:
+  password: "34sU^7WyEJWMGTnJ7r8wf7ckK!ubzNXz"
+
+sensor:
+  - platform: ultrasonic
+    trigger_pin: D1
+    echo_pin: D2
+    name: "Water Tank Level"
+    unit_of_measurement: "%"
+    accuracy_decimals: 0
+    update_interval: 10s
+    pulse_time: 20us
+    timeout: 2m
+    filters:
+      - lambda: return ((((x*100)-20)-(123-20))/(123-20))*-100;
+      - filter_out: nan

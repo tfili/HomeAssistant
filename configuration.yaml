@@ -2,25 +2,30 @@
 default_config:
 
 homeassistant:
-  customize: !include customize.yaml
+  # Packages
   packages: !include_dir_merge_named packages
+
+  # 2FA
   auth_mfa_modules:
     - type: totp
+  
+  # Let known users login from their phones
+  # Let kiosk user login from local network
+  # Any other scenario requires HA login
   auth_providers:
     - type: homeassistant
     - type: trusted_networks
       trusted_networks:
         - 192.168.0.0/24
-        #- 172.58.206.151
-        #- 172.16.0.0/12
-        #- fe80::/10
       trusted_users:
-        192.168.0.55:
+        192.168.0.4:
           - 9c546e5ab33f47fcbd2103594668aaaf # tom
-        192.168.0.88:
+        192.168.0.5:
           - 7e537ada4de44808a33c00cbf425c4e0 # jami
         192.168.0.0/24:
           - 74a1a86c82c44c3db9e8263156846c35 # Kiosk
+
+  # On restart, set the automations enabled flags to previous values
   customize_domain:
     automation:
       initial_state: true
@@ -28,17 +33,13 @@ homeassistant:
 logger:
   default: warning
 
-# lovelace:
-#   mode: yaml
+# HTTP Server settings
+# IP Banning blocks IOS app too easily so its disabled
+# http:
+#   ip_ban_enabled: true
+#   login_attempts_threshold: 5
 
-# Trust nginx and enable IP Banning
-http:
-  use_x_forwarded_for: true
-  trusted_proxies:
-    - 172.30.33.0/24
-  #ip_ban_enabled: true
-  #login_attempts_threshold: 5
-
+# Lovelace configuration
 frontend:
   themes: !include_dir_merge_named themes
 
@@ -132,7 +133,6 @@ recorder:
       - sensor.rx
       - sensor.tx
 
-
 alert: !include alerts.yaml
 automation: !include automations.yaml
 binary_sensor: !include binary_sensors.yaml
@@ -155,25 +155,6 @@ nest:
   project_id: !secret nest_project_id
   subscriber_id: !secret nest_subscriber_id
 
-# Samsung TV cofig
-# media_player:
-#   - platform: samsungtv_tizen
-#     host: 192.168.0.181
-#     mac: !secret samsung_mac
-#     update_method: "smartthings"
-#     app_list: '{"YouTubeTV": "PvWgqxV3Xa.YouTubeTV", "Netflix": "RN1MCdNq8t.Netflix", "Disney+": "MCmYXNxgcu.DisneyPlus", "Prime Video": "evKhCgZelL.AmazonIgnitionLauncher2", "Hulu": "LBUAQX1exg.Hulu", "AppleTV": "com.samsung.tv.aria-video", "YouTube": "9Ur5IzDKqV.TizenYouTube"}'
-#     api_key: !secret samsung_api_key
-#     device_id: !secret samsung_device_id
-#     broadcast_address: "192.168.0.255"
-
-# Owntracks
-owntracks:
-  max_gps_accuracy: 200
-  waypoints: true
-  mqtt_topic: "owntracks/#"
-  events_only: true
-  #secret: !secret owntracks_secret
-
 # InfluxDB
 influxdb:
   host: !secret influx_host
@@ -188,3 +169,42 @@ influxdb:
 google:
   client_id: !secret google_client_id
   client_secret: !secret google_secret
+
+# LG Projector
+webostv:
+  name: Basement Projector
+  host: 192.168.0.6
+  turn_on_action:
+    service: wake_on_lan.send_magic_packet
+    data:
+      mac: B0:37:95:01:2B:92
+      broadcast_address: 192.168.0.255
+  customize:
+    sources:
+      - YouTube
+      - Netflix
+      - Disney+
+      - Amazon Prime Video
+      - VUDU
+      - HDMI 1
+      - HDMI 2
+      - Web Browser
+
+# Owntracks
+# owntracks:
+#   max_gps_accuracy: 200
+#   waypoints: true
+#   mqtt_topic: "owntracks/#"
+#   events_only: true
+#   secret: !secret owntracks_secret
+
+# Samsung TV cofig
+# media_player:
+#   - platform: samsungtv_tizen
+#     host: 192.168.0.181
+#     mac: !secret samsung_mac
+#     update_method: "smartthings"
+#     app_list: '{"YouTubeTV": "PvWgqxV3Xa.YouTubeTV", "Netflix": "RN1MCdNq8t.Netflix", "Disney+": "MCmYXNxgcu.DisneyPlus", "Prime Video": "evKhCgZelL.AmazonIgnitionLauncher2", "Hulu": "LBUAQX1exg.Hulu", "AppleTV": "com.samsung.tv.aria-video", "YouTube": "9Ur5IzDKqV.TizenYouTube"}'
+#     api_key: !secret samsung_api_key
+#     device_id: !secret samsung_device_id
+#     broadcast_address: "192.168.0.255"
