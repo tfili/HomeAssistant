@@ -43,3 +43,6 @@ home-assistant_v2.db*
 
 # HomeAssistant log files
 home-assistant.log.*
+
+# webostv config db
+webostv.conf

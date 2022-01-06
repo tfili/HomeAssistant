@@ -377,6 +377,7 @@ irobot_mop:
   automation:
     # Initiate Selective Room Clean
     - alias: Mop Clean Rooms
+      id: mop_clean_rooms
       trigger:
         - platform: event
           event_type: initiate_mop_clean
@@ -407,6 +408,7 @@ irobot_mop:
 
     # Update Mop REST Sensor for Location Details
     - alias: Mop Update Location
+      id: mop_update_location
       initial_state: true
       trigger:
         - platform: time_pattern
@@ -433,6 +435,7 @@ irobot_mop:
 
     # Log Mop Location to File
     - alias: Mop Log Position
+      id: mop_log_position
       initial_state: true
       trigger:
         platform: state
@@ -453,6 +456,7 @@ irobot_mop:
 
     # Initialize Blank Mop Log File
     - alias: Mop Clean Log
+      id: mop_clean_log
       initial_state: true
       trigger:
         - platform: state
@@ -469,6 +473,7 @@ irobot_mop:
 
     # Update Mop Log File with Finished Status
     - alias: Mop Notify on Finished Cleaning
+      id: mop_notify_on_finished_cleaning
       initial_state: true
       trigger:
         - platform: state
@@ -490,6 +495,7 @@ irobot_mop:
 
     # Update Mop Log File with Stuck Status
     - alias: Mop Notify on Stuck Status
+      id: mop_notify_on_stuck_status
       initial_state: true
       trigger:
         platform: template
@@ -516,6 +522,7 @@ irobot_mop:
 
     # Generate Complete Mop Map
     - alias: Mop Generate Image after Cleaning
+      id: mop_generate_image_after_cleaning
       initial_state: true
       trigger:
         - platform: state
@@ -556,6 +563,7 @@ irobot_mop:
 
     # Maintence Check
     - alias: Mop Maintenance Check
+      id: mop_maintenance_check
       initial_state: true
       trigger:
         - platform: time_pattern
@@ -585,6 +593,7 @@ irobot_mop:
 
     # Add Rooms for Ordered Cleaning
     - alias: Mop Add Rooms for Cleaning
+      id: mop_add_rooms_for_cleaning
       initial_state: true
       trigger:
         platform: state
@@ -611,6 +620,7 @@ irobot_mop:
 
     # Remove Rooms for Ordered Cleaning
     - alias: Mop Remove Rooms for Cleaning
+      id: mop_remove_rooms_for_cleaning
       initial_state: true
       trigger:
         platform: state
@@ -635,6 +645,7 @@ irobot_mop:
 
     # Mop Cleaning Schedule 1
     # - alias: Mop Cleaning Schedule 1
+    #   id: mop_cleaning_schedule_1
     #   initial_state: true
     #   trigger:
     #     platform: time_pattern
@@ -659,6 +670,7 @@ irobot_mop:
 
     # Delete Old Mop Image Files
     - alias: Mop Delete Images
+      id: mop_delete_images
       initial_state: true
       trigger:
         platform: time_pattern

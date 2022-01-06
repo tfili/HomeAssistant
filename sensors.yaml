@@ -1,6 +1,11 @@
 # ICA RSS Feed
-platform: feedparser
-name: Iron Cross Athletics
-feed_url: "https://iron-cross-athletics.com/feed/"
-date_format: "%a, %b %d %I:%M %p"
-show_topn: 1
+- platform: feedparser
+  name: Iron Cross Athletics
+  feed_url: "https://iron-cross-athletics.com/feed/"
+  date_format: "%a, %b %d %I:%M %p"
+  show_topn: 1
+
+# Peloton
+- platform: peloton
+  username: !secret peloton_username
+  password: !secret peloton_password

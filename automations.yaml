@@ -432,6 +432,11 @@
       fw_ver: '{{ trigger.payload_json.fw_ver }}'
       model: '{{ trigger.payload_json.model }}'
       mode: '{{ trigger.payload_json.mode | default }}'
+      host: '{{ trigger.payload_json.ip }}'
       shellyswitch25-3C6105E4C230:
         relay-0: light
         relay-1: light
+        force_update_sensors: true
+      shelly1-E8DB84ACA160:
+        relay-0: light
+        force_update_sensors: true

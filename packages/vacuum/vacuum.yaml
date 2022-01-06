@@ -390,6 +390,7 @@ irobot_vacuum:
   automation:
     # Initiate Selective Room Clean
     - alias: Vacuum Clean Rooms
+      id: vacuum_clean_rooms
       trigger:
         - platform: event
           event_type: initiate_vacuum_clean
@@ -426,6 +427,7 @@ irobot_vacuum:
 
     # Update Vacuum REST Sensor for Location Details
     - alias: Vacuum Update Location
+      id: vacuum_update_location
       initial_state: true
       trigger:
         - platform: time_pattern
@@ -452,6 +454,7 @@ irobot_vacuum:
 
     # Log Vacuum Location to File
     - alias: Vacuum Log Position
+      id: vacuum_log_position
       initial_state: true
       trigger:
         platform: state
@@ -472,6 +475,7 @@ irobot_vacuum:
 
     # Initialize Blank Vacuum Log File
     - alias: Vacuum Clean Log
+      id: vacuum_clean_log
       initial_state: true
       trigger:
         - platform: state
@@ -488,6 +492,7 @@ irobot_vacuum:
 
     # Update Vacuum Log File with Finished Status
     - alias: Vacuum Notify on Finished Cleaning
+      id: vacuum_notify_on_finished_cleaning
       initial_state: true
       trigger:
         - platform: state
@@ -509,6 +514,7 @@ irobot_vacuum:
 
     # Update Vacuum Log File with Stuck Status
     - alias: Vacuum Notify on Stuck Status
+      id: vacuum_notify_on_stuck_status
       initial_state: true
       trigger:
         platform: template
@@ -535,6 +541,7 @@ irobot_vacuum:
 
     # Generate Complete Vacuum Map
     - alias: Vacuum Generate Image after Cleaning
+      id: vacuum_generate_image_after_cleaning
       initial_state: true
       trigger:
         - platform: state
@@ -575,6 +582,7 @@ irobot_vacuum:
 
     # Maintence Check
     - alias: Vacuum Maintenance Check
+      id: vacuum_maintenance_check
       initial_state: true
       trigger:
         - platform: time_pattern
@@ -606,6 +614,7 @@ irobot_vacuum:
 
     # Add Rooms for Ordered Cleaning
     - alias: Vacuum Add Rooms for Cleaning
+      id: vacuum_add_rooms_for_cleaning
       initial_state: true
       trigger:
         platform: state
@@ -634,6 +643,7 @@ irobot_vacuum:
 
     # Remove Rooms for Ordered Cleaning
     - alias: Vacuum Remove Rooms for Cleaning
+      id: vacuum_remove_rooms_for_cleaning
       initial_state: true
       trigger:
         platform: state
@@ -660,6 +670,7 @@ irobot_vacuum:
 
     # Vacuum Cleaning Schedule 1
     # - alias: Vacuum Cleaning Schedule 1
+    #   id: vacuum_cleaning_schedule_1
     #   initial_state: true
     #   trigger:
     #     platform: time_pattern
@@ -684,6 +695,7 @@ irobot_vacuum:
 
     # Delete Old Vacuum Image Files
     - alias: Vacuum Delete Images
+      id: vacuum_delete_images
       initial_state: true
       trigger:
         platform: time_pattern
