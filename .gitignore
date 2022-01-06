@@ -46,3 +46,6 @@ home-assistant.log.*
 
 # webostv config db
 webostv.conf
+
+# Temporarily ignore esphome
+/esphome/*
