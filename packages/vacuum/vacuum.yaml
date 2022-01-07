@@ -490,28 +490,6 @@ irobot_vacuum:
         - service: shell_command.vacuum_clear_log
         - service: shell_command.vacuum_clear_image
 
-    # Update Vacuum Log File with Finished Status
-    - alias: Vacuum Notify on Finished Cleaning
-      id: vacuum_notify_on_finished_cleaning
-      initial_state: true
-      trigger:
-        - platform: state
-          entity_id: sensor.vacuum
-          from: "Clean"
-          to: "Ready"
-        - platform: state
-          entity_id: sensor.vacuum
-          from: "Train"
-          to: "Ready"
-        - platform: state
-          entity_id: sensor.vacuum
-          from: "Pending"
-          to: "Ready"
-      action:
-        - service: notify.vacuumfile
-          data_template:
-            message: "Finished"
-
     # Update Vacuum Log File with Stuck Status
     - alias: Vacuum Notify on Stuck Status
       id: vacuum_notify_on_stuck_status
@@ -539,30 +517,56 @@ irobot_vacuum:
               entity_id: camera.roomba
             # =============
 
+    # Update Vacuum Log File with Finished Status
     # Generate Complete Vacuum Map
-    - alias: Vacuum Generate Image after Cleaning
-      id: vacuum_generate_image_after_cleaning
+    # Send notification to iphone
+    - alias: Vacuum Notify on Finished Cleaning
+      id: vacuum_notify_on_finished_cleaning
       initial_state: true
       trigger:
         - platform: state
           entity_id: sensor.vacuum
           from: "Clean"
-          to: "Ready"
           for:
             seconds: 10
         - platform: state
           entity_id: sensor.vacuum
           from: "Train"
-          to: "Ready"
           for:
             seconds: 10
         - platform: state
           entity_id: sensor.vacuum
           from: "Pending"
-          to: "Ready"
           for:
             seconds: 10
       action:
+        # If state is Ready then continue
+        # If not, then wait 1 minute for it to become Ready
+        #  Sometimes it will become Not Ready for like 10 seconds
+        - choose:
+            - conditions:
+                - condition: not
+                  conditions:
+                    - condition: state
+                      entity_id: sensor.vacuum
+                      state: Ready
+              sequence:
+                - wait_for_trigger:
+                    - platform: state
+                      entity_id: sensor.vacuum
+                      to: Ready
+                      for:
+                        seconds: 10
+                  continue_on_timeout: false
+                  timeout: '00:01:00'
+        # Verify the state is Ready, because the wait_for_trigger above
+        #  only stops that sequence not the whole automation
+        - condition: state
+          entity_id: sensor.vacuum
+          state: Ready
+        - service: notify.vacuumfile
+          data_template:
+            message: "Finished"
         - service: shell_command.vacuum_generate_image
         # DELETE BELOW SECTION IF YOU DONT WANT NOTIFICATIONS
         - delay: 5

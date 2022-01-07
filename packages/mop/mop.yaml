@@ -471,28 +471,6 @@ irobot_mop:
         - service: shell_command.mop_clear_log
         - service: shell_command.mop_clear_image
 
-    # Update Mop Log File with Finished Status
-    - alias: Mop Notify on Finished Cleaning
-      id: mop_notify_on_finished_cleaning
-      initial_state: true
-      trigger:
-        - platform: state
-          entity_id: sensor.mop
-          from: "Clean"
-          to: "Ready"
-        - platform: state
-          entity_id: sensor.mop
-          from: "Train"
-          to: "Ready"
-        - platform: state
-          entity_id: sensor.mop
-          from: "Pending"
-          to: "Ready"
-      action:
-        - service: notify.mopfile
-          data_template:
-            message: "Finished"
-
     # Update Mop Log File with Stuck Status
     - alias: Mop Notify on Stuck Status
       id: mop_notify_on_stuck_status
@@ -520,30 +498,56 @@ irobot_mop:
               entity_id: camera.braava
             # =============
 
+    # Update Mop Log File with Finished Status
     # Generate Complete Mop Map
-    - alias: Mop Generate Image after Cleaning
-      id: mop_generate_image_after_cleaning
+    # Send notification to iphone
+    - alias: Mop Notify on Finished Cleaning
+      id: mop_notify_on_finished_cleaning
       initial_state: true
       trigger:
         - platform: state
           entity_id: sensor.mop
           from: "Clean"
-          to: "Ready"
           for:
             seconds: 10
         - platform: state
           entity_id: sensor.mop
           from: "Train"
-          to: "Ready"
           for:
             seconds: 10
         - platform: state
           entity_id: sensor.mop
           from: "Pending"
-          to: "Ready"
           for:
             seconds: 10
       action:
+        # If state is Ready then continue
+        # If not, then wait 1 minute for it to become Ready
+        #  Sometimes it will become Not Ready for like 10 seconds
+        - choose:
+            - conditions:
+                - condition: not
+                  conditions:
+                    - condition: state
+                      entity_id: sensor.mop
+                      state: Ready
+              sequence:
+                - wait_for_trigger:
+                    - platform: state
+                      entity_id: sensor.mop
+                      to: Ready
+                      for:
+                        seconds: 10
+                  continue_on_timeout: false
+                  timeout: '00:01:00'
+        # Verify the state is Ready, because the wait_for_trigger above
+        #  only stops that sequence not the whole automation
+        - condition: state
+          entity_id: sensor.mop
+          state: Ready
+        - service: notify.mopfile
+          data_template:
+            message: "Finished"
         - service: shell_command.mop_generate_image
         # DELETE BELOW SECTION IF YOU DONT WANT NOTIFICATIONS
         - delay: 5
