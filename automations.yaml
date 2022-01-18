@@ -326,7 +326,7 @@
         ) %}\n{% if deviceId == \"79442c3198ce3df321db20b7874d6285\" %}\n  input_boolean.motion_abels_room\n\
         {% elif deviceId == \"f608a75804749b060fc4274bb4bd9939\" %}\n  input_boolean.motion_backyard_camera\n\
         {% elif deviceId == \"9d8105f724dc536601acaa2daf3cef79\" %}\n  input_boolean.motion_front_door\n\
-        {% elif deviceId == \"b8c655b88ad70bf5a8c4e92f4d7d5ffc\" %}\n  input_boolean.motion_kitchen\n\
+        {% elif deviceId == \"b8c655b88ad70bf5a8c4e92f4d7d5ffc\" %}\n  input_boolean.motion_reeves_room\n\
         {% elif deviceId == \"b2f4cef4c127ec8f30d445e39dd7add5\" %}\n  input_boolean.motion_morning_room\n\
         {% elif deviceId == \"631237edbf1b66bf10461c63d27d037a\" %}\n  input_boolean.motion_nursery\n\
         {% endif %}\n"
@@ -341,7 +341,7 @@
         ) %}\n{% if deviceId == \"79442c3198ce3df321db20b7874d6285\" %}\n  input_boolean.motion_abels_room\n\
         {% elif deviceId == \"f608a75804749b060fc4274bb4bd9939\" %}\n  input_boolean.motion_backyard_camera\n\
         {% elif deviceId == \"9d8105f724dc536601acaa2daf3cef79\" %}\n  input_boolean.motion_front_door\n\
-        {% elif deviceId == \"b8c655b88ad70bf5a8c4e92f4d7d5ffc\" %}\n  input_boolean.motion_kitchen\n\
+        {% elif deviceId == \"b8c655b88ad70bf5a8c4e92f4d7d5ffc\" %}\n  input_boolean.motion_reeves_room\n\
         {% elif deviceId == \"b2f4cef4c127ec8f30d445e39dd7add5\" %}\n  input_boolean.motion_morning_room\n\
         {% elif deviceId == \"631237edbf1b66bf10461c63d27d037a\" %}\n  input_boolean.motion_nursery\n\
         {% endif %}\n"
@@ -485,4 +485,4 @@
     data:
       title: Vacuum Test Ok
       message: Nice
-  mode: single
+  mode: restart

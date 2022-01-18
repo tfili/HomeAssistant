@@ -476,8 +476,14 @@ irobot_mop:
       id: mop_notify_on_stuck_status
       initial_state: true
       trigger:
-        platform: template
-        value_template: "{{ is_state_attr('sensor.mop', 'phase', 'Stuck') }}"
+        # platform: template
+        # value_template: "{{ is_state_attr('sensor.mop', 'phase', 'Stuck') }}"
+        platform: state
+        entity_id: sensor.mop
+        attribute: phase
+        to: Stuck
+        for:
+          seconds: 10
       action:
         - service: notify.mopfile
           data_template:
@@ -493,8 +499,6 @@ irobot_mop:
             data:
               attachment:
                 content-type: jpeg
-              push:
-                category: camera
               entity_id: camera.braava
             # =============
 
@@ -504,6 +508,7 @@ irobot_mop:
     - alias: Mop Notify on Finished Cleaning
       id: mop_notify_on_finished_cleaning
       initial_state: true
+      mode: restart
       trigger:
         - platform: state
           entity_id: sensor.mop
@@ -537,9 +542,9 @@ irobot_mop:
                       entity_id: sensor.mop
                       to: Ready
                       for:
-                        seconds: 10
+                        minutes: 1
                   continue_on_timeout: false
-                  timeout: '00:01:00'
+                  timeout: '01:00:00'
         # Verify the state is Ready, because the wait_for_trigger above
         #  only stops that sequence not the whole automation
         - condition: state

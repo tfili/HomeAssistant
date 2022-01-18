@@ -10,8 +10,8 @@ motion_front_door:
   name: Motion out front
   initial: false
 
-motion_kitchen:
-  name: Motion in kitchen
+motion_reeves_room:
+  name: Motion in Reeves Room
   initial: false
 
 motion_morning_room:
