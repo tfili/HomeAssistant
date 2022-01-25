@@ -381,6 +381,12 @@ irobot_mop:
       trigger:
         - platform: event
           event_type: initiate_mop_clean
+      condition:
+        condition: not
+        conditions:
+          - condition: state
+            entity_id: input_text.mop_rooms
+            state: ""
       action:
         - service: rest_command.mop_clean
           data_template:
@@ -550,6 +556,13 @@ irobot_mop:
         - condition: state
           entity_id: sensor.mop
           state: Ready
+        # Check that it is not Stuck, because apparently Ready but Stuck can happen
+        - condition: not
+          conditions:
+            - condition: state
+              entity_id: sensor.mop
+              state: Stuck
+              attribute: phase
         - service: notify.mopfile
           data_template:
             message: "Finished"
@@ -565,8 +578,6 @@ irobot_mop:
             data:
               attachment:
                 content-type: jpeg
-              push:
-                category: camera
               entity_id: camera.braava
             # =============
 

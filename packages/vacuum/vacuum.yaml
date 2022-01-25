@@ -518,8 +518,6 @@ irobot_vacuum:
             data:
               attachment:
                 content-type: jpeg
-              push:
-                category: camera
               entity_id: camera.roomba
             # =============
 
@@ -571,6 +569,13 @@ irobot_vacuum:
         - condition: state
           entity_id: sensor.vacuum
           state: Ready
+        # Check that it is not Stuck, because apparently Ready but Stuck can happen
+        - condition: not
+          conditions:
+            - condition: state
+              entity_id: sensor.vacuum
+              state: Stuck
+              attribute: phase
         - service: notify.vacuumfile
           data_template:
             message: "Finished"

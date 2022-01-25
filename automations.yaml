@@ -454,9 +454,9 @@
   - platform: state
     entity_id: sensor.vacuum_test
     from: Train
-  - platform: state
-    entity_id: sensor.vacuum_test
-    from: Pending
+  - platform: sun
+    event: sunrise
+    offset: '0'
   condition: []
   action:
   - choose:
@@ -481,6 +481,12 @@
   - condition: state
     entity_id: sensor.vacuum_test
     state: Ready
+  - condition: not
+    conditions:
+    - condition: state
+      entity_id: sensor.vacuum
+      state: Stuck
+      attribute: phase
   - service: notify.mobile_app_toms_iphone
     data:
       title: Vacuum Test Ok
