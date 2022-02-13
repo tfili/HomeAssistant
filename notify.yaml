@@ -1,5 +1,5 @@
 name: everyone
 platform: group
 services:
-  - service: mobile_app_theresas_iphone
+  - service: mobile_app_iphone
   - service: mobile_app_toms_iphone

@@ -124,7 +124,7 @@
   - platform: device
     device_id: 07abf403cb31b012a75b9b2210f815a1
     domain: device_tracker
-    entity_id: device_tracker.theresas_iphone
+    entity_id: device_tracker.jamis_iphone
     type: enters
     zone: zone.home
   condition: []

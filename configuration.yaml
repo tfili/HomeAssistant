@@ -74,13 +74,13 @@ proximity:
     unit_of_measurement: mi
   home_jami:
     devices:
-      - device_tracker.theresas_iphone
+      - device_tracker.jamis_iphone
     tolerance: 50
     unit_of_measurement: mi
   home:
     devices:
       - device_tracker.toms_iphone
-      - device_tracker.theresas_iphone
+      - device_tracker.jamis_iphone
     tolerance: 50
     unit_of_measurement: mi
 
