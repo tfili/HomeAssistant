@@ -440,55 +440,13 @@
       shelly1-E8DB84ACA160:
         relay-0: light
         force_update_sensors: true
-- id: '1641508878192'
-  alias: Vacuum Test
-  description: ''
+- id: '1644036755398'
+  alias: Basement Projector Wake-on-LAN
   trigger:
-  - platform: state
-    entity_id: sensor.vacuum_test
-    from: Clean
-    for:
-      hours: 0
-      minutes: 0
-      seconds: 10
-  - platform: state
-    entity_id: sensor.vacuum_test
-    from: Train
-  - platform: sun
-    event: sunrise
-    offset: '0'
-  condition: []
+  - platform: webostv.turn_on
+    entity_id: media_player.basement_projector
   action:
-  - choose:
-    - conditions:
-      - condition: not
-        conditions:
-        - condition: state
-          entity_id: sensor.vacuum_test
-          state: Ready
-      sequence:
-      - wait_for_trigger:
-        - platform: state
-          entity_id: sensor.vacuum_test
-          to: Ready
-          for:
-            hours: 0
-            minutes: 0
-            seconds: 10
-        continue_on_timeout: false
-        timeout: 00:01:00
-    default: []
-  - condition: state
-    entity_id: sensor.vacuum_test
-    state: Ready
-  - condition: not
-    conditions:
-    - condition: state
-      entity_id: sensor.vacuum
-      state: Stuck
-      attribute: phase
-  - service: notify.mobile_app_toms_iphone
+  - service: wake_on_lan.send_magic_packet
     data:
-      title: Vacuum Test Ok
-      message: Nice
-  mode: restart
+      mac: B0:37:95:01:2B:92
+      broadcast_address: 192.168.0.255

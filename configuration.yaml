@@ -171,24 +171,24 @@ google:
   client_secret: !secret google_secret
 
 # LG Projector
-webostv:
-  name: Basement Projector
-  host: 192.168.0.6
-  turn_on_action:
-    service: wake_on_lan.send_magic_packet
-    data:
-      mac: B0:37:95:01:2B:92
-      broadcast_address: 192.168.0.255
-  customize:
-    sources:
-      - YouTube
-      - Netflix
-      - Disney+
-      - Amazon Prime Video
-      - VUDU
-      - HDMI 1
-      - HDMI 2
-      - Web Browser
+# webostv:
+#   name: Basement Projector
+#   host: 192.168.0.6
+#   turn_on_action:
+#     service: wake_on_lan.send_magic_packet
+#     data:
+#       mac: B0:37:95:01:2B:92
+#       broadcast_address: 192.168.0.255
+#   customize:
+#     sources:
+#       - YouTube
+#       - Netflix
+#       - Disney+
+#       - Amazon Prime Video
+#       - VUDU
+#       - HDMI 1
+#       - HDMI 2
+#       - Web Browser
 
 # Owntracks
 # owntracks:

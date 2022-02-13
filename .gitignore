@@ -47,5 +47,8 @@ home-assistant.log.*
 # webostv config db
 webostv.conf
 
+# Nest event images
+/nest/event_media/**/*.jpg
+
 # Temporarily ignore esphome
 /esphome/*
