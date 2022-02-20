@@ -1,13 +1,8 @@
 - platform: group
   name: Basement Lights
   entities:
+    - light.basement_stairs
     - light.basement_hallway
     - light.basement_main
     - light.basement_gym
-
-- platform: group
-  name: Cabinet
-  entities:
-    - light.cabinet_refrigerator
-    - light.cabinet_stove_left
-    - light.cabinet_stove_right
+    - light.wine_rack

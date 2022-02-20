@@ -419,13 +419,11 @@
       payload: announce
 - id: shellies_discovery
   alias: Shellies Discovery
-  mode: queued
-  max: 999
   trigger:
-    platform: mqtt
+  - platform: mqtt
     topic: shellies/announce
   action:
-    service: python_script.shellies_discovery
+  - service: python_script.shellies_discovery
     data:
       id: '{{ trigger.payload_json.id }}'
       mac: '{{ trigger.payload_json.mac }}'
@@ -440,6 +438,14 @@
       shelly1-E8DB84ACA160:
         relay-0: light
         force_update_sensors: true
+      shelly1-3C6105E3A4C2:
+        relay-0: light
+        force_update_sensors: true
+      shelly1-3C6105E3A7C9:
+        relay-0: light
+        force_update_sensors: true
+  mode: queued
+  max: 999
 - id: '1644036755398'
   alias: Basement Projector Wake-on-LAN
   trigger:
@@ -450,3 +456,21 @@
     data:
       mac: B0:37:95:01:2B:92
       broadcast_address: 192.168.0.255
+- id: '1645034312500'
+  alias: Dryer Complete
+  description: ''
+  trigger:
+  - platform: state
+    entity_id: binary_sensor.dryer_dry_completed
+    from: 'off'
+    to: 'on'
+  condition: []
+  action:
+  - service: notify.alexa_media
+    data:
+      message: The dryer is done. You better get folding.
+      target:
+      - media_player.kitchen_alexa
+      data:
+        type: tts
+  mode: single
