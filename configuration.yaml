@@ -135,15 +135,12 @@ recorder:
 
 alert: !include alerts.yaml
 automation: !include automations.yaml
-binary_sensor: !include binary_sensors.yaml
 group: !include groups.yaml
 input_boolean: !include input_boolean.yaml
 light: !include light.yaml
 notify: !include notify.yaml
-scene: !include scenes.yaml
-script: !include scripts.yaml
 sensor: !include sensors.yaml
-timer: !include timer.yaml
+template: !include_dir_list templates/
 
 # Enable python scripts
 python_script:
