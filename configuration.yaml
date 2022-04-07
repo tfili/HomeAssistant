@@ -94,6 +94,8 @@ recorder:
       - calendar
       - group
       - remote
+      - update
+      - weather
     entity_globs:
       # AdGuard
       - sensor.adguard_*
@@ -119,6 +121,9 @@ recorder:
       - sensor.*_tx
       - sensor.rx_*
       - sensor.tx_*
+      # Shelly Firmware updates
+      - binary_sensor.*_firmware_update
+      - button.*_update_firmware
     entities:
       # Feed Parser
       - sensor.iron_cross_athletics
@@ -166,26 +171,6 @@ influxdb:
 google:
   client_id: !secret google_client_id
   client_secret: !secret google_secret
-
-# LG Projector
-# webostv:
-#   name: Basement Projector
-#   host: 192.168.0.6
-#   turn_on_action:
-#     service: wake_on_lan.send_magic_packet
-#     data:
-#       mac: B0:37:95:01:2B:92
-#       broadcast_address: 192.168.0.255
-#   customize:
-#     sources:
-#       - YouTube
-#       - Netflix
-#       - Disney+
-#       - Amazon Prime Video
-#       - VUDU
-#       - HDMI 1
-#       - HDMI 2
-#       - Web Browser
 
 # Owntracks
 # owntracks:

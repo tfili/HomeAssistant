@@ -338,17 +338,27 @@
   description: ''
   trigger:
   - platform: state
-    entity_id: binary_sensor.home_assistant_website_update_available
+    entity_id: update.home_assistant_core_update
     from: 'off'
     to: 'on'
-  - platform: state
-    entity_id: sensor.home_assistant_website
+  - platform: homeassistant
+    event: start
+  - platform: time
+    at: '12:00:00'
   condition: []
   action:
+  - delay:
+      hours: 0
+      minutes: 1
+      seconds: 0
+      milliseconds: 0
+  - condition: state
+    entity_id: update.home_assistant_core_update
+    state: 'on'
   - service: notify.mobile_app_toms_iphone
     data:
-      message: 'Version {{ states(''sensor.home_assistant_website'') }} is now available
-        (current: {{ states(''sensor.current_version'') }})'
+      title: HA v{{ states('sensor.home_assistant_website') }} is now available
+      message: Currently running v{{ states('sensor.current_version') }}
       data:
         actions:
         - action: RELEASE_NOTES

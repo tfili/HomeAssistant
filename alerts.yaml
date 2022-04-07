@@ -101,7 +101,7 @@ mailbox:
         authenticationRequired: true
         destructive: true
     action_data:
-      entity_id: binary_sensor.mailbox_contact
+      entity_id: alert.mailbox
   notifiers:
     - mobile_app_toms_iphone
     - mobile_app_iphone
@@ -109,10 +109,10 @@ mailbox:
 garage_doors:
   name: Garage Door Ajar
   message: >
-    {{ states.binary_sensor.garage_open_at_night.name }} have been open for {{ ((as_timestamp(now())-as_timestamp(states.binary_sensor.garage_open_at_night.last_changed)) / 60) | round }} minutes
+    {{ state_attr('binary_sensor.template_garage_open_at_night', 'friendly_name') }} have been open for {{ ((as_timestamp(now())-as_timestamp(states.binary_sensor.template_garage_open_at_night.last_changed)) / 60) | round }} minutes
   done_message: >
-    {{ states.binary_sensor.garage_open_at_night.name }} are closed
-  entity_id: binary_sensor.garage_open_at_night
+    {{ state_attr('binary_sensor.template_garage_open_at_night', 'friendly_name') }} are closed
+  entity_id: binary_sensor.template_garage_open_at_night
   state: "on"
   repeat: 30
   can_acknowledge: true
@@ -127,7 +127,31 @@ garage_doors:
         authenticationRequired: true
         destructive: true
     action_data:
-      entity_id: alert.garage
+      entity_id: alert.garage_doors
+  notifiers:
+    - mobile_app_toms_iphone
+    - mobile_app_iphone
+
+mail_delivered:
+  name: Mail Delivered
+  message: "Mail has been delivered"
+  done_message: "Mail has been retrieved"
+  entity_id: input_boolean.mail_delivered
+  state: "on"
+  repeat: 60
+  can_acknowledge: true
+  skip_first: false
+  data:
+    actions:
+      - identifier: "MAIL_RETRIEVED"
+        title: "Mail Retrieved"
+        authenticationRequired: true
+      - identifier: "DISMISS_ALERT"
+        title: "Dismiss Alert"
+        authenticationRequired: true
+        destructive: true
+    action_data:
+      entity_id: alert.mail_delivered
   notifiers:
     - mobile_app_toms_iphone
     - mobile_app_iphone
@@ -135,9 +159,9 @@ garage_doors:
 alarm_not_set:
   name: Alarm Not Set
   message: >
-    Alarm has not been set for {{ ((as_timestamp(now())-as_timestamp(states.binary_sensor.alarm_not_set.last_changed)) / 60) | round }} minutes
+    Alarm has not been set for {{ ((as_timestamp(now())-as_timestamp(states.binary_sensor.template_alarm_not_set.last_changed)) / 60) | round }} minutes
   done_message: "Alarm has been set"
-  entity_id: binary_sensor.alarm_not_set
+  entity_id: binary_sensor.template_alarm_not_set
   state: "on"
   repeat: 30
   can_acknowledge: true

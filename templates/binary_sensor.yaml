@@ -1,10 +1,14 @@
 binary_sensor:
    # On if a garage door is open at night
-  - name: "Garage Open at Night"
+  - unique_id: garage_open_at_night
     state: >-
       {{ is_state("sun.sun", "below_horizon") and (is_state("cover.left_garage_door", "open") or is_state("cover.right_garage_door", "open")) }}
+    attributes:
+      friendly_name: "Garage doors"
 
   # On if the alarm isn't set and we are 20 miles from home
-  - name: "Alarm Not Set"
+  - unique_id: alarm_not_set
     state: >-
       {{ states("proximity.home")|int > 20 and is_state("alarm_control_panel.abode_alarm", "disarmed") }}
+    attributes:
+      friendly_name: "Alarm"
