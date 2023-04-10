@@ -49,12 +49,12 @@ tts:
     base_url: http://192.168.0.105:8123
 
 # Enable discovery for mqtt
-mqtt:
-  broker: !secret mqtt_broker
-  username: !secret mqtt_username
-  password: !secret mqtt_password
-  discovery: true
-  discovery_prefix: homeassistant
+# mqtt:
+  # broker: !secret mqtt_broker
+  # username: !secret mqtt_username
+  # password: !secret mqtt_password
+  # discovery: true
+  # discovery_prefix: homeassistant
 
 # Enable wake on lan
 wake_on_lan:
@@ -151,11 +151,11 @@ template: !include_dir_list templates/
 python_script:
 
 # Nest config
-nest:
-  client_id: !secret nest_client_id
-  client_secret: !secret nest_client_secret
-  project_id: !secret nest_project_id
-  subscriber_id: !secret nest_subscriber_id
+# nest:
+#   client_id: !secret nest_client_id
+#   client_secret: !secret nest_client_secret
+#   project_id: !secret nest_project_id
+#   subscriber_id: !secret nest_subscriber_id
 
 # InfluxDB
 influxdb:
@@ -166,11 +166,6 @@ influxdb:
   password: !secret influx_password
   max_retries: 3
   default_measurement: state
-
-# Google Calendar
-google:
-  client_id: !secret google_client_id
-  client_secret: !secret google_secret
 
 # Owntracks
 # owntracks:

@@ -2,7 +2,7 @@ motion_abels_room:
   name: Motion in Abels Room
   initial: false
 
-motion_backyard_camera:
+motion_backyard:
   name: Motion in backyard
   initial: false
 
@@ -20,6 +20,10 @@ motion_morning_room:
 
 motion_nursery:
   name: Motion in nursery
+  initial: false
+
+motion_basement:
+  name: Motion in basement
   initial: false
 
 mail_delivered:

@@ -157,53 +157,57 @@
     device_id: 79442c3198ce3df321db20b7874d6285
     domain: nest
     type: camera_motion
+    variables:
+      motion_entity: input_boolean.motion_abels_room
   - platform: device
     device_id: 9d8105f724dc536601acaa2daf3cef79
     domain: nest
     type: camera_motion
+    variables:
+      motion_entity: input_boolean.motion_front_door
   - platform: device
     device_id: b8c655b88ad70bf5a8c4e92f4d7d5ffc
     domain: nest
     type: camera_motion
+    variables:
+      motion_entity: input_boolean.motion_reeves_room
   - platform: device
     device_id: b2f4cef4c127ec8f30d445e39dd7add5
     domain: nest
     type: camera_motion
+    variables:
+      motion_entity: input_boolean.motion_morning_room
   - platform: device
     device_id: 631237edbf1b66bf10461c63d27d037a
     domain: nest
     type: camera_motion
+    variables:
+      motion_entity: input_boolean.motion_nursery
   - platform: device
     device_id: f608a75804749b060fc4274bb4bd9939
     domain: nest
     type: camera_motion
+    variables:
+      motion_entity: input_boolean.motion_backyard
+  - platform: device
+    device_id: 8dff70f5a35e4c1cd87ce0154edbf8a6
+    domain: nest
+    type: camera_motion
+    variables:
+      motion_entity: input_boolean.motion_basement
   condition: []
   action:
   - service: input_boolean.turn_on
-    data_template:
-      entity_id: "{% set deviceId = trigger.event | regex_findall_index(\"device_id=([0-9a-f]+?),\"\
-        ) %}\n{% if deviceId == \"79442c3198ce3df321db20b7874d6285\" %}\n  input_boolean.motion_abels_room\n\
-        {% elif deviceId == \"f608a75804749b060fc4274bb4bd9939\" %}\n  input_boolean.motion_backyard_camera\n\
-        {% elif deviceId == \"9d8105f724dc536601acaa2daf3cef79\" %}\n  input_boolean.motion_front_door\n\
-        {% elif deviceId == \"b8c655b88ad70bf5a8c4e92f4d7d5ffc\" %}\n  input_boolean.motion_reeves_room\n\
-        {% elif deviceId == \"b2f4cef4c127ec8f30d445e39dd7add5\" %}\n  input_boolean.motion_morning_room\n\
-        {% elif deviceId == \"631237edbf1b66bf10461c63d27d037a\" %}\n  input_boolean.motion_nursery\n\
-        {% endif %}\n"
+    data:
+      entity_id: '{{ motion_entity }}'
   - delay:
       hours: 0
       minutes: 0
       seconds: 20
       milliseconds: 0
   - service: input_boolean.turn_off
-    data_template:
-      entity_id: "{% set deviceId = trigger.event | regex_findall_index(\"device_id=([0-9a-f]+?),\"\
-        ) %}\n{% if deviceId == \"79442c3198ce3df321db20b7874d6285\" %}\n  input_boolean.motion_abels_room\n\
-        {% elif deviceId == \"f608a75804749b060fc4274bb4bd9939\" %}\n  input_boolean.motion_backyard_camera\n\
-        {% elif deviceId == \"9d8105f724dc536601acaa2daf3cef79\" %}\n  input_boolean.motion_front_door\n\
-        {% elif deviceId == \"b8c655b88ad70bf5a8c4e92f4d7d5ffc\" %}\n  input_boolean.motion_reeves_room\n\
-        {% elif deviceId == \"b2f4cef4c127ec8f30d445e39dd7add5\" %}\n  input_boolean.motion_morning_room\n\
-        {% elif deviceId == \"631237edbf1b66bf10461c63d27d037a\" %}\n  input_boolean.motion_nursery\n\
-        {% endif %}\n"
+    data:
+      entity_id: '{{ motion_entity }}'
   mode: queued
   max: 10
 - id: '1618875855459'
@@ -220,8 +224,8 @@
       tag_id: a8c94b61-8c2e-4c4e-83ac-12320c6a94ab
   condition: []
   action:
-  - service_template: "{% if is_state('lock.mud_room_lock', 'locked') %}\n  lock.unlock\n\
-      {% else %}\n  lock.lock\n{% endif %}\n"
+  - service_template: "{% if is_state('lock.mud_room_lock', 'locked') %}\n  lock.unlock\n{%
+      else %}\n  lock.lock\n{% endif %}\n"
     target:
       entity_id: lock.mud_room_lock
     data: {}
