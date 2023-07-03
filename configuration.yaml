@@ -48,14 +48,6 @@ tts:
   - platform: google_translate
     base_url: http://192.168.0.105:8123
 
-# Enable discovery for mqtt
-# mqtt:
-  # broker: !secret mqtt_broker
-  # username: !secret mqtt_username
-  # password: !secret mqtt_password
-  # discovery: true
-  # discovery_prefix: homeassistant
-
 # Enable wake on lan
 wake_on_lan:
 
@@ -142,20 +134,12 @@ alert: !include alerts.yaml
 automation: !include automations.yaml
 group: !include groups.yaml
 input_boolean: !include input_boolean.yaml
-light: !include light.yaml
 notify: !include notify.yaml
 sensor: !include sensors.yaml
 template: !include_dir_list templates/
 
 # Enable python scripts
 python_script:
-
-# Nest config
-# nest:
-#   client_id: !secret nest_client_id
-#   client_secret: !secret nest_client_secret
-#   project_id: !secret nest_project_id
-#   subscriber_id: !secret nest_subscriber_id
 
 # InfluxDB
 influxdb:

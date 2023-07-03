@@ -1,8 +1,0 @@
-- platform: group
-  name: Basement Lights
-  entities:
-    - light.basement_stairs
-    - light.basement_hallway
-    - light.basement_main
-    - light.basement_gym
-    - light.basement_rear
