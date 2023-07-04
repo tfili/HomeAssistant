@@ -373,3 +373,32 @@
           title: Update Version
           uri: /config/dashboard
   mode: single
+- id: '1688434775547'
+  alias: Low Battery Notification
+  description: ''
+  trigger:
+  - platform: time
+    at: 09:00:00
+  condition: []
+  action:
+  - variables:
+      threshold: 10
+      sensors: "{% set result = namespace(sensors=[]) %} {% for state in states.sensor
+        | selectattr('attributes.device_class', '==', 'battery') %}\n  {% if 0 <=
+        state.state | int(-1) < threshold %}\n    {% set name = state.name | replace('
+        battery', '') %}\n    {% set result.sensors = result.sensors + [name ~ ' ('
+        ~ state.state ~ ' %)'] %}\n  {% endif %}\n{% endfor %} {% for state in states.binary_sensor
+        | selectattr('attributes.battery_low', '==', true) %}\n  {% set result.sensors
+        = result.sensors + [state.name] %}\n{% endfor %} {{result.sensors | sort |
+        join(', ')}}"
+  - condition: template
+    value_template: '{{ sensors != '''' }}'
+  - service: notify.mobile_app_toms_iphone
+    data:
+      title: Low Battery
+      message: '{{sensors}}
+
+        '
+      data:
+        url: /lovelace/battery-alert
+  mode: single
