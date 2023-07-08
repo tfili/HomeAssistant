@@ -402,3 +402,35 @@
       data:
         url: /lovelace/battery-alert
   mode: single
+- id: '1688667415109'
+  alias: Control Blinds with Button
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - sensor.basement_blind_button_action
+  condition: []
+  action:
+  - service: notify.mobile_app_toms_iphone
+    data:
+      message: '{{ trigger.to_state.state }}'
+  - if:
+    - condition: template
+      value_template: '{{ trigger.to_state.state == ''open'' }}
+
+        '
+    then:
+    - service: cover.open_cover
+      data: {}
+      target:
+        device_id: e83194d36344b6a7628d6173595e0447
+    else:
+    - if:
+      - condition: template
+        value_template: '{{ trigger.to_state.state == ''close'' }}'
+      then:
+      - service: cover.close_cover
+        data: {}
+        target:
+          device_id: e83194d36344b6a7628d6173595e0447
+  mode: single

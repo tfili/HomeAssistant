@@ -43,11 +43,6 @@ logger:
 frontend:
   themes: !include_dir_merge_named themes
 
-# Text to speech
-tts:
-  - platform: google_translate
-    base_url: http://192.168.0.105:8123
-
 # Enable wake on lan
 wake_on_lan:
 
