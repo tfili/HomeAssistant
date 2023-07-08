@@ -115,7 +115,7 @@ recorder:
       # Feed Parser
       - sensor.iron_cross_athletics
       # iRobot
-      - sensor.rest980
+      - vacuum.rest980
       - sensor.rest980mop
       - camera.roomba
       - camera.braava
@@ -127,7 +127,6 @@ recorder:
 
 alert: !include alerts.yaml
 automation: !include automations.yaml
-group: !include groups.yaml
 input_boolean: !include input_boolean.yaml
 notify: !include notify.yaml
 sensor: !include sensors.yaml
