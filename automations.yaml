@@ -434,3 +434,66 @@
         target:
           device_id: e83194d36344b6a7628d6173595e0447
   mode: single
+- id: '1688856626822'
+  alias: Vacuum/mop status update
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - vacuum.basement_roomba
+    - vacuum.greatroom_roomba
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 5
+  condition:
+  - condition: template
+    value_template: '{{ trigger.from_state.state != trigger.to_state.state and (trigger.to_state.state
+      == ''error'' or trigger.to_state.state == ''docked'') }}'
+  action:
+  - variables:
+      name: '{{ trigger.to_state.name }}'
+      status: '{{ trigger.to_state.attributes.status }}'
+      errorEntity: '{{ trigger.entity_id | replace(''vacuum.'', ''input_boolean.'')
+        }}_error'
+      message: "{% if trigger.to_state.state == 'docked' %}\n  {% if is_state(errorEntity,
+        'on') %}\n    {{ name }} has been returned to the dock ({{ status }})\n  {%
+        else %}\n    {{ name }} has finished successfully ({{ status }})\n  {% endif
+        %}\n{% else %}\n  {% if status == 'Stuck' %}\n    {{ name }} is stuck\n  {%
+        else %}\n    {{ name }} couldn't complete the job ({{ status }})\n  {% endif
+        %}\n{% endif %}\n"
+  - service: notify.mobile_app_toms_iphone
+    data:
+      title: '{{ name }}'
+      message: '{{ message }}'
+  - if:
+    - condition: template
+      value_template: '{{ trigger.to_state.state == ''docked'' }}'
+    then:
+    - service: input_boolean.turn_off
+      data: {}
+      target:
+        entity_id: '{{ errorEntity }}'
+    else:
+    - service: input_boolean.turn_on
+      data: {}
+      target:
+        entity_id: '{{ errorEntity }}'
+  mode: single
+- id: '1688913235675'
+  alias: Vacuum bin full notification
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - vacuum.basement_roomba
+    - vacuum.greatroom_roomba
+    attribute: status
+    from: 'false'
+    to: 'true'
+  condition: []
+  action:
+  - service: notify.mobile_app_toms_iphone
+    data:
+      message: '{{ trigger.from_state.name }}''s bin is full'
+  mode: single
