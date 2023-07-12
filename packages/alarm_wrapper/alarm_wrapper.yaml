@@ -81,11 +81,3 @@ alarm_wrapper:
     alarm_previous_state:
       name: Alarm State (Previous Value)
       initial: Unknown
-
-  script:
-    alarm_tasks_no_arm:
-      sequence:
-        - alias: "Do alarm tasks"
-          event: alarm_tasks_no_arm
-          event_data:
-            entity_id: alarm_control_panel.abode_alarm

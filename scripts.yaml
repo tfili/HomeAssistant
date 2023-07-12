@@ -1,0 +1,30 @@
+close_garage_doors:
+  alias: Close Garage Doors
+  sequence:
+  - parallel:
+    - if:
+      - condition: state
+        entity_id: cover.wrapped_left_garage
+        state: open
+      then:
+      - service: cover.close_cover
+        data: {}
+        target:
+          entity_id: cover.wrapped_left_garage
+    - if:
+      - condition: state
+        entity_id: cover.wrapped_right_garage
+        state: open
+      then:
+      - service: cover.close_cover
+        data: {}
+        target:
+          entity_id: cover.wrapped_right_garage
+  mode: single
+  icon: mdi:garage
+alarm_tasks_no_arm:
+  sequence:
+  - alias: Do alarm tasks
+    event: alarm_tasks_no_arm
+    event_data:
+      entity_id: alarm_control_panel.abode_alarm

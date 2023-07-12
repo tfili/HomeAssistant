@@ -12,3 +12,10 @@ binary_sensor:
       {{ states("proximity.home")|int > 20 and is_state("alarm_control_panel.abode_alarm", "disarmed") }}
     attributes:
       friendly_name: "Alarm"
+
+  # On if the alarm isn't set and we are 20 miles from home
+  - unique_id: office_ups_low_voltage
+    state: >-
+      {{ states("sensor.apc_input_voltage")|int < 100 }}
+    attributes:
+      friendly_name: "Office UPS low voltage"

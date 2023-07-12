@@ -181,3 +181,24 @@ alarm_not_set:
   notifiers:
     - mobile_app_toms_iphone
     - mobile_app_iphone
+
+office_ups_low_voltage:
+  name: Office UPS Low Voltage
+  message: >
+    Office UPS has had low voltage for {{ ((as_timestamp(now())-as_timestamp(states.binary_sensor.office_ups_low_voltage.last_changed)) / 60) | round }} minutes
+  done_message: "Office UPS voltage has been restored to normal"
+  entity_id: binary_sensor.template_office_ups_low_voltage
+  state: "on"
+  repeat: 30
+  can_acknowledge: true
+  skip_first: false
+  data:
+    actions:
+      - identifier: "DISMISS_ALERT"
+        title: "Dismiss Alert"
+        authenticationRequired: true
+        destructive: true
+    action_data:
+      entity_id: alert.office_ups_low_voltage
+  notifiers:
+    - mobile_app_toms_iphone
