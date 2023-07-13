@@ -19,3 +19,13 @@ binary_sensor:
       {{ states("sensor.apc_input_voltage")|int < 100 }}
     attributes:
       friendly_name: "Office UPS low voltage"
+
+  # On if the Lomi is running
+  - unique_id: lomi_running
+    icon: mdi:compost
+    device_class: power
+    delay_off: 
+      seconds: 10
+    state: "{{ states('sensor.lomi_plug_power')|int > 5 }}" 
+    attributes:
+      friendly_name: "Lomi"
