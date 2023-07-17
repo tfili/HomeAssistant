@@ -13,10 +13,6 @@ abodepy_cache.pickle
 # Google Calendar token
 .google.token
 
-# Node Red modules and backup files
-/node-red/node_modules/*
-/node-red/*.backup
-
 # NabuCasa files
 /.cloud/*
 
@@ -36,10 +32,6 @@ home-assistant_v2.db*
 # Daily mail delivery gif
 /www/mail_and_packages/*
 /images/mail_and_packages/*
-
-# Roomba and Braava point and image files
-/irobot/*.log
-/irobot/latest*.png
 
 # HomeAssistant log files
 home-assistant.log.*

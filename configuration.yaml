@@ -135,32 +135,3 @@ template: !include_dir_list templates/
 
 # Enable python scripts
 python_script:
-
-# InfluxDB
-influxdb:
-  host: !secret influx_host
-  port: 8086
-  database: !secret influx_database
-  username: !secret influx_username
-  password: !secret influx_password
-  max_retries: 3
-  default_measurement: state
-
-# Owntracks
-# owntracks:
-#   max_gps_accuracy: 200
-#   waypoints: true
-#   mqtt_topic: "owntracks/#"
-#   events_only: true
-#   secret: !secret owntracks_secret
-
-# Samsung TV cofig
-# media_player:
-#   - platform: samsungtv_tizen
-#     host: 192.168.0.181
-#     mac: !secret samsung_mac
-#     update_method: "smartthings"
-#     app_list: '{"YouTubeTV": "PvWgqxV3Xa.YouTubeTV", "Netflix": "RN1MCdNq8t.Netflix", "Disney+": "MCmYXNxgcu.DisneyPlus", "Prime Video": "evKhCgZelL.AmazonIgnitionLauncher2", "Hulu": "LBUAQX1exg.Hulu", "AppleTV": "com.samsung.tv.aria-video", "YouTube": "9Ur5IzDKqV.TizenYouTube"}'
-#     api_key: !secret samsung_api_key
-#     device_id: !secret samsung_device_id
-#     broadcast_address: "192.168.0.255"
