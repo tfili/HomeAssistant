@@ -28,3 +28,75 @@ alarm_tasks_no_arm:
     event: alarm_tasks_no_arm
     event_data:
       entity_id: alarm_control_panel.abode_alarm
+start_vacuum_or_mop:
+  alias: Start vacuum or mop
+  description: Starts a vacuum or mop. It makes sure it's docked first and waits for
+    it to complete
+  fields:
+    entity_id:
+      name: Entity of the vacuum or mop
+      description: The entity ID of the cleaning device that should be started
+      required: true
+      selector:
+        entity:
+          multiple: false
+          filter:
+          - domain: vacuum
+  sequence:
+  - if:
+    - condition: template
+      value_template: '{{ not is_state(entity_id, ''docked'') }}'
+    then:
+    - service: vacuum.stop
+      data: {}
+      target:
+        entity_id: '{{ entity_id }}'
+    - delay:
+        hours: 0
+        minutes: 0
+        seconds: 10
+        milliseconds: 0
+    - service: vacuum.return_to_base
+      data: {}
+      target:
+        entity_id: '{{ entity_id }}'
+    - wait_for_trigger:
+      - platform: template
+        value_template: '{{ is_state(entity_id, ''docked'') }}'
+      timeout:
+        hours: 0
+        minutes: 10
+        seconds: 0
+        milliseconds: 0
+    - if:
+      - condition: template
+        value_template: '{{ not wait.completed }}'
+      then:
+      - variables:
+          result_value: false
+      - service: notify.mobile_app_toms_iphone
+        data:
+          title: Failed to start
+          message: '{{ entity_id }}''s state is {{ states(entity_id) }} and failed
+            to dock'
+      - stop: Could not start
+        response_variable: result_value
+      else: []
+  - service: vacuum.start
+    data: {}
+    target:
+      entity_id: '{{ entity_id }}'
+  - wait_for_trigger:
+    - platform: template
+      value_template: '{{ is_state(entity_id, ''docked'') }}'
+    timeout:
+      hours: 4
+      minutes: 0
+      seconds: 0
+      milliseconds: 0
+  - variables:
+      result_value: '{{ wait.completed }}'
+  - stop: Finished
+    response_variable: result_value
+  mode: single
+  icon: mdi:robot-vacuum
