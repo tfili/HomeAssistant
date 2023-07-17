@@ -939,3 +939,250 @@
       - light.cabinet
       - light.kitchen_dimmer
   mode: single
+- id: '1689557717000'
+  alias: Doorbell
+  description: ''
+  trigger:
+  - platform: event
+    event_type: nest_event
+  condition:
+  - condition: template
+    value_template: '{{ trigger.event.data.device_id == ''9d8105f724dc536601acaa2daf3cef79''
+      and (trigger.event.data.type == ''doorbell_chime'' or trigger.event.data.type
+      == ''camera_person'') }}'
+  action:
+  - variables:
+      light_state: '{{ states(''light.cabinet'') }}'
+  - parallel:
+    - service: notify.alexa_media
+      data:
+        target:
+        - media_player.kitchen_alexa
+        - media_player.basement_alexa
+        data:
+          type: tts
+        message: '"Someone is at the front door"'
+    - service: tts.cloud_say
+      data:
+        cache: true
+        entity_id: media_player.office_display
+        message: Someone is at the front door
+    - if:
+      - condition: state
+        entity_id: light.cabinet
+        state: 'off'
+      then:
+      - service: light.turn_on
+        data: {}
+        target:
+          entity_id: light.cabinet
+      - delay:
+          hours: 0
+          minutes: 0
+          seconds: 1
+          milliseconds: 0
+  - variables:
+      brightness: '{{ state_attr(''light.cabinet'', ''brightness'') }}'
+      color:
+      - '{{ state_attr(''light.cabinet'', ''color'').x }}'
+      - '{{ state_attr(''light.cabinet'', ''color'').y }}'
+  - service: light.turn_on
+    data:
+      rgb_color:
+      - 247
+      - 2
+      - 2
+      brightness: 255
+    target:
+      entity_id: light.cabinet
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 5
+      milliseconds: 0
+  - service: light.turn_on
+    data:
+      xy_color: '{{ color }}'
+      brightness: '{{ brightness }}'
+    target:
+      entity_id: light.cabinet
+  - if:
+    - condition: template
+      value_template: '{{ light_state == ''off'' }}'
+    then:
+    - delay:
+        hours: 0
+        minutes: 0
+        seconds: 2
+        milliseconds: 0
+    - service: light.turn_off
+      data: {}
+      target:
+        entity_id: light.cabinet
+  mode: single
+- id: '1689561875523'
+  alias: Cesium Meeting
+  description: ''
+  trigger:
+  - platform: calendar
+    event: start
+    offset: -0:1:0
+    entity_id: calendar.tom_cesium_com
+    id: calendar_meeting
+  - platform: webhook
+    allowed_methods:
+    - POST
+    - PUT
+    local_only: true
+    webhook_id: q4fryupTsZLO8QE5MIyp6ekXzohLkjmb
+  condition: []
+  action:
+  - parallel:
+    - if:
+      - condition: state
+        entity_id: media_player.office_tv
+        state: playing
+      then:
+      - service: media_player.media_pause
+        data: {}
+        target:
+          entity_id: media_player.office_tv
+    - if:
+      - condition: trigger
+        id:
+        - calendar_meeting
+      then:
+      - service: tts.cloud_say
+        data:
+          cache: false
+          entity_id: media_player.office_display
+          message: '{{ trigger.calendar_event.summary }}'
+  mode: single
+- id: '1689562922595'
+  alias: Office
+  description: ''
+  trigger:
+  - platform: time
+    at: 07:00:00
+    id: start_work
+  - platform: time
+    at: '18:00:00'
+    id: end_work
+  - platform: state
+    entity_id:
+    - binary_sensor.office_motion_sensor_occupancy
+    to: 'on'
+    id: office_motion
+  - platform: numeric_state
+    entity_id: sensor.office_motion_sensor_illuminance_lux
+    below: 20
+    id: lux_below_20
+  - platform: numeric_state
+    entity_id: sensor.office_motion_sensor_illuminance_lux
+    above: 35
+    id: lux_above_35
+  - platform: state
+    entity_id:
+    - binary_sensor.office_motion_sensor_occupancy
+    to: 'off'
+    for:
+      hours: 0
+      minutes: 30
+      seconds: 0
+    id: office_clear_for_30
+  - platform: state
+    entity_id:
+    - sensor.office_motion_sensor_temperature
+    id: temp_change
+  condition: []
+  action:
+  - if:
+    - condition: trigger
+      id:
+      - lux_above_35
+    then:
+    - service: notify.mobile_app_toms_iphone
+      data:
+        title: Turn off light
+        message: Lux {{ trigger.to_state.state }}
+  - if:
+    - condition: or
+      conditions:
+      - condition: and
+        conditions:
+        - condition: trigger
+          id:
+          - lux_below_20
+        - condition: time
+          weekday:
+          - mon
+          - tue
+          - wed
+          - thu
+          - fri
+          after: 07:00:00
+          before: '18:00:00'
+      - condition: and
+        conditions:
+        - condition: trigger
+          id:
+          - office_motion
+          - start_work
+        - condition: numeric_state
+          entity_id: sensor.office_motion_sensor_illuminance_lux
+          below: 20
+    then:
+    - service: notify.mobile_app_toms_iphone
+      data:
+        title: Turn on light
+        message: Lux {{ states(sensor.office_motion_sensor_illuminance_lux) }}
+  - if:
+    - condition: or
+      conditions:
+      - condition: time
+        before: 07:00:00
+        weekday:
+        - fri
+        - thu
+        - wed
+        - tue
+        - mon
+      - condition: time
+        after: '18:00:00'
+        weekday:
+        - fri
+        - thu
+        - wed
+        - tue
+        - mon
+      - condition: time
+        weekday:
+        - sat
+        - sun
+      - condition: state
+        entity_id: binary_sensor.office_motion_sensor_occupancy
+        state: 'off'
+        for:
+          hours: 0
+          minutes: 30
+          seconds: 0
+    then:
+    - service: media_player.turn_off
+      data: {}
+      target:
+        entity_id: media_player.office_tv
+    - service: notify.mobile_app_toms_iphone
+      data:
+        title: Turn off
+        message: light & fan
+  - if:
+    - condition: trigger
+      id:
+      - temp_change
+      - start_work
+    then:
+    - variables:
+        temp: '{{ states(sensor.office_motion_sensor_temperature) }}'
+        fan_speed: "{% if temp < 72 %}\n  0\n{% elif temp < 76 %}\n  1\n{% elif temp
+          < 80 %}\n  2\n{% else %}\n  3\n{% endif %}\n  \n"
+  mode: single
