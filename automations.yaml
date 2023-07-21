@@ -1,11 +1,11 @@
 - id: '1606676673191'
-  alias: Thermostats (20 miles moving away)
+  alias: 'Proximity: Set Thermostats to Eco'
   description: Set thermostats to Eco if more than 20 miles away and traveling away
     from home.
   trigger:
   - platform: numeric_state
     entity_id: proximity.home
-    above: '20'
+    above: 10
   - platform: state
     entity_id:
     - proximity.home
@@ -19,7 +19,17 @@
       state: towards
   - condition: numeric_state
     entity_id: proximity.home
-    above: 20
+    above: 10
+  - condition: or
+    conditions:
+    - condition: state
+      entity_id: climate.flex_room
+      attribute: preset_mode
+      state: none
+    - condition: state
+      entity_id: climate.bedroom
+      attribute: preset_mode
+      state: none
   action:
   - device_id: 08a6dd4b35b484d1b40a2ecd10030df2
     domain: climate
@@ -31,28 +41,44 @@
     entity_id: climate.bedroom
     type: set_preset_mode
     preset_mode: eco
+  - service: notify.mobile_app_toms_iphone
+    data:
+      message: Thermostats have been set Eco mode
+      title: Leaving Home
   mode: single
 - id: '1606676792936'
-  alias: Thermostats (20 miles moving towards)
+  alias: 'Proximity: Set Thermostats to Normal'
   description: Set thermostats to Eco if more than 20 miles away and traveling towards
     from home.
   trigger:
   - platform: numeric_state
     entity_id: proximity.home
-    below: 20
+    below: 10
   - platform: state
     entity_id:
     - proximity.home
     attribute: dir_of_travel
     to: towards
   condition:
-  - condition: state
-    entity_id: proximity.home
-    state: towards
-    attribute: dir_of_travel
   - condition: numeric_state
     entity_id: proximity.home
-    below: 20
+    below: 10
+  - condition: not
+    conditions:
+    - condition: state
+      entity_id: proximity.home
+      attribute: dir_of_travel
+      state: away_from
+  - condition: or
+    conditions:
+    - condition: state
+      entity_id: climate.flex_room
+      attribute: preset_mode
+      state: eco
+    - condition: state
+      entity_id: climate.bedroom
+      attribute: preset_mode
+      state: eco
   action:
   - device_id: 015b691a363ef213cfde9c91ad3cab1e
     domain: climate
@@ -64,6 +90,10 @@
     entity_id: climate.flex_room
     type: set_preset_mode
     preset_mode: none
+  - service: notify.mobile_app_toms_iphone
+    data:
+      message: Thermostats have been set Normal mode
+      title: Going Home
   mode: single
 - id: '1607443386474'
   alias: Reset Motion Sensors
@@ -516,8 +546,9 @@
         'on') %}\n    {{ name }} has been returned to the dock ({{ status }})\n  {%
         else %}\n    {{ name }} has finished successfully ({{ status }})\n  {% endif
         %}\n{% else %}\n  {% if status == 'Stuck' %}\n    {{ name }} is stuck\n  {%
-        else %}\n    {{ name }} couldn't complete the job ({{ status }})\n  {% endif
-        %}\n{% endif %}\n"
+        elif status == 'Base Unplugged' %}\n    The base for {{ name }} is unplugged,
+        so it cannot charge\n  {% else %}\n    {{ name }} couldn't complete the job
+        ({{ status }})\n  {% endif %}\n{% endif %}\n"
   - service: notify.mobile_app_toms_iphone
     data:
       title: '{{ name }}'
@@ -789,6 +820,20 @@
     data:
       title: Alarm State Changed
       message: Disarmed
+      data:
+        actions:
+        - identifier: OPEN_RIGHT_GARAGE_DOOR
+          title: Open Right Garage Door
+          authenticationRequired: true
+        - identifier: OPEN_LEFT_GARAGE_DOOR
+          title: Open Left Garage Door
+          authenticationRequired: true
+        - identifier: OPEN_GARAGE_DOORS
+          title: Open Both Garage Doors
+          authenticationRequired: true
+        - identifier: NOTHING
+          title: Nothing
+          authenticationRequired: false
   mode: single
 - id: '1689187420027'
   alias: 'Wake-on-LAN: Greatroom TV'
@@ -828,8 +873,8 @@
       title: "{% if trigger.platform == 'event' %}\n  Alarm Actions\n{% else %}\n
         \ Alarm State Changed\n{% endif %}\n"
       message: "{% if trigger.platform == 'event' %}\n  What do you want to clean?\n{%
-        else %}\n  {{ trigger.to_state.state | replace('armed_', '') }}\n{% endif
-        %}\n"
+        else %}\n  {{ trigger.to_state.state | replace('armed_', '') | title }}\n{%
+        endif %}\n"
   - parallel:
     - service: lock.lock
       data: {}
@@ -837,7 +882,7 @@
         entity_id: lock.mud_room_lock
     - service: script.close_garage_doors
       data: {}
-    - service: notify.mobile_app_toms_iphone
+    - service: notify.everyone
       data:
         title: '{{ title }}'
         message: '{{ message }}'
@@ -855,7 +900,7 @@
     - if:
       - condition: template
         value_template: '{{ trigger.platform == ''event'' or (trigger.platform ==
-          ''state'' and trigger.to_state.state != ''armed_away'') }}'
+          ''state'' and trigger.to_state.state == ''armed_away'') }}'
       then:
       - parallel:
         - service: light.turn_off
@@ -1096,11 +1141,17 @@
     id: temp_change
   condition: []
   action:
+  - variables:
+      is_workday: '{{ now().weekday() < 5 and now().hour > 7 and now().hour < 18 }}'
   - if:
     - condition: trigger
       id:
       - lux_above_35
     then:
+    - service: light.turn_off
+      data: {}
+      target:
+        entity_id: light.office_ceiling_fan
     - service: notify.mobile_app_toms_iphone
       data:
         title: Turn off light
@@ -1113,15 +1164,8 @@
         - condition: trigger
           id:
           - lux_below_20
-        - condition: time
-          weekday:
-          - mon
-          - tue
-          - wed
-          - thu
-          - fri
-          after: 07:00:00
-          before: '18:00:00'
+        - condition: template
+          value_template: '{{ is_workday }}'
       - condition: and
         conditions:
         - condition: trigger
@@ -1132,45 +1176,41 @@
           entity_id: sensor.office_motion_sensor_illuminance_lux
           below: 20
     then:
+    - service: light.turn_on
+      data: {}
+      target:
+        entity_id: light.office_ceiling_fan
     - service: notify.mobile_app_toms_iphone
       data:
         title: Turn on light
         message: Lux {{ states(sensor.office_motion_sensor_illuminance_lux) }}
   - if:
-    - condition: or
-      conditions:
-      - condition: time
-        before: 07:00:00
-        weekday:
-        - fri
-        - thu
-        - wed
-        - tue
-        - mon
-      - condition: time
-        after: '18:00:00'
-        weekday:
-        - fri
-        - thu
-        - wed
-        - tue
-        - mon
-      - condition: time
-        weekday:
-        - sat
-        - sun
-      - condition: state
-        entity_id: binary_sensor.office_motion_sensor_occupancy
-        state: 'off'
-        for:
-          hours: 0
-          minutes: 30
-          seconds: 0
+    - condition: trigger
+      id:
+      - end_work
+      - office_clear_for_30
+    - condition: state
+      entity_id: binary_sensor.office_motion_sensor_occupancy
+      state: 'off'
+      for:
+        hours: 0
+        minutes: 30
+        seconds: 0
+    - condition: template
+      value_template: '{{ not is_workday }}'
     then:
     - service: media_player.turn_off
       data: {}
       target:
         entity_id: media_player.office_tv
+    - service: fan.turn_off
+      data: {}
+      target:
+        entity_id: fan.office_ceiling_fan
+    - service: light.turn_off
+      data: {}
+      target:
+        entity_id: light.office_ceiling_fan
     - service: notify.mobile_app_toms_iphone
       data:
         title: Turn off
@@ -1182,7 +1222,70 @@
       - start_work
     then:
     - variables:
-        temp: '{{ states(sensor.office_motion_sensor_temperature) }}'
-        fan_speed: "{% if temp < 72 %}\n  0\n{% elif temp < 76 %}\n  1\n{% elif temp
-          < 80 %}\n  2\n{% else %}\n  3\n{% endif %}\n  \n"
+        temp: '{{ states(''sensor.office_motion_sensor_temperature'') }}'
+        fan_speed: "{% if temp < 73 %}\n  0\n{% elif temp < 76.5 %}\n  33\n{% elif
+          temp < 80 %}\n  66\n{% else %}\n  100\n{% endif %}\n  \n"
+    - if:
+      - condition: template
+        value_template: '{{ fan_speed != state_attr(''fan.office_ceiling_fan'', ''percentage'')
+          }}'
+      then:
+      - if:
+        - condition: template
+          value_template: '{{ fan_speed > 0 and is_workday }}'
+        then:
+        - service: fan.set_percentage
+          data:
+            percentage: '{{ fan_speed }}'
+          target:
+            entity_id: fan.office_ceiling_fan
+        else:
+        - service: fan.turn_off
+          data: {}
+          target:
+            entity_id: fan.office_ceiling_fan
+      - service: notify.mobile_app_toms_iphone
+        data:
+          title: Fan Speed Update
+          message: '{{ fan_speed }} ({{ temp }}°)'
+        enabled: false
+  mode: single
+- id: '1689773551816'
+  alias: 'Event Handler: Open Garage Doors'
+  description: ''
+  trigger:
+  - platform: event
+    event_type:
+    - mobile_app_notification_action
+    - ios.action_fired
+  condition:
+  - condition: template
+    value_template: "{{\n  trigger.event.data.action == 'OPEN_RIGHT_GARAGE_DOOR' or
+      trigger.event.data.actionName == 'OPEN_RIGHT_GARAGE_DOOR' or\n  trigger.event.data.action
+      == 'OPEN_LEFT_GARAGE_DOOR' or trigger.event.data.actionName == 'OPEN_LEFT_GARAGE_DOOR'
+      or\n  trigger.event.data.action == 'OPEN_GARAGE_DOORS' or trigger.event.data.actionName
+      == 'OPEN_GARAGE_DOORS'\n}}"
+  action:
+  - variables:
+      action: "{% if trigger.event.data.action is defined %}\n  {{ trigger.event.data.action
+        }}\n{% else %}\n  {{ trigger.event.data.actionName }}\n{% endif %}\n"
+  - parallel:
+    - if:
+      - condition: template
+        value_template: '{{ action == ''OPEN_RIGHT_GARAGE_DOOR'' or action == ''OPEN_GARAGE_DOORS''
+          }}'
+      then:
+      - service: cover.open_cover
+        data: {}
+        target:
+          entity_id: cover.wrapped_right_garage
+    - if:
+      - condition: template
+        value_template: '{{ action == ''OPEN_LEFT_GARAGE_DOOR'' or action == ''OPEN_GARAGE_DOORS''
+          }}'
+      then:
+      - service: cover.open_cover
+        data: {}
+        target:
+          entity_id: cover.wrapped_left_garage
   mode: single

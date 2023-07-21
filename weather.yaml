@@ -1,0 +1,20 @@
+- name: "Green Meadow Station"
+  platform: template
+  unique_id: "green_meadow_station"
+  condition_template: "{{ states('weather.home_hourly') }}"
+  temperature_template: "{{ states('sensor.green_meadow_station_temp') }}"
+  dew_point_template: "{{ states('sensor.green_meadow_station_dew_point') }}"
+  apparent_temperature_template: "{{ states('sensor.green_meadow_station_feels_like') }}"
+  temperature_unit: "°F"
+  humidity_template: "{{ states('sensor.green_meadow_station_humidity') }}"
+  pressure_template: "{{ states('sensor.green_meadow_station_rel_pressure') }}"
+  pressure_unit: inHg
+  wind_speed_template: "{{ states('sensor.green_meadow_station_wind_speed') }}"
+  wind_gust_speed_template: "{{ states('sensor.green_meadow_station_wind_gust') }}"
+  wind_speed_unit: mph
+  wind_bearing_template: "{{ states('sensor.green_meadow_station_wind_dir') }}"
+  cloud_coverage_template: "{{ state_attr('weather.home_hourly', 'cloud_coverage') }}"
+  visibility_unit: mi
+  precipitation_unit: in
+  forecast_template: "{{ state_attr('weather.home_hourly', 'forecast') }}"
+  attribution_template: "Provided by Thomas Fili of the Green Meadow Weather Station"

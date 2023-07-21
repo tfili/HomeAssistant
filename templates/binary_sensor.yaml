@@ -6,14 +6,14 @@ binary_sensor:
     attributes:
       friendly_name: "Garage doors"
 
-  # On if the alarm isn't set and we are 20 miles from home
+  # On if the alarm isn't set and we are 10 miles from home
   - unique_id: alarm_not_set
     state: >-
-      {{ states("proximity.home")|int > 20 and is_state("alarm_control_panel.abode_alarm", "disarmed") }}
+      {{ states("proximity.home")|int > 10 and is_state("alarm_control_panel.abode_alarm", "disarmed") }}
     attributes:
       friendly_name: "Alarm"
 
-  # On if the alarm isn't set and we are 20 miles from home
+  # On if office UPS has low voltage
   - unique_id: office_ups_low_voltage
     state: >-
       {{ states("sensor.apc_input_voltage")|int < 100 }}
