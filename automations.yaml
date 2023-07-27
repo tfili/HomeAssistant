@@ -800,40 +800,41 @@
     value_template: '{{ trigger.from_state is not none and trigger.from_state.state
       != ''unavailable'' }}'
   action:
-  - service: lock.unlock
-    data: {}
-    target:
-      entity_id: lock.mud_room_lock
-  - if:
-    - condition: state
-      entity_id: sun.sun
-      state: below_horizon
-    then:
-    - service: light.turn_on
-      data:
-        brightness_pct: 50
+  - parallel:
+    - service: lock.unlock
+      data: {}
       target:
-        entity_id:
-        - light.cabinet
-        - light.kitchen_dimmer
-  - service: notify.everyone
-    data:
-      title: Alarm State Changed
-      message: Disarmed
+        entity_id: lock.mud_room_lock
+    - service: notify.everyone
       data:
-        actions:
-        - identifier: OPEN_RIGHT_GARAGE_DOOR
-          title: Open Right Garage Door
-          authenticationRequired: true
-        - identifier: OPEN_LEFT_GARAGE_DOOR
-          title: Open Left Garage Door
-          authenticationRequired: true
-        - identifier: OPEN_GARAGE_DOORS
-          title: Open Both Garage Doors
-          authenticationRequired: true
-        - identifier: NOTHING
-          title: Nothing
-          authenticationRequired: false
+        title: Alarm State Changed
+        message: Disarmed
+        data:
+          actions:
+          - identifier: OPEN_RIGHT_GARAGE_DOOR
+            title: Open Right Garage Door
+            authenticationRequired: true
+          - identifier: OPEN_LEFT_GARAGE_DOOR
+            title: Open Left Garage Door
+            authenticationRequired: true
+          - identifier: OPEN_GARAGE_DOORS
+            title: Open Both Garage Doors
+            authenticationRequired: true
+          - identifier: NOTHING
+            title: Nothing
+            authenticationRequired: false
+    - if:
+      - condition: state
+        entity_id: sun.sun
+        state: below_horizon
+      then:
+      - service: light.turn_on
+        data:
+          brightness_pct: 50
+        target:
+          entity_id:
+          - light.cabinet
+          - light.kitchen_dimmer
   mode: single
 - id: '1689187420027'
   alias: 'Wake-on-LAN: Greatroom TV'
@@ -1147,6 +1148,9 @@
     - condition: trigger
       id:
       - lux_above_35
+    - condition: state
+      entity_id: light.office_ceiling_fan
+      state: 'on'
     then:
     - service: light.turn_off
       data: {}
@@ -1220,6 +1224,7 @@
       id:
       - temp_change
       - start_work
+      - office_motion
     then:
     - variables:
         temp: '{{ states(''sensor.office_motion_sensor_temperature'') }}'
@@ -1232,7 +1237,14 @@
       then:
       - if:
         - condition: template
-          value_template: '{{ fan_speed > 0 and is_workday }}'
+          value_template: '{{ fan_speed > 0 }}'
+        - condition: or
+          conditions:
+          - condition: template
+            value_template: '{{ is_workday }}'
+          - condition: trigger
+            id:
+            - office_motion
         then:
         - service: fan.set_percentage
           data:
@@ -1288,4 +1300,58 @@
         data: {}
         target:
           entity_id: cover.wrapped_left_garage
+  mode: single
+- id: '1690424019295'
+  alias: Abode Test
+  description: ''
+  trigger:
+  - platform: event
+    event_type: abode_alarm
+    event_data: {}
+  - platform: event
+    event_type: abode_alarm_end
+    event_data: {}
+  - platform: event
+    event_type: abode_automation
+    event_data: {}
+  - platform: event
+    event_type: abode_panel_fault
+    event_data: {}
+  - platform: event
+    event_type: abode_panel_restore
+    event_data: {}
+  - platform: event
+    event_type: abode_disarm
+    event_data: {}
+  - platform: event
+    event_type: abode_arm
+    event_data: {}
+  - platform: event
+    event_type: abode_arm_fault
+    event_data: {}
+  - platform: event
+    event_type: abode_test
+    event_data: {}
+  - platform: event
+    event_type: abode_capture
+    event_data: {}
+  - platform: event
+    event_type: abode_device
+    event_data: {}
+  condition: []
+  action:
+  - event: '{{ trigger.event.event_type | replace(''abode'', ''alarm'') }}'
+    event_data:
+      device_id: '{{ trigger.event.data.device_id }}'
+      device_name: '{{ trigger.event.data.device_name }}'
+      device_type: '{{ trigger.event.data.device_type }}'
+      event_code: '{{ trigger.event.data.event_code }}'
+      event_name: '{{ trigger.event.data.event_name }}'
+      event_type: '{{ trigger.event.data.event_type }}'
+      event_utc: '{{ trigger.event.data.event_utc }}'
+      user_name: '{{ trigger.event.data.user_name }}'
+      app_type: '{{ trigger.event.data.app_type }}'
+      event_by: '{{ trigger.event.data.event_by }}'
+      date: '{{ trigger.event.data.date }}'
+      time: '{{ trigger.event.data.time }}'
   mode: single
