@@ -56,18 +56,18 @@ stream:
 proximity:
   home_tom:
     devices:
-      - device_tracker.toms_iphone
+      - device_tracker.tom
     tolerance: 50
     unit_of_measurement: mi
   home_jami:
     devices:
-      - device_tracker.jamis_iphone
+      - device_tracker.jami
     tolerance: 50
     unit_of_measurement: mi
   home:
     devices:
-      - device_tracker.toms_iphone
-      - device_tracker.jamis_iphone
+      - device_tracker.tom
+      - device_tracker.jami
     tolerance: 50
     unit_of_measurement: mi
 

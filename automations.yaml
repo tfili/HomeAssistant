@@ -1087,7 +1087,9 @@
     - if:
       - condition: state
         entity_id: media_player.office_tv
-        state: playing
+        state:
+        - playing
+        - unavailable
       then:
       - service: media_player.media_pause
         data: {}
@@ -1354,4 +1356,58 @@
       event_by: '{{ trigger.event.data.event_by }}'
       date: '{{ trigger.event.data.date }}'
       time: '{{ trigger.event.data.time }}'
+  mode: single
+- id: '1690910220345'
+  alias: Combine Device Trackers
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - device_tracker.toms_iphone_icloud
+    - device_tracker.toms_iphone
+    - device_tracker.jamis_iphone
+    - device_tracker.jamis_iphone_icloud
+  condition: []
+  action:
+  - variables:
+      topic: "{% if 'tom' in trigger.entity_id %}\n  tom\n{% elif 'jami' in trigger.entity_id
+        %}\n  jami\n{% else %}\n  unknown\n{% endif %}\n"
+      combinined_entity_id: device_tracker.{{ topic }}
+      tempid: combined_device_tracker_mqtt_{{topic}}
+      unique_id: '{{ tempid | base64_encode | replace(''='', '''') }}'
+      attributes: "{% set data = namespace(result=[]) %} {% set ignoredFields = ['icon',
+        'friendly_name'] %} {% for prop in trigger.to_state.attributes.items() %}\n
+        \ {% if prop[0] not in ignoredFields %}\n    {% set data.result = data.result
+        + [prop] %}\n  {% endif %}\n{% endfor %} {{ dict.from_keys(data.result) |
+        to_json }}\n"
+  - if:
+    - condition: template
+      value_template: '{{ states.device_tracker[topic].state is not defined  }}'
+    then:
+    - service: mqtt.publish
+      data:
+        qos: 0
+        retain: false
+        topic: homeassistant/device_tracker/{{ unique_id }}/{{ topic }}/config
+        payload: "{\n  \"name\": \"{{topic | title}}\",\n  \"state_topic\": \"homeassistant/device_tracker/{{
+          unique_id }}/{{ topic }}/state\",\n  \"json_attributes_topic\": \"homeassistant/device_tracker/{{
+          unique_id }}/{{ topic }}/attributes\",\n  \"unique_id\": \"{{unique_id}}\",\n
+          \ \"icon\": \"mdi:account\"\n}\n"
+  - if:
+    - condition: template
+      value_template: '{{ not is_state(combinined_entity_id, trigger.to_state.state)
+        }}'
+    then:
+    - service: mqtt.publish
+      data:
+        qos: 0
+        retain: false
+        topic: homeassistant/device_tracker/{{ unique_id }}/{{ topic }}/state
+        payload: '{{ trigger.to_state.state }}'
+  - service: mqtt.publish
+    data:
+      qos: 0
+      retain: false
+      topic: homeassistant/device_tracker/{{ unique_id }}/{{ topic }}/attributes
+      payload: '{{ attributes }}'
   mode: single
