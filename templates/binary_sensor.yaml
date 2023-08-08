@@ -26,6 +26,6 @@ binary_sensor:
     device_class: power
     delay_off: 
       seconds: 10
-    state: "{{ states('sensor.lomi_plug_power')|int > 5 }}" 
+    state: "{{ states('sensor.lomi_plug_power')|int(0) > 5 }}" 
     attributes:
       friendly_name: "Lomi"

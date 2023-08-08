@@ -32,6 +32,8 @@ homeassistant:
 
 logger:
   default: warning
+  logs:
+    homeassistant.components.mobile_app.notify: debug
 
 # HTTP Server settings
 # IP Banning blocks IOS app too easily so its disabled
@@ -45,12 +47,6 @@ frontend:
 
 # Enable wake on lan
 wake_on_lan:
-
-# Enable discovery
-discovery:
-
-# Enable camera mqtt_statestream:
-stream:
 
 # Enable proximity sensors for all iphones
 proximity:
