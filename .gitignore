@@ -23,7 +23,6 @@ abodepy_cache.pickle
 secrets.yaml
 
 # Recorder Database
-home-assistant.log
 home-assistant_v2.db*
 
 # Lovelace cards from HACS
@@ -34,6 +33,7 @@ home-assistant_v2.db*
 /images/mail_and_packages/*
 
 # HomeAssistant log files
+home-assistant.log
 home-assistant.log.*
 
 # webostv config db
@@ -41,6 +41,9 @@ webostv.conf
 
 # Nest event images
 /nest/event_media/**/*.jpg
+
+# Watchman report
+/watchman_report.txt
 
 # Temporarily ignore esphome
 /esphome/*

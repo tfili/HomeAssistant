@@ -23,22 +23,22 @@
   - condition: or
     conditions:
     - condition: state
-      entity_id: climate.flex_room
+      entity_id: climate.downstairs
       attribute: preset_mode
       state: none
     - condition: state
-      entity_id: climate.bedroom
+      entity_id: climate.upstairs
       attribute: preset_mode
       state: none
   action:
-  - device_id: 08a6dd4b35b484d1b40a2ecd10030df2
+  - device_id: e74fe3309cf9ebdff5b8de50dc762cd2
     domain: climate
-    entity_id: climate.flex_room
+    entity_id: 9c57958aa4086eebc3c1c663f1dcfe64
     type: set_preset_mode
     preset_mode: eco
-  - device_id: 015b691a363ef213cfde9c91ad3cab1e
+  - device_id: bce5cbf2a20b1630b3fcd0c39f29f7ad
     domain: climate
-    entity_id: climate.bedroom
+    entity_id: 0356f8a2d4516c53d1077d9dd81fea49
     type: set_preset_mode
     preset_mode: eco
   - service: notify.mobile_app_toms_iphone
@@ -72,22 +72,22 @@
   - condition: or
     conditions:
     - condition: state
-      entity_id: climate.flex_room
+      entity_id: climate.downstairs
       attribute: preset_mode
       state: eco
     - condition: state
-      entity_id: climate.bedroom
+      entity_id: climate.upstairs
       attribute: preset_mode
       state: eco
   action:
-  - device_id: 015b691a363ef213cfde9c91ad3cab1e
+  - device_id: e74fe3309cf9ebdff5b8de50dc762cd2
     domain: climate
-    entity_id: climate.bedroom
+    entity_id: 9c57958aa4086eebc3c1c663f1dcfe64
     type: set_preset_mode
     preset_mode: none
-  - device_id: 08a6dd4b35b484d1b40a2ecd10030df2
+  - device_id: bce5cbf2a20b1630b3fcd0c39f29f7ad
     domain: climate
-    entity_id: climate.flex_room
+    entity_id: 0356f8a2d4516c53d1077d9dd81fea49
     type: set_preset_mode
     preset_mode: none
   - service: notify.mobile_app_toms_iphone
@@ -181,19 +181,6 @@
     data: {}
     entity_id: light.cabinet
   mode: restart
-- id: '1608858136491'
-  alias: Kitchen iBeacon Test
-  description: ''
-  trigger:
-  - platform: state
-    entity_id: device_tracker.mqtt_60cbab37_8f46_4482_9b89_27781ac02af6
-    to: kitchen
-  condition: []
-  action:
-  - service: notify.mobile_app_toms_iphone
-    data:
-      message: Entered kitchen
-  mode: single
 - id: 5338138641074509ac3d115c3132d868
   alias: Set Default Theme
   description: ''
@@ -211,35 +198,35 @@
   description: ''
   trigger:
   - platform: device
-    device_id: 79442c3198ce3df321db20b7874d6285
+    device_id: 17221139504c939b70008ccefdd0be45
     domain: nest
     type: camera_motion
     variables:
       motion_entity: input_boolean.motion_abels_room
   - platform: device
-    device_id: 9d8105f724dc536601acaa2daf3cef79
+    device_id: 071987be0fcc0f04e764fa87ef7cfa08
     domain: nest
     type: camera_motion
     variables:
       motion_entity: input_boolean.motion_front_door
   - platform: device
-    device_id: b8c655b88ad70bf5a8c4e92f4d7d5ffc
+    device_id: 1147fbae5177cd1c188b10b78454dbb7
     domain: nest
     type: camera_motion
     variables:
       motion_entity: input_boolean.motion_reeves_room
   - platform: device
-    device_id: b2f4cef4c127ec8f30d445e39dd7add5
+    device_id: a15c183382243d7f47e4dc6a3433ed8c
     domain: nest
     type: camera_motion
     variables:
       motion_entity: input_boolean.motion_morning_room
   - platform: device
-    device_id: 631237edbf1b66bf10461c63d27d037a
+    device_id: 0285fc92583747d2a75e96f29502995f
     domain: nest
     type: camera_motion
     variables:
-      motion_entity: input_boolean.motion_nursery
+      motion_entity: input_boolean.motion_ellis_room
   - platform: device
     device_id: f608a75804749b060fc4274bb4bd9939
     domain: nest
@@ -281,7 +268,7 @@
       tag_id: a8c94b61-8c2e-4c4e-83ac-12320c6a94ab
   condition: []
   action:
-  - service_template: "{% if is_state('lock.mud_room_lock', 'locked') %}\n  lock.unlock\n{%
+  - service: "{% if is_state('lock.mud_room_lock', 'locked') %}\n  lock.unlock\n{%
       else %}\n  lock.lock\n{% endif %}\n"
     target:
       entity_id: lock.mud_room_lock
@@ -425,7 +412,7 @@
       target:
       - media_player.kitchen_alexa
       - media_player.kitchen_echo_show
-      - media_player.basement_alexa
+      - media_player.bedroom_alexa
       data:
         type: tts
   mode: single
@@ -655,24 +642,31 @@
   - platform: sun
     event: sunset
     offset: 0
+    id: sunset
+  - platform: sun
+    event: sunrise
+    offset: 0
+    id: sunrise
   condition: []
   action:
-  - service: light.turn_on
-    data: {}
-    target:
-      entity_id:
-      - light.porch_lights
-      - light.driveway_lights
-  - wait_for_trigger:
-    - platform: sun
-      event: sunrise
-      offset: 0
-  - service: light.turn_off
-    data: {}
-    target:
-      entity_id:
-      - light.porch_lights
-      - light.driveway_lights
+  - if:
+    - condition: trigger
+      id:
+      - sunset
+    then:
+    - service: light.turn_on
+      data: {}
+      target:
+        entity_id:
+        - light.porch_lights
+        - light.driveway_lights
+    else:
+    - service: light.turn_off
+      data: {}
+      target:
+        entity_id:
+        - light.porch_lights
+        - light.driveway_lights
   mode: single
 - id: '1689021667956'
   alias: Door sensor notifications
@@ -702,7 +696,7 @@
       message: '{{ name }} was opened'
       target:
       - media_player.kitchen_alexa
-      - media_player.basement_alexa
+      - media_player.bedroom_alexa
       - media_player.kitchen_echo_show
   mode: single
 - id: '1689023119740'
@@ -1000,7 +994,7 @@
     event_type: nest_event
   condition:
   - condition: template
-    value_template: '{{ trigger.event.data.device_id == ''9d8105f724dc536601acaa2daf3cef79''
+    value_template: '{{ trigger.event.data.device_id == ''071987be0fcc0f04e764fa87ef7cfa08''
       and (trigger.event.data.type == ''doorbell_chime'' or trigger.event.data.type
       == ''camera_person'') }}'
   action:
@@ -1011,7 +1005,7 @@
       data:
         target:
         - media_player.kitchen_alexa
-        - media_player.basement_alexa
+        - media_player.bedroom_alexa
         - media_player.kitchen_echo_show
         data:
           type: tts
@@ -1046,58 +1040,60 @@
           media_player: media_player.office_display
         target:
           entity_id: camera.front_door
-    - if:
-      - condition: state
-        entity_id: light.cabinet
-        state: 'off'
+    - if: []
       then:
+      - if:
+        - condition: state
+          entity_id: light.cabinet
+          state: 'off'
+        then:
+        - service: light.turn_on
+          data: {}
+          target:
+            entity_id: light.cabinet
+        - delay:
+            hours: 0
+            minutes: 0
+            seconds: 1
+            milliseconds: 0
+      - variables:
+          brightness: '{{ state_attr(''light.cabinet'', ''brightness'') }}'
+          color:
+          - '{{ state_attr(''light.cabinet'', ''color'').x }}'
+          - '{{ state_attr(''light.cabinet'', ''color'').y }}'
       - service: light.turn_on
-        data: {}
+        data:
+          rgb_color:
+          - 247
+          - 2
+          - 2
+          brightness: 255
         target:
           entity_id: light.cabinet
       - delay:
           hours: 0
           minutes: 0
-          seconds: 1
+          seconds: 5
           milliseconds: 0
-  - variables:
-      brightness: '{{ state_attr(''light.cabinet'', ''brightness'') }}'
-      color:
-      - '{{ state_attr(''light.cabinet'', ''color'').x }}'
-      - '{{ state_attr(''light.cabinet'', ''color'').y }}'
-  - service: light.turn_on
-    data:
-      rgb_color:
-      - 247
-      - 2
-      - 2
-      brightness: 255
-    target:
-      entity_id: light.cabinet
-  - delay:
-      hours: 0
-      minutes: 0
-      seconds: 5
-      milliseconds: 0
-  - service: light.turn_on
-    data:
-      xy_color: '{{ color }}'
-      brightness: '{{ brightness }}'
-    target:
-      entity_id: light.cabinet
-  - if:
-    - condition: template
-      value_template: '{{ light_state == ''off'' }}'
-    then:
-    - delay:
-        hours: 0
-        minutes: 0
-        seconds: 2
-        milliseconds: 0
-    - service: light.turn_off
-      data: {}
-      target:
-        entity_id: light.cabinet
+      - service: light.turn_on
+        data:
+          xy_color: '{{ color }}'
+          brightness: '{{ brightness }}'
+        target:
+          entity_id: light.cabinet
+      - if:
+        - condition: template
+          value_template: '{{ light_state == ''off'' }}'
+        then:
+        - delay:
+            hours: 0
+            minutes: 0
+            seconds: 2
+            milliseconds: 0
+        - service: light.turn_off
+          data: {}
+          target:
+            entity_id: light.cabinet
   mode: single
 - id: '1689561875523'
   alias: Cesium Meeting
@@ -1175,6 +1171,11 @@
     entity_id:
     - sensor.office_motion_sensor_temperature
     id: temp_change
+  - platform: state
+    entity_id:
+    - alarm_control_panel.wrapped_alarm
+    to: armed_away
+    id: alarm_away
   condition: []
   action:
   - variables:
@@ -1230,15 +1231,23 @@
       id:
       - end_work
       - office_clear_for_30
-    - condition: state
-      entity_id: binary_sensor.office_motion_sensor_occupancy
-      state: 'off'
-      for:
-        hours: 0
-        minutes: 30
-        seconds: 0
-    - condition: template
-      value_template: '{{ not is_workday }}'
+      - alarm_away
+    - condition: or
+      conditions:
+      - condition: state
+        entity_id: alarm_control_panel.wrapped_alarm
+        state: armed_away
+      - condition: and
+        conditions:
+        - condition: template
+          value_template: '{{ not is_workday }}'
+        - condition: state
+          entity_id: binary_sensor.office_motion_sensor_occupancy
+          state: 'off'
+          for:
+            hours: 0
+            minutes: 30
+            seconds: 0
     then:
     - service: media_player.turn_off
       data: {}
@@ -1447,3 +1456,75 @@
       payload: '{{ attributes }}'
   mode: queued
   max: 10
+- id: '1691811863982'
+  alias: Reset Ad Filter
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - switch.ad_filter
+    to: 'off'
+  condition: []
+  action:
+  - wait_for_trigger:
+    - platform: state
+      entity_id:
+      - switch.ad_filter
+      to: 'on'
+      for:
+        hours: 0
+        minutes: 0
+        seconds: 0
+    timeout:
+      hours: 0
+      minutes: 2
+      seconds: 0
+      milliseconds: 0
+  - if:
+    - condition: template
+      value_template: '{{ wait.trigger == none }}'
+    then:
+    - service: switch.turn_on
+      data: {}
+      target:
+        entity_id: switch.ad_filter
+    - service: notify.mobile_app_toms_iphone
+      data:
+        message: Ad Filter Set to On
+      enabled: false
+  mode: restart
+- id: '1692025965540'
+  alias: Watchman Report
+  description: ''
+  trigger:
+  - platform: time
+    at: 09:00:00
+  condition: []
+  action:
+  - service: watchman.report
+    data:
+      create_file: true
+      parse_config: false
+      chunk_size: false
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 10
+      milliseconds: 0
+  - if:
+    - condition: numeric_state
+      entity_id: sensor.watchman_missing_services
+      above: 0
+    - condition: numeric_state
+      entity_id: sensor.watchman_missing_entities
+      above: 0
+    then:
+    - service: notify.mobile_app_toms_iphone
+      data:
+        title: Watchman Report
+        message: '{{ states(''sensor.watchman_missing_services'') }} missing services
+
+          {{ states(''sensor.watchman_missing_entities'') }} missing entities
+
+          '
+  mode: single

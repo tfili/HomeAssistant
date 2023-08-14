@@ -28,6 +28,8 @@ alarm_tasks_no_arm:
     event: alarm_tasks_no_arm
     event_data:
       entity_id: alarm_control_panel.abode_alarm
+  alias: Alarm tasks without arming
+  mode: single
 start_vacuum_or_mop:
   alias: Start vacuum or mop
   description: Starts a vacuum or mop. It makes sure it's docked first and waits for

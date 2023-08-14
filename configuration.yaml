@@ -8,7 +8,7 @@ homeassistant:
   # 2FA
   auth_mfa_modules:
     - type: totp
-  
+
   # Let known users login from their phones
   # Let kiosk user login from local network
   # Any other scenario requires HA login
@@ -52,18 +52,18 @@ wake_on_lan:
 proximity:
   home_tom:
     devices:
-      - device_tracker.tom
+      - device_tracker.toms_iphone
     tolerance: 50
     unit_of_measurement: mi
   home_jami:
     devices:
-      - device_tracker.jami
+      - device_tracker.jamis_iphone_icloud
     tolerance: 50
     unit_of_measurement: mi
   home:
     devices:
-      - device_tracker.tom
-      - device_tracker.jami
+      - device_tracker.toms_iphone
+      - device_tracker.jamis_iphone_icloud
     tolerance: 50
     unit_of_measurement: mi
 
@@ -87,39 +87,17 @@ recorder:
       - media_player.*_alexa_*
       - sensor.*_alexa_*
       - switch.*_alexa_*
-      # iRobot
-      - automation.mop_*
-      - input_boolean.vacuum_*
-      - input_text.vacuum_*
-      - sensor.mop_*
-      - automation.vacuum_*
-      - input_boolean.mop_*
-      - input_text.mop_*
-      - sensor.vacuum_*
       # Supervisor & Zigbee2MQTT
       - binary_sensor.*_update_available
       - sensor.*_version
-      # Ubiquity Unifi
-      - sensor.*_rx
-      - sensor.*_tx
-      - sensor.rx_*
-      - sensor.tx_*
       # Shelly Firmware updates
       - binary_sensor.*_firmware_update
       - button.*_update_firmware
     entities:
       # Feed Parser
       - sensor.iron_cross_athletics
-      # iRobot
-      - vacuum.rest980
-      - sensor.rest980mop
-      - camera.roomba
-      - camera.braava
       # Sun
       - sun.sun
-      # Ubiquity Unifi
-      - sensor.rx
-      - sensor.tx
 
 alert: !include alerts.yaml
 automation: !include automations.yaml
@@ -127,6 +105,7 @@ input_boolean: !include input_boolean.yaml
 notify: !include notify.yaml
 script: !include scripts.yaml
 sensor: !include sensors.yaml
+switch: !include switch.yaml
 template: !include_dir_list templates/
 weather: !include weather.yaml
 

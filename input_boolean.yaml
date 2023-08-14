@@ -18,8 +18,8 @@ motion_morning_room:
   name: Motion in morning room
   initial: false
 
-motion_nursery:
-  name: Motion in nursery
+motion_ellis_room:
+  name: Motion in Ellis Room
   initial: false
 
 motion_basement:
