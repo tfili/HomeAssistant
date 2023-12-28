@@ -67,3 +67,9 @@
       ignore_availability: true
       name: Philadelphia Eagles
       track: true
+
+- cal_id: c_3d2383ceb99d6af192708ded560ea175408e40ffd250e837aa51c919c33284dd@group.calendar.google.com
+  entities:
+  - device_id: core_technology_wg
+    ignore_availability: true
+    name: Core-Technology-WG
