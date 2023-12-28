@@ -23,9 +23,6 @@ function updateKVP(on, brightness, oldValues) {
   }
 }
 
-let status = Shelly.getComponentStatus("light",0);
-updateKVP(status.output, status.brightness);
-
 function updateLight(event) {
   const delta = event.delta;
   if (delta.source === "loopback" || typeof delta.brightness === "undefined") {
@@ -35,7 +32,7 @@ function updateLight(event) {
   Shelly.call(
     "KVS.Get",
     {key: KEY},
-    function (entry, error_code, message) {
+    function (entry) {
       const kvp = JSON.parse(entry.value);
       
       if (DEBUG) {
@@ -44,8 +41,8 @@ function updateLight(event) {
       }
       
       let newBrightness = delta.brightness;
-      let newIsOn = delta.output;
-      if (newIsOn === kvp.on && newBrightness !== kvp.brightness) {
+      const newIsOn = delta.output;
+      if (newBrightness !== kvp.brightness) {
         newBrightness = Math.floor(newBrightness * 0.75);
         Shelly.call("Light.Set",
           {"id":event.id, "on":newIsOn, "brightness":newBrightness},
@@ -54,5 +51,8 @@ function updateLight(event) {
       updateKVP(newIsOn, newBrightness, kvp);
     }, null);
 }
+
+const lightStatus = Shelly.getComponentStatus("light",0);
+updateKVP(lightStatus.output, lightStatus.brightness);
 
 Shelly.addStatusHandler(updateLight, null);
