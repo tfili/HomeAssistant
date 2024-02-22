@@ -1,6 +1,0 @@
-# ICA RSS Feed
-- platform: feedparser
-  name: Iron Cross Athletics
-  feed_url: "https://iron-cross-athletics.com/feed/"
-  date_format: "%a, %b %d %I:%M %p"
-  show_topn: 1

@@ -48,25 +48,6 @@ frontend:
 # Enable wake on lan
 wake_on_lan:
 
-# Enable proximity sensors for all iphones
-proximity:
-  home_tom:
-    devices:
-      - device_tracker.toms_iphone
-    tolerance: 50
-    unit_of_measurement: mi
-  home_jami:
-    devices:
-      - device_tracker.jamis_iphone
-    tolerance: 50
-    unit_of_measurement: mi
-  home:
-    devices:
-      - device_tracker.toms_iphone
-      - device_tracker.jamis_iphone
-    tolerance: 50
-    unit_of_measurement: mi
-
 # Recorder
 recorder:
   # MariaDB
@@ -94,8 +75,6 @@ recorder:
       - binary_sensor.*_firmware_update
       - button.*_update_firmware
     entities:
-      # Feed Parser
-      - sensor.iron_cross_athletics
       # Sun
       - sun.sun
 
@@ -104,7 +83,7 @@ automation: !include automations.yaml
 input_boolean: !include input_boolean.yaml
 notify: !include notify.yaml
 script: !include scripts.yaml
-sensor: !include sensors.yaml
+#sensor: !include sensors.yaml
 switch: !include switch.yaml
 template: !include_dir_list templates/
 weather: !include weather.yaml

@@ -16,5 +16,6 @@
   cloud_coverage_template: "{{ state_attr('weather.home_hourly', 'cloud_coverage') }}"
   visibility_unit: mi
   precipitation_unit: in
-  forecast_template: "{{ state_attr('weather.home_hourly', 'forecast') }}"
+  forecast_hourly_template: "{{ state_attr('weather.home_hourly', 'forecast') }}"
+  forecast_daily_template: "{{ state_attr('weather.home', 'forecast') }}"
   attribution_template: "Provided by Thomas Fili of the Green Meadow Weather Station"

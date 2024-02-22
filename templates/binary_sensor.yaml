@@ -9,7 +9,7 @@ binary_sensor:
   # On if the alarm isn't set and we are 10 miles from home
   - unique_id: alarm_not_set
     state: >-
-      {{ states("proximity.home")|int > 10 and is_state("alarm_control_panel.abode_alarm", "disarmed") }}
+      {{ states("sensor.home_proximity_nearest_distance")|int > 52800 and is_state("alarm_control_panel.abode_alarm", "disarmed") }}
     attributes:
       friendly_name: "Alarm"
 

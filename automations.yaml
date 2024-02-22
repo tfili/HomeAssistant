@@ -4,22 +4,19 @@
     from home.
   trigger:
   - platform: numeric_state
-    entity_id: proximity.home
-    above: 10
+    entity_id: sensor.home_proximity_nearest_distance
+    above: 52800
   - platform: state
-    entity_id:
-    - proximity.home
-    attribute: dir_of_travel
+    entity_id: sensor.home_proximity_nearest_direction_of_travel
   condition:
   - condition: not
     conditions:
     - condition: state
-      entity_id: proximity.home
-      attribute: dir_of_travel
+      entity_id: sensor.home_proximity_nearest_direction_of_travel
       state: towards
   - condition: numeric_state
-    entity_id: proximity.home
-    above: 10
+    entity_id: sensor.home_proximity_nearest_distance
+    above: 52800
   - condition: or
     conditions:
     - condition: state
@@ -52,22 +49,19 @@
     from home.
   trigger:
   - platform: numeric_state
-    entity_id: proximity.home
-    below: 10
+    entity_id: sensor.home_proximity_nearest_distance
+    below: 52800
   - platform: state
-    entity_id:
-    - proximity.home
-    attribute: dir_of_travel
+    entity_id: sensor.home_proximity_nearest_direction_of_travel
     to: towards
   condition:
   - condition: numeric_state
-    entity_id: proximity.home
-    below: 10
+    entity_id: sensor.home_proximity_nearest_distance
+    below: 52800
   - condition: not
     conditions:
     - condition: state
-      entity_id: proximity.home
-      attribute: dir_of_travel
+      entity_id: sensor.home_proximity_nearest_direction_of_travel
       state: away_from
   - condition: or
     conditions:
@@ -336,17 +330,17 @@
       model: '{{ trigger.payload_json.model }}'
       mode: '{{ trigger.payload_json.mode | default }}'
       host: '{{ trigger.payload_json.ip }}'
-      shellyswitch25-3C6105E4C230:
+      basement-hallway-main-lights:
         relay-0: light
         relay-1: light
         force_update_sensors: true
-      shelly1-E8DB84ACA160:
+      basement-gym-lights:
         relay-0: light
         force_update_sensors: true
-      shelly1-3C6105E3A4C2:
+      basement-stairs:
         relay-0: light
         force_update_sensors: true
-      shelly1-3C6105E3A7C9:
+      basement-rear-lights:
         relay-0: light
         force_update_sensors: true
   mode: queued
@@ -363,8 +357,8 @@
       device_info_payload: '{{ {''id'': 1, ''src'':''shellies_discovery'', ''method'':''Shelly.GetConfig''}
         | to_json }}'
       device_ids:
-      - shellies/shellyplugus-083af2019ca8
-      - shellies/shellypluswdus-b48a0a1c700c
+      - shellies/lomi-plug
+      - shellies/basement-wine-rack-dimmer
   - repeat:
       for_each: '{{ device_ids }}'
       sequence:
@@ -403,7 +397,10 @@
     entity_id: binary_sensor.dryer_dry_completed
     from: 'off'
     to: 'on'
-  condition: []
+  condition:
+  - condition: time
+    after: 08:00:00
+    before: '20:00:00'
   action:
   - service: notify.alexa_media
     data:
@@ -516,7 +513,8 @@
   - platform: state
     entity_id:
     - vacuum.basement_roomba
-    - vacuum.greatroom_roomba
+    - vacuum.downstairs_roomba
+    - vacuum.braava_jet
     for:
       hours: 0
       minutes: 0
@@ -565,7 +563,8 @@
   - platform: state
     entity_id:
     - vacuum.basement_roomba
-    - vacuum.greatroom_roomba
+    - vacuum.downstairs_roomba
+    - vacuum.braava_jet
     attribute: status
     from: 'false'
     to: 'true'
@@ -741,11 +740,11 @@
   trigger:
   - platform: zone
     entity_id: person.tom_fili
-    zone: zone.auto_home
+    zone: zone.home
     event: enter
   - platform: zone
     entity_id: person.jami_fili
-    zone: zone.auto_home
+    zone: zone.home
     event: enter
   condition:
   - condition: not
@@ -976,7 +975,7 @@
       - light.kitchen_dimmer
   - service: script.start_vacuum_or_mop
     data:
-      entity_id: vacuum.greatroom_roomba
+      entity_id: vacuum.downstairs_roomba
     response_variable: vacuum_success
   - if:
     - condition: template
@@ -984,13 +983,15 @@
         }}'
     then:
     - service: script.start_vacuum_or_mop
-      data: {}
-      enabled: false
+      data:
+        entity_id: vacuum.braava_jet
+      enabled: true
       response_variable: final_success
     - variables:
         final_success: '{{ vacuum_success }}'
         comment: This is temporary until the mop is working. Enable the above and
           delete this.
+      enabled: false
     else:
     - variables:
         final_success: '{{ vacuum_success }}'
@@ -1128,7 +1129,7 @@
     allowed_methods:
     - POST
     - PUT
-    local_only: true
+    local_only: false
     webhook_id: q4fryupTsZLO8QE5MIyp6ekXzohLkjmb
   condition: []
   action:
