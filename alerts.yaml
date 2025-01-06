@@ -135,10 +135,10 @@ garage_doors:
 mail_delivered:
   name: Mail Delivered
   message: "Mail has been delivered"
-  done_message: "Mail has been retrieved"
+  #done_message: "Mail has been retrieved"
   entity_id: input_boolean.mail_delivered
   state: "on"
-  repeat: 60
+  repeat: 1440
   can_acknowledge: true
   skip_first: false
   data:
@@ -154,7 +154,6 @@ mail_delivered:
       entity_id: alert.mail_delivered
   notifiers:
     - mobile_app_toms_iphone
-    - mobile_app_jamis_iphone
 
 alarm_not_set:
   name: Alarm Not Set

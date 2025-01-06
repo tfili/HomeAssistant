@@ -2,13 +2,13 @@
   alias: 'Proximity: Set Thermostats to Eco'
   description: Set thermostats to Eco if more than 20 miles away and traveling away
     from home.
-  trigger:
-  - platform: numeric_state
-    entity_id: sensor.home_proximity_nearest_distance
+  triggers:
+  - entity_id: sensor.home_proximity_nearest_distance
     above: 52800
-  - platform: state
-    entity_id: sensor.home_proximity_nearest_direction_of_travel
-  condition:
+    trigger: numeric_state
+  - entity_id: sensor.home_proximity_nearest_direction_of_travel
+    trigger: state
+  conditions:
   - condition: not
     conditions:
     - condition: state
@@ -27,7 +27,7 @@
       entity_id: climate.upstairs
       attribute: preset_mode
       state: none
-  action:
+  actions:
   - device_id: e74fe3309cf9ebdff5b8de50dc762cd2
     domain: climate
     entity_id: 9c57958aa4086eebc3c1c663f1dcfe64
@@ -38,23 +38,23 @@
     entity_id: 0356f8a2d4516c53d1077d9dd81fea49
     type: set_preset_mode
     preset_mode: eco
-  - service: notify.mobile_app_toms_iphone
-    data:
+  - data:
       message: Thermostats have been set Eco mode
       title: Leaving Home
+    action: notify.mobile_app_toms_iphone
   mode: single
 - id: '1606676792936'
   alias: 'Proximity: Set Thermostats to Normal'
   description: Set thermostats to Eco if more than 20 miles away and traveling towards
     from home.
-  trigger:
-  - platform: numeric_state
-    entity_id: sensor.home_proximity_nearest_distance
+  triggers:
+  - entity_id: sensor.home_proximity_nearest_distance
     below: 52800
-  - platform: state
-    entity_id: sensor.home_proximity_nearest_direction_of_travel
+    trigger: numeric_state
+  - entity_id: sensor.home_proximity_nearest_direction_of_travel
     to: towards
-  condition:
+    trigger: state
+  conditions:
   - condition: numeric_state
     entity_id: sensor.home_proximity_nearest_distance
     below: 52800
@@ -73,7 +73,7 @@
       entity_id: climate.upstairs
       attribute: preset_mode
       state: eco
-  action:
+  actions:
   - device_id: e74fe3309cf9ebdff5b8de50dc762cd2
     domain: climate
     entity_id: 9c57958aa4086eebc3c1c663f1dcfe64
@@ -84,17 +84,16 @@
     entity_id: 0356f8a2d4516c53d1077d9dd81fea49
     type: set_preset_mode
     preset_mode: none
-  - service: notify.mobile_app_toms_iphone
-    data:
+  - data:
       message: Thermostats have been set Normal mode
       title: Going Home
+    action: notify.mobile_app_toms_iphone
   mode: single
 - id: '1607443386474'
   alias: Reset Motion Sensors
   description: ''
-  trigger:
-  - platform: state
-    to: 'on'
+  triggers:
+  - to: 'on'
     for:
       hours: 0
       minutes: 5
@@ -105,54 +104,60 @@
     - binary_sensor.kitchen_motion_sensor
     - binary_sensor.basement_motion_sensor
     id: motion_detected
-  - platform: homeassistant
-    event: start
+    trigger: state
+  - event: start
     id: ha_start
-  condition: []
-  action:
+    trigger: homeassistant
+  conditions: []
+  actions:
   - if:
     - condition: trigger
       id:
       - motion_detected
     then:
-    - service: python_script.hass_entities
-      data:
+    - data:
         action: set_state
         entity_id: '{{ trigger.entity_id }}'
         state: 'off'
+      action: python_script.hass_entities
     else:
     - delay: 00:01:00
-    - service: python_script.hass_entities
-      data:
+    - data:
         action: set_state
         entity_id: binary_sensor.front_door_motion_sensor
         state: 'off'
-    - service: python_script.hass_entities
-      data:
+      action: python_script.hass_entities
+    - data:
         action: set_state
         entity_id: binary_sensor.great_room_motion_sensor
         state: 'off'
-    - service: python_script.hass_entities
-      data:
+      action: python_script.hass_entities
+    - data:
         action: set_state
         entity_id: binary_sensor.kitchen_motion_sensor
         state: 'off'
-    - service: python_script.hass_entities
-      data:
+      action: python_script.hass_entities
+    - data:
         action: set_state
         entity_id: binary_sensor.basement_motion_sensor
         state: 'off'
+      action: python_script.hass_entities
   mode: queued
   max: 10
 - id: '1607999948442'
   alias: Kitchen Motion Lights
   description: ''
-  trigger:
-  - platform: state
-    from: 'off'
+  triggers:
+  - from: 'off'
     to: 'on'
-    entity_id: binary_sensor.basement_door_motion_sensor_occupancy
-  condition:
+    entity_id:
+    - binary_sensor.basement_door_motion_sensor_occupancy
+    trigger: state
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 0
+  conditions:
   - condition: or
     conditions:
     - condition: state
@@ -162,168 +167,167 @@
       entity_id: automation.kitchen_motion_lights
       attribute: current
       above: '0'
-  action:
-  - service: light.turn_on
-    data: {}
+  actions:
+  - data: {}
     entity_id: light.cabinet
+    action: light.turn_on
   - wait_for_trigger:
-    - platform: state
-      from: 'on'
+    - from: 'on'
       to: 'off'
       entity_id: binary_sensor.basement_door_motion_sensor_occupancy
+      trigger: state
   - delay: 00:02:00
-  - service: light.turn_off
-    data: {}
+  - data: {}
     entity_id: light.cabinet
+    action: light.turn_off
   mode: restart
 - id: 5338138641074509ac3d115c3132d868
   alias: Set Default Theme
   description: ''
-  trigger:
+  triggers:
   - event: start
-    platform: homeassistant
-  condition: []
-  action:
+    trigger: homeassistant
+  conditions: []
+  actions:
   - data:
       name: Google Light and Dark Theme
       mode: dark
-    service: frontend.set_theme
+    action: frontend.set_theme
 - id: '1617642446660'
   alias: Set Nest Motion Entities
   description: ''
-  trigger:
-  - platform: device
-    device_id: 17221139504c939b70008ccefdd0be45
+  triggers:
+  - device_id: 17221139504c939b70008ccefdd0be45
     domain: nest
     type: camera_motion
     variables:
       motion_entity: input_boolean.motion_abels_room
-  - platform: device
-    device_id: 071987be0fcc0f04e764fa87ef7cfa08
+    trigger: device
+  - device_id: 071987be0fcc0f04e764fa87ef7cfa08
     domain: nest
     type: camera_motion
     variables:
       motion_entity: input_boolean.motion_front_door
-  - platform: device
-    device_id: 1147fbae5177cd1c188b10b78454dbb7
+    trigger: device
+  - device_id: 1147fbae5177cd1c188b10b78454dbb7
     domain: nest
     type: camera_motion
     variables:
       motion_entity: input_boolean.motion_reeves_room
-  - platform: device
-    device_id: a15c183382243d7f47e4dc6a3433ed8c
+    trigger: device
+  - device_id: a15c183382243d7f47e4dc6a3433ed8c
     domain: nest
     type: camera_motion
     variables:
       motion_entity: input_boolean.motion_morning_room
-  - platform: device
-    device_id: 0285fc92583747d2a75e96f29502995f
+    trigger: device
+  - device_id: 0285fc92583747d2a75e96f29502995f
     domain: nest
     type: camera_motion
     variables:
       motion_entity: input_boolean.motion_ellis_room
-  - platform: device
-    device_id: c0275b210992e5c0d0ac22bbb39308e5
+    trigger: device
+  - device_id: c0275b210992e5c0d0ac22bbb39308e5
     domain: nest
     type: camera_motion
     variables:
       motion_entity: input_boolean.motion_basement
-  condition: []
-  action:
-  - service: input_boolean.turn_on
-    data:
+    trigger: device
+  conditions: []
+  actions:
+  - data:
       entity_id: '{{ motion_entity }}'
+    action: input_boolean.turn_on
   - delay:
       hours: 0
       minutes: 0
       seconds: 20
       milliseconds: 0
-  - service: input_boolean.turn_off
-    data:
+  - data:
       entity_id: '{{ motion_entity }}'
+    action: input_boolean.turn_off
   mode: queued
   max: 10
 - id: '1618875855459'
   alias: 'Tag scan: Toggle Mudroom Lock'
   description: ''
-  trigger:
-  - platform: event
-    event_type: tag_scanned
+  triggers:
+  - event_type: tag_scanned
     context:
       user_id:
       - 7e537ada4de44808a33c00cbf425c4e0
       - 9c546e5ab33f47fcbd2103594668aaaf
     event_data:
       tag_id: a8c94b61-8c2e-4c4e-83ac-12320c6a94ab
-  condition: []
-  action:
-  - service: "{% if is_state('lock.mud_room_lock', 'locked') %}\n  lock.unlock\n{%
-      else %}\n  lock.lock\n{% endif %}\n"
-    target:
+    trigger: event
+  conditions: []
+  actions:
+  - target:
       entity_id: lock.mud_room_lock
     data: {}
+    action: "{% if is_state('lock.mud_room_lock', 'locked') %}\n  lock.unlock\n{%
+      else %}\n  lock.lock\n{% endif %}\n"
   mode: single
 - id: '1618931661466'
   alias: 'Tag scan: Toggle Left Garage Door'
   description: ''
-  trigger:
-  - platform: event
-    event_type: tag_scanned
+  triggers:
+  - event_type: tag_scanned
     context:
       user_id:
       - 7e537ada4de44808a33c00cbf425c4e0
       - 9c546e5ab33f47fcbd2103594668aaaf
     event_data:
       tag_id: a8e180a9-678e-4725-9257-625425614d2a
-  condition: []
-  action:
-  - service: cover.toggle
-    target:
+    trigger: event
+  conditions: []
+  actions:
+  - target:
       entity_id: cover.left_garage_door
     data: {}
+    action: cover.toggle
   mode: single
 - id: '1618932628621'
   alias: 'Tag scan: Toggle Right Garage Door'
   description: ''
-  trigger:
-  - platform: event
-    event_type: tag_scanned
+  triggers:
+  - event_type: tag_scanned
     context:
       user_id:
       - 7e537ada4de44808a33c00cbf425c4e0
       - 9c546e5ab33f47fcbd2103594668aaaf
     event_data:
       tag_id: 3c9eae60-e72c-45e2-b4bc-8c1a92fc9820
-  condition: []
-  action:
-  - service: cover.toggle
-    data: {}
+    trigger: event
+  conditions: []
+  actions:
+  - data: {}
     target:
       entity_id: cover.right_garage_door
+    action: cover.toggle
   mode: single
 - id: shellies_announce
   alias: Shellies Announce
-  trigger:
-  - platform: homeassistant
-    event: start
-  - platform: time_pattern
-    hours: /1
-  action:
-    service: mqtt.publish
-    data:
+  triggers:
+  - event: start
+    trigger: homeassistant
+  - hours: /1
+    trigger: time_pattern
+  actions:
+  - data:
       topic: shellies/command
       payload: announce
+    action: mqtt.publish
 - id: shellies_discovery
   alias: Shellies Discovery
-  trigger:
-  - platform: mqtt
-    topic: shellies/announce
-  condition:
+  triggers:
+  - topic: shellies/announce
+    trigger: mqtt
+  conditions:
   - condition: template
     value_template: '{{ trigger.payload_json.gen is not defined }}'
-  action:
-  - service: python_script.shellies_discovery
-    data:
+  actions:
+  - data:
       id: '{{ trigger.payload_json.id }}'
       mac: '{{ trigger.payload_json.mac }}'
       fw_ver: '{{ trigger.payload_json.fw_ver }}'
@@ -343,16 +347,17 @@
       basement-rear-lights:
         relay-0: light
         force_update_sensors: true
+    action: python_script.shellies_discovery
   mode: queued
   max: 999
 - id: shellies_announce_gen2
   alias: Shellies Announce Gen2
-  trigger:
-  - platform: homeassistant
-    event: start
-  - platform: time_pattern
-    hours: /1
-  action:
+  triggers:
+  - event: start
+    trigger: homeassistant
+  - hours: /1
+    trigger: time_pattern
+  actions:
   - variables:
       device_info_payload: '{{ {''id'': 1, ''src'':''shellies_discovery'', ''method'':''Shelly.GetConfig''}
         | to_json }}'
@@ -362,70 +367,76 @@
   - repeat:
       for_each: '{{ device_ids }}'
       sequence:
-      - service: mqtt.publish
-        data:
+      - data:
           topic: '{{ repeat.item }}/rpc'
           payload: '{{ device_info_payload }}'
+        action: mqtt.publish
 - id: shellies_discovery_gen2
   alias: Shellies Discovery Gen2
-  mode: queued
-  max: 999
-  trigger:
-  - platform: mqtt
-    topic: shellies_discovery/rpc
-  action:
-  - service: python_script.shellies_discovery_gen2
-    data:
+  triggers:
+  - topic: shellies_discovery/rpc
+    trigger: mqtt
+  actions:
+  - data:
       id: '{{ trigger.payload_json.src }}'
       device_config: '{{ trigger.payload_json.result }}'
+    action: python_script.shellies_discovery_gen2
+  mode: queued
+  max: 999
 - id: '1644036755398'
   alias: 'Wake-on-LAN: Basement Projector'
   description: ''
-  trigger:
-  - platform: webostv.turn_on
-    entity_id: media_player.basement_projector
-  action:
-  - service: wake_on_lan.send_magic_packet
-    data:
+  triggers:
+  - entity_id: media_player.basement_projector
+    trigger: webostv.turn_on
+  actions:
+  - data:
       mac: B0:37:95:01:2B:92
       broadcast_address: 192.168.0.255
+    action: wake_on_lan.send_magic_packet
 - id: '1645034312500'
   alias: Dryer Complete
   description: ''
-  trigger:
-  - platform: state
-    entity_id: binary_sensor.dryer_dry_completed
+  triggers:
+  - entity_id: binary_sensor.dryer_dry_completed
     from: 'off'
     to: 'on'
-  condition:
+    trigger: state
+  conditions:
   - condition: time
     after: 08:00:00
     before: '20:00:00'
-  action:
-  - service: notify.alexa_media
+  actions:
+  - action: google_generative_ai_conversation.generate_content
+    metadata: {}
     data:
-      message: The dryer is done. You better get folding.
+      prompt: The dryer is done but folding needs to be done. Keep it cheeky and under
+        10 words.
+    response_variable: alert_message
+  - data:
       target:
       - media_player.basement_echo
       - media_player.kitchen_echo_show
       - media_player.bedroom_echo
       data:
         type: tts
+      message: '{{alert_message.text}}'
+    action: notify.alexa_media
   mode: single
 - id: '1646407771689'
-  alias: New version availabile
+  alias: New Version Availabile
   description: ''
-  trigger:
-  - platform: state
-    entity_id: update.home_assistant_core_update
+  triggers:
+  - entity_id: update.home_assistant_core_update
     from: 'off'
     to: 'on'
-  - platform: homeassistant
-    event: start
-  - platform: time
-    at: '12:00:00'
-  condition: []
-  action:
+    trigger: state
+  - event: start
+    trigger: homeassistant
+  - at: '12:00:00'
+    trigger: time
+  conditions: []
+  actions:
   - delay:
       hours: 0
       minutes: 1
@@ -434,8 +445,7 @@
   - condition: state
     entity_id: update.home_assistant_core_update
     state: 'on'
-  - service: notify.mobile_app_toms_iphone
-    data:
+  - data:
       title: HA v{{ states('sensor.home_assistant_website') }} is now available
       message: Currently running v{{ states('sensor.current_version') }}
       data:
@@ -447,15 +457,16 @@
         - action: UPDATE
           title: Update Version
           uri: /config/dashboard
+    action: notify.mobile_app_toms_iphone
   mode: single
 - id: '1688434775547'
   alias: Low Battery Notification
   description: ''
-  trigger:
-  - platform: time
-    at: 09:00:00
-  condition: []
-  action:
+  triggers:
+  - at: 09:00:00
+    trigger: time
+  conditions: []
+  actions:
   - variables:
       threshold: 10
       sensors: "{% set result = namespace(sensors=[]) %} {% for state in states.sensor
@@ -468,50 +479,53 @@
         join(', ')}}"
   - condition: template
     value_template: '{{ sensors != '''' }}'
-  - service: notify.mobile_app_toms_iphone
-    data:
+  - data:
       title: Low Battery
       message: '{{sensors}}
 
         '
       data:
         url: /lovelace/battery-alert
+    action: notify.mobile_app_toms_iphone
   mode: single
 - id: '1688667415109'
   alias: Control Blinds with Button
   description: ''
-  trigger:
-  - platform: state
-    entity_id:
-    - sensor.basement_blind_button_action
-  condition: []
-  action:
+  triggers:
+  - domain: mqtt
+    device_id: e14a3977dd0430fb77f0cbeb06145968
+    type: action
+    subtype: open
+    trigger: device
+    id: open_click
+  - domain: mqtt
+    device_id: e14a3977dd0430fb77f0cbeb06145968
+    type: action
+    subtype: close
+    trigger: device
+    id: close_click
+  conditions: []
+  actions:
   - if:
-    - condition: template
-      value_template: '{{ trigger.to_state.state == ''open'' }}
-
-        '
+    - condition: trigger
+      id:
+      - open_click
     then:
-    - service: cover.open_cover
-      data: {}
-      target:
-        device_id: e83194d36344b6a7628d6173595e0447
+    - device_id: e83194d36344b6a7628d6173595e0447
+      domain: cover
+      entity_id: 6dfd1b3018e8a5b21ffe7fe1d114f879
+      type: open
     else:
-    - if:
-      - condition: template
-        value_template: '{{ trigger.to_state.state == ''close'' }}'
-      then:
-      - service: cover.close_cover
-        data: {}
-        target:
-          device_id: e83194d36344b6a7628d6173595e0447
+    - device_id: e83194d36344b6a7628d6173595e0447
+      domain: cover
+      entity_id: 6dfd1b3018e8a5b21ffe7fe1d114f879
+      type: close
   mode: single
 - id: '1688856626822'
   alias: Vacuum/mop status update
   description: ''
-  trigger:
-  - platform: state
-    entity_id:
+  triggers:
+  - entity_id:
     - vacuum.basement_roomba
     - vacuum.downstairs_roomba
     - vacuum.braava_jet
@@ -519,11 +533,12 @@
       hours: 0
       minutes: 0
       seconds: 5
-  condition:
+    trigger: state
+  conditions:
   - condition: template
     value_template: '{{ trigger.from_state.state != trigger.to_state.state and (trigger.to_state.state
       == ''error'' or trigger.to_state.state == ''docked'') }}'
-  action:
+  actions:
   - variables:
       name: '{{ trigger.to_state.name }}'
       status: '{{ trigger.to_state.attributes.status }}'
@@ -538,52 +553,52 @@
         base for {{ name }} is unplugged, so it cannot charge\n  {% else %}\n    {{
         name }} couldn't complete the job ({{ status }})\n  {% endif %}\n{% endif
         %}\n"
-  - service: notify.mobile_app_toms_iphone
-    data:
+  - data:
       title: '{{ name }}'
       message: '{{ message }}'
+    action: notify.mobile_app_toms_iphone
   - if:
     - condition: template
       value_template: '{{ trigger.to_state.state == ''docked'' }}'
     then:
-    - service: input_boolean.turn_off
-      data: {}
+    - data: {}
       target:
         entity_id: '{{ errorEntity }}'
+      action: input_boolean.turn_off
     else:
-    - service: input_boolean.turn_on
-      data: {}
+    - data: {}
       target:
         entity_id: '{{ errorEntity }}'
+      action: input_boolean.turn_on
   mode: single
 - id: '1688913235675'
   alias: Vacuum bin full notification
   description: ''
-  trigger:
-  - platform: state
-    entity_id:
+  triggers:
+  - entity_id:
     - vacuum.basement_roomba
     - vacuum.downstairs_roomba
     - vacuum.braava_jet
     attribute: status
     from: 'false'
     to: 'true'
-  condition: []
-  action:
-  - service: notify.mobile_app_toms_iphone
-    data:
+    trigger: state
+  conditions: []
+  actions:
+  - data:
       message: '{{ trigger.from_state.name }}''s bin is full'
+    action: notify.mobile_app_toms_iphone
   mode: single
 - id: '1689002155415'
   alias: Kitchen Light Remote
   description: ''
-  trigger:
-  - platform: mqtt
-    topic: zigbee2mqtt/Remote/action
-  condition:
+  triggers:
+  - topic: zigbee2mqtt/Remote/action
+    trigger: mqtt
+  conditions:
   - condition: template
     value_template: '{{ ''_press_release'' not in trigger.payload }}'
-  action:
+  actions:
   - variables:
       payload: '{{ trigger.payload }}'
       serviceName: "{% if payload == 'off_press' or payload == 'off_hold_release'
@@ -591,93 +606,92 @@
       serviceData: "{% if payload == 'up_press' or payload == 'up_hold' %}\n  { \"brightness_step_pct\":
         10 }\n{% elif payload == 'down_press' or payload == 'down_hold' %}\n  { \"brightness_step_pct\":
         -10 }\n{% else %}\n  {}\n{% endif %}\n"
-  - service: '{{ serviceName }}'
-    data: '{{ serviceData }}'
+  - data: '{{ serviceData }}'
     target:
       entity_id: light.cabinet
+    action: '{{ serviceName }}'
   mode: queued
   max: 10
 - id: '1689010045910'
   alias: Mail Delivered event handler
   description: ''
-  trigger:
-  - platform: event
-    event_type:
+  triggers:
+  - event_type:
     - mobile_app_notification_action
     - ios.action_fired
-  condition:
+    trigger: event
+  conditions:
   - condition: template
     value_template: '{{ trigger.event.data.action == ''MAIL_RETRIEVED'' or trigger.event.data.actionName
       == ''MAIL_RETRIEVED'' }}'
-  action:
-  - service: input_boolean.turn_off
-    data: {}
+  actions:
+  - data: {}
     target:
       entity_id: input_boolean.mail_delivered
+    action: input_boolean.turn_off
   mode: single
 - id: '1689010572552'
   alias: Dismiss Alert event handler
   description: ''
-  trigger:
-  - platform: event
-    event_type:
+  triggers:
+  - event_type:
     - mobile_app_notification_action
     - ios.action_fired
-  condition:
+    trigger: event
+  conditions:
   - condition: template
     value_template: '{{ trigger.event.data.action == ''DISMISS_ALERT'' or trigger.event.data.actionName
       == ''DISMISS_ALERT'' }}'
-  action:
-  - service: alert.turn_off
-    data: {}
+  actions:
+  - data: {}
     target:
       entity_id: '{{ trigger.event.action_data.entity_id }}'
+    action: alert.turn_off
   mode: single
 - id: '1689010815681'
   alias: Turn on porch & driveway lights
   description: ''
-  trigger:
-  - platform: sun
-    event: sunset
-    offset: 0
+  triggers:
+  - event: sunset
     id: sunset
-  - platform: sun
-    event: sunrise
+    trigger: sun
+  - event: sunrise
     offset: 0
     id: sunrise
-  condition: []
-  action:
+    trigger: sun
+  conditions: []
+  actions:
   - if:
     - condition: trigger
       id:
       - sunset
     then:
-    - service: light.turn_on
-      data: {}
+    - data: {}
       target:
         entity_id:
         - light.porch_lights
         - light.driveway_lights
+      action: light.turn_on
     else:
-    - service: light.turn_off
-      data: {}
+    - data: {}
       target:
         entity_id:
         - light.porch_lights
         - light.driveway_lights
+      action: light.turn_off
   mode: single
 - id: '1689021667956'
   alias: Door sensor notifications
   description: ''
-  trigger:
-  - platform: state
-    entity_id:
+  triggers:
+  - entity_id:
     - binary_sensor.abels_door_contact
     - binary_sensor.reeves_door_contact
     - binary_sensor.basement_egress_window
     from: 'off'
     to: 'on'
-  condition:
+    trigger: state
+  conditions:
   - condition: or
     conditions:
     - condition: and
@@ -699,149 +713,155 @@
     - condition: template
       value_template: '{{ trigger.entity_id == ''binary_sensor.basement_egress_window''
         }}'
-  action:
+  actions:
   - variables:
       name: '{{ trigger.from_state.name | replace('' contact'', '''') }}'
       cameraEntity: "{% if trigger.entity_id == 'binary_sensor.abels_door_contact'
         %}\n    camera.abels_room\n{% elif trigger.entity_id == 'binary_sensor.reeves_door_contact'
         %}\n  camera.reeves_room\n{% else %}\n  camera.basement\n{% endif %}\n"
-  - service: notify.everyone
+  - action: google_generative_ai_conversation.generate_content
+    metadata: {}
     data:
-      message: '{{ name }} was opened'
+      prompt: A door was opened. Reword this in a funny way. Keep it to 12 words and
+        family friendly.
+    response_variable: message_prompt
+  - data:
+      message: '{{ name }} was opened. {{ message_prompt.text }}'
       data:
         entity_id: '{{ cameraEntity }}'
-  - service: notify.alexa_media
-    data:
-      message: '{{ name }} was opened'
+    action: notify.everyone
+  - data:
+      message: '{{ name }} was opened. {{ message_prompt.text }}'
       target:
       - media_player.basement_echo
       - media_player.bedroom_echo
       - media_player.kitchen_echo_show
+    action: notify.alexa_media
   mode: single
 - id: '1689023119740'
-  alias: Mail delivered
+  alias: Mail Delivered
   description: ''
-  trigger:
-  - platform: state
-    entity_id:
+  triggers:
+  - entity_id:
     - binary_sensor.mailbox_contact
     from: 'off'
     to: 'on'
-  condition: []
-  action:
-  - service: input_boolean.turn_on
-    data: {}
+    trigger: state
+  conditions: []
+  actions:
+  - data: {}
     target:
       entity_id: input_boolean.mail_delivered
+    action: input_boolean.turn_on
   mode: single
 - id: '1689023382014'
   alias: Auto Home
   description: ''
-  trigger:
-  - platform: zone
-    entity_id: person.tom_fili
+  triggers:
+  - entity_id: person.tom_fili
     zone: zone.home
     event: enter
-  - platform: zone
-    entity_id: person.jami_fili
+    trigger: zone
+  - entity_id: person.jami_fili
     zone: zone.home
     event: enter
-  condition:
+    trigger: zone
+  conditions:
   - condition: not
     conditions:
     - condition: state
       entity_id: alarm_control_panel.wrapped_alarm
       state: disarmed
-  action:
-  - service: alarm_control_panel.alarm_disarm
-    data: {}
+  actions:
+  - data: {}
     target:
       entity_id: alarm_control_panel.wrapped_alarm
+    action: alarm_control_panel.alarm_disarm
   mode: single
 - id: '1689027625322'
   alias: 'Event Handler: Arm Alarm'
   description: ''
-  trigger:
-  - platform: event
-    event_type:
+  triggers:
+  - event_type:
     - mobile_app_notification_action
     - ios.action_fired
-  condition:
+    trigger: event
+  conditions:
   - condition: template
     value_template: '{{ trigger.event.data.action == ''ALARM_ARM'' or trigger.event.data.actionName
       == ''ALARM_ARM'' }}'
-  action:
-  - service: alarm_control_panel.alarm_arm_away
-    data: {}
+  actions:
+  - data: {}
     target:
       entity_id: alarm_control_panel.wrapped_alarm
+    action: alarm_control_panel.alarm_arm_away
   mode: single
 - id: '1689097272905'
   alias: 'Event Handler: Close Garage Doors'
   description: ''
-  trigger:
-  - platform: event
-    event_type:
+  triggers:
+  - event_type:
     - mobile_app_notification_action
     - ios.action_fired
-  condition:
+    trigger: event
+  conditions:
   - condition: template
     value_template: '{{ trigger.event.data.action == ''GARAGE_CLOSE'' or trigger.event.data.actionName
       == ''GARAGE_CLOSE'' }}'
-  action:
-  - service: script.close_garage_doors
-    data: {}
+  actions:
+  - data: {}
+    action: script.close_garage_doors
   mode: single
 - id: '1689179755919'
   alias: Shutdown HA when running out of battery
   description: ''
-  trigger:
-  - platform: numeric_state
-    entity_id: sensor.apc_battery_charge
+  triggers:
+  - entity_id:
+    - sensor.apc_battery_charge
     below: 10
-  condition:
+    trigger: numeric_state
+  conditions:
   - condition: template
     value_template: '{{ ''DISCHRG'' in sensor.apc_status_data }}'
-  action:
-  - service: hassio.host_shutdown
-    data: {}
+  actions:
+  - data: {}
+    action: hassio.host_shutdown
   mode: single
 - id: '1689186557347'
-  alias: Alarm disarmed
+  alias: Alarm Disarmed
   description: ''
-  trigger:
-  - platform: state
-    entity_id:
+  triggers:
+  - entity_id:
     - alarm_control_panel.wrapped_alarm
     to: disarmed
     for:
       hours: 0
       minutes: 0
       seconds: 0
-  condition:
+    trigger: state
+  conditions:
   - condition: template
     value_template: '{{ trigger.from_state is not none and trigger.from_state.state
       != ''unavailable'' }}'
-  action:
+  actions:
   - parallel:
-    - service: lock.unlock
-      data: {}
+    - data: {}
       target:
         entity_id: lock.mud_room_lock
+      action: lock.unlock
     - if:
       - condition: state
         entity_id: sun.sun
         state: below_horizon
       then:
-      - service: light.turn_on
-        data:
+      - data:
           brightness_pct: 50
         target:
           entity_id:
           - light.cabinet
           - light.kitchen_dimmer
-    - service: notify.everyone
-      data:
+        action: light.turn_on
+    - data:
         title: Alarm State Changed
         message: Disarmed
         data:
@@ -855,41 +875,42 @@
           - identifier: NOTHING
             title: Nothing
             authenticationRequired: false
+      action: notify.everyone
   mode: single
 - id: '1689187420027'
   alias: 'Wake-on-LAN: Greatroom TV'
   description: ''
-  trigger:
-  - platform: samsungtv.turn_on
-    entity_id: media_player.greatroom_tv
-  condition: []
-  action:
-  - service: wake_on_lan.send_magic_packet
-    data:
+  triggers:
+  - entity_id: media_player.greatroom_tv
+    trigger: samsungtv.turn_on
+  conditions: []
+  actions:
+  - data:
       broadcast_port: 9
       mac: 10:2B:41:89:E8:54
       broadcast_address: 192.168.0.255
+    action: wake_on_lan.send_magic_packet
   mode: single
 - id: '1689189186005'
-  alias: Alarm armed
+  alias: Alarm Armed
   description: ''
-  trigger:
-  - platform: state
-    entity_id:
+  triggers:
+  - entity_id:
     - alarm_control_panel.wrapped_alarm
     to: armed_away
-  - platform: state
-    entity_id:
+    trigger: state
+  - entity_id:
     - alarm_control_panel.wrapped_alarm
     to: armed_home
-  - platform: event
-    event_type: alarm_tasks_no_arm
-  condition:
+    trigger: state
+  - event_type: alarm_tasks_no_arm
+    trigger: event
+  conditions:
   - condition: template
     value_template: '{{ trigger.platform == ''event'' or (trigger.platform == ''state''
       and trigger.from_state is not none and trigger.from_state.state != ''unavailable'')
       }}'
-  action:
+  actions:
   - variables:
       title: "{% if trigger.platform == 'event' %}\n  Alarm Actions\n{% else %}\n
         \ Alarm State Changed\n{% endif %}\n"
@@ -897,14 +918,13 @@
         else %}\n  {{ trigger.to_state.state | replace('armed_', '') | title }}\n{%
         endif %}\n"
   - parallel:
-    - service: lock.lock
-      data: {}
+    - data: {}
       target:
         entity_id: lock.mud_room_lock
-    - service: script.close_garage_doors
-      data: {}
-    - service: notify.everyone
-      data:
+      action: lock.lock
+    - data: {}
+      action: script.close_garage_doors
+    - data:
         title: '{{ title }}'
         message: '{{ message }}'
         data:
@@ -918,34 +938,34 @@
           - identifier: NOTHING
             title: Nothing
             authenticationRequired: false
+      action: notify.everyone
     - if:
       - condition: template
         value_template: '{{ trigger.platform == ''event'' or (trigger.platform ==
           ''state'' and trigger.to_state.state == ''armed_away'') }}'
       then:
       - parallel:
-        - service: light.turn_off
-          data: {}
+        - data: {}
           target:
             entity_id:
             - light.basement_lights
             - light.kitchen_dimmer
             - light.cabinet
-        - service: remote.send_command
-          data:
+          action: light.turn_off
+        - data:
             num_repeats: 1
             delay_secs: 0.4
             hold_secs: 0
             command: KEY_HOME
           target:
             entity_id: remote.greatroom_tv
+          action: remote.send_command
       - delay:
           hours: 0
           minutes: 0
           seconds: 1
           milliseconds: 0
-      - service: media_player.turn_off
-        data: {}
+      - data: {}
         target:
           entity_id:
           - media_player.bar_tv
@@ -953,40 +973,41 @@
           - media_player.gym_tv
           - media_player.office_tv
           - media_player.greatroom_tv
+        action: media_player.turn_off
   mode: single
 - id: '1689552243582'
   alias: 'Event Handler: Vacuum/Mop'
   description: ''
-  trigger:
-  - platform: event
-    event_type:
+  triggers:
+  - event_type:
     - mobile_app_notification_action
-  condition:
+    trigger: event
+  conditions:
   - condition: template
     value_template: '{{ trigger.event.data.action == ''VACUUM_AND_MOP'' or trigger.event.data.action
       == ''VACUUM'' }}'
-  action:
-  - service: light.turn_on
-    data:
+  actions:
+  - data:
       brightness_pct: 50
     target:
       entity_id:
       - light.cabinet
       - light.kitchen_dimmer
-  - service: script.start_vacuum_or_mop
-    data:
+    action: light.turn_on
+  - data:
       entity_id: vacuum.downstairs_roomba
     response_variable: vacuum_success
+    action: script.start_vacuum_or_mop
   - if:
     - condition: template
       value_template: '{{ vacuum_success and  trigger.event.data.action == ''VACUUM_AND_MOP''
         }}'
     then:
-    - service: script.start_vacuum_or_mop
-      data:
+    - data:
         entity_id: vacuum.braava_jet
       enabled: true
       response_variable: final_success
+      action: script.start_vacuum_or_mop
     - variables:
         final_success: '{{ vacuum_success }}'
         comment: This is temporary until the mop is working. Enable the above and
@@ -1000,67 +1021,107 @@
       minutes: 10
       seconds: 0
       milliseconds: 0
-  - service: light.turn_off
-    data: {}
+  - data: {}
     target:
       entity_id:
       - light.cabinet
       - light.kitchen_dimmer
+    action: light.turn_off
   mode: single
 - id: '1689557717000'
   alias: Doorbell
   description: ''
-  trigger:
-  - platform: event
-    event_type: nest_event
-  condition:
+  triggers:
+  - event_type: nest_event
+    trigger: event
+  conditions:
   - condition: template
     value_template: '{{ trigger.event.data.device_id == ''071987be0fcc0f04e764fa87ef7cfa08''
       and (trigger.event.data.type == ''doorbell_chime'' or trigger.event.data.type
       == ''camera_person'') }}'
-  action:
+  actions:
   - variables:
       light_state: '{{ states(''light.cabinet'') }}'
+      snapshot_filename: '{{ now().strftime("%Y-%m-%dT%H:%M:%S.%f") }}.jpg
+
+        '
+      snapshot_localpath: /media/tmp/automations/doorbell/{{ snapshot_filename }}
+      snapshot_mediapath: /media/local/tmp/automations/doorbell/{{ snapshot_filename
+        }}
+  - action: pyscript.safe_snapshot
+    metadata: {}
+    data:
+      filename: '{{ snapshot_localpath }}'
+    target:
+      entity_id: camera.front_door
+    response_variable: snapshot_output
+  - action: google_generative_ai_conversation.generate_content
+    metadata: {}
+    data:
+      image_filename: "{% if snapshot_output[\"result\"] %}\n  {{ snapshot_localpath
+        }}\n{% else %}\n  null\n{% endif %}\n"
+      prompt: If you see a person or package in the picture, describe it. Otherwise
+        just say there is something at the front door.
+    response_variable: alert_message
   - parallel:
-    - service: notify.alexa_media
-      data:
-        target:
-        - media_player.basement_echo
-        - media_player.bedroom_echo
-        - media_player.kitchen_echo_show
-        data:
-          type: tts
-        message: '"Someone is at the front door"'
-    - service: media_player.play_media
-      data:
-        media_content_id: Show front door
-        media_content_type: custom
-      target:
-        entity_id: media_player.kitchen_echo_show
     - if: []
       then:
-      - service: tts.cloud_say
+      - data:
+          target:
+          - media_player.basement_echo
+          - media_player.bedroom_echo
+          - media_player.kitchen_echo_show
+          data:
+            type: tts
+          message: '{{ alert_message.text }}'
+        action: notify.alexa_media
+      - data:
+          media_content_id: Show front door
+          media_content_type: custom
+        target:
+          entity_id: media_player.kitchen_echo_show
+        action: media_player.play_media
+        enabled: false
+      - action: media_player.play_media
+        metadata: {}
         data:
+          media_content_type: image/jpeg
+          media_content_id: '{{ snapshot_mediapath }}'
+        target:
+          device_id: b34fd4cc78ba62a9d84134e6605c7104
+    - if: []
+      then:
+      - data:
           cache: true
           entity_id: media_player.office_display
-          message: Someone is at the front door
+          message: '{{ alert_message.text }}'
+        action: tts.cloud_say
       - wait_for_trigger:
-        - platform: state
-          entity_id:
+        - entity_id:
           - media_player.office_display
           to:
           - 'off'
           - idle
+          trigger: state
         timeout:
           hours: 0
           minutes: 0
           seconds: 5
           milliseconds: 0
-      - service: camera.play_stream
-        data:
+        enabled: true
+      - data:
           media_player: media_player.office_display
         target:
           entity_id: camera.front_door
+        action: camera.play_stream
+        enabled: false
+      - action: media_player.play_media
+        metadata: {}
+        data:
+          media_content_type: image/jpeg
+          media_content_id: '{{ snapshot_mediapath }}'
+        target:
+          device_id: c2685da3baade91935397f4ed4c077b5
     - if: []
       then:
       - if:
@@ -1068,10 +1129,10 @@
           entity_id: light.cabinet
           state: 'off'
         then:
-        - service: light.turn_on
-          data: {}
+        - data: {}
           target:
             entity_id: light.cabinet
+          action: light.turn_on
         - delay:
             hours: 0
             minutes: 0
@@ -1080,10 +1141,9 @@
       - variables:
           brightness: '{{ state_attr(''light.cabinet'', ''brightness'') }}'
           color:
-          - '{{ state_attr(''light.cabinet'', ''color'').x }}'
-          - '{{ state_attr(''light.cabinet'', ''color'').y }}'
-      - service: light.turn_on
-        data:
+          - '{{ state_attr(''light.cabinet'', ''xy_color'')[0] }}'
+          - '{{ state_attr(''light.cabinet'', ''xy_color'')[1] }}'
+      - data:
           rgb_color:
           - 247
           - 2
@@ -1091,17 +1151,18 @@
           brightness: 255
         target:
           entity_id: light.cabinet
+        action: light.turn_on
       - delay:
           hours: 0
           minutes: 0
           seconds: 5
           milliseconds: 0
-      - service: light.turn_on
-        data:
+      - data:
           xy_color: '{{ color }}'
           brightness: '{{ brightness }}'
         target:
           entity_id: light.cabinet
+        action: light.turn_on
       - if:
         - condition: template
           value_template: '{{ light_state == ''off'' }}'
@@ -1111,28 +1172,36 @@
             minutes: 0
             seconds: 2
             milliseconds: 0
-        - service: light.turn_off
-          data: {}
+        - data: {}
           target:
             entity_id: light.cabinet
+          action: light.turn_off
+    - action: notify.everyone
+      metadata: {}
+      data:
+        title: Front Door
+        message: '{{ alert_message.text }}'
+        data:
+          image: "{% if snapshot_output[\"result\"] %}\n  {{ snapshot_mediapath }}\n{%
+            else %}\n  null\n{% endif %}\n"
   mode: single
 - id: '1689561875523'
   alias: Cesium Meeting
   description: ''
-  trigger:
-  - platform: calendar
-    event: start
+  triggers:
+  - event: start
     offset: -0:1:0
     entity_id: calendar.tom_cesium_com
     id: calendar_meeting
-  - platform: webhook
-    allowed_methods:
+    trigger: calendar
+  - allowed_methods:
     - POST
     - PUT
     local_only: false
     webhook_id: q4fryupTsZLO8QE5MIyp6ekXzohLkjmb
-  condition: []
-  action:
+    trigger: webhook
+  conditions: []
+  actions:
   - parallel:
     - if:
       - condition: state
@@ -1141,46 +1210,47 @@
         - playing
         - unavailable
       then:
-      - service: media_player.media_pause
-        data: {}
+      - data: {}
         target:
           entity_id: media_player.office_tv
+        action: media_player.media_pause
     - if:
       - condition: trigger
         id:
         - calendar_meeting
       then:
-      - service: tts.cloud_say
-        data:
+      - data:
           cache: false
           entity_id: media_player.office_display
           message: '{{ trigger.calendar_event.summary }}'
+        action: tts.cloud_say
   mode: single
 - id: '1689562922595'
   alias: Office
   description: ''
-  trigger:
-  - platform: time
-    at: 07:00:00
+  triggers:
+  - at: 07:00:00
     id: start_work
-  - platform: time
-    at: '18:00:00'
+    trigger: time
+  - at: '18:00:00'
     id: end_work
-  - platform: state
-    entity_id:
+    trigger: time
+  - entity_id:
     - binary_sensor.office_motion_sensor_occupancy
     to: 'on'
     id: office_motion
-  - platform: numeric_state
-    entity_id: sensor.office_motion_sensor_illuminance_lux
+    trigger: state
+  - entity_id:
+    - sensor.office_motion_sensor_illuminance
     below: 25
     id: lux_below_25
-  - platform: numeric_state
-    entity_id: sensor.office_motion_sensor_illuminance_lux
+    trigger: numeric_state
+  - entity_id:
+    - sensor.office_motion_sensor_illuminance
     above: 40
     id: lux_above_40
-  - platform: state
-    entity_id:
+    trigger: numeric_state
+  - entity_id:
     - binary_sensor.office_motion_sensor_occupancy
     to: 'off'
     for:
@@ -1188,17 +1258,18 @@
       minutes: 30
       seconds: 0
     id: office_clear_for_30
-  - platform: state
-    entity_id:
+    trigger: state
+  - entity_id:
     - sensor.office_motion_sensor_temperature
     id: temp_change
-  - platform: state
-    entity_id:
+    trigger: state
+  - entity_id:
     - alarm_control_panel.wrapped_alarm
     to: armed_away
     id: alarm_away
-  condition: []
-  action:
+    trigger: state
+  conditions: []
+  actions:
   - variables:
       is_workday: '{{ now().weekday() < 5 and now().hour > 7 and now().hour < 18 }}'
   - if:
@@ -1209,15 +1280,15 @@
       entity_id: light.office_ceiling_fan
       state: 'on'
     then:
-    - service: light.turn_off
-      data: {}
+    - data: {}
       target:
         entity_id: light.office_ceiling_fan
-    - service: notify.mobile_app_toms_iphone
-      data:
+      action: light.turn_off
+    - data:
         title: Turn off light
         message: Lux {{ trigger.to_state.state }}
       enabled: false
+      action: notify.mobile_app_toms_iphone
   - if:
     - condition: or
       conditions:
@@ -1235,18 +1306,18 @@
           - office_motion
           - start_work
         - condition: numeric_state
-          entity_id: sensor.office_motion_sensor_illuminance_lux
+          entity_id: sensor.office_motion_sensor_illuminance
           below: 25
     then:
-    - service: light.turn_on
-      data: {}
+    - data: {}
       target:
         entity_id: light.office_ceiling_fan
-    - service: notify.mobile_app_toms_iphone
-      data:
+      action: light.turn_on
+    - data:
         title: Turn on light
-        message: Lux {{ states(sensor.office_motion_sensor_illuminance_lux) }}
+        message: Lux {{ states(sensor.office_motion_sensor_illuminance) }}
       enabled: false
+      action: notify.mobile_app_toms_iphone
   - if:
     - condition: trigger
       id:
@@ -1270,23 +1341,23 @@
             minutes: 30
             seconds: 0
     then:
-    - service: media_player.turn_off
-      data: {}
+    - data: {}
       target:
         entity_id: media_player.office_tv
-    - service: fan.turn_off
-      data: {}
+      action: media_player.turn_off
+    - data: {}
       target:
         entity_id: fan.office_ceiling_fan
-    - service: light.turn_off
-      data: {}
+      action: fan.turn_off
+    - data: {}
       target:
         entity_id: light.office_ceiling_fan
-    - service: notify.mobile_app_toms_iphone
-      data:
+      action: light.turn_off
+    - data:
         title: Turn off
         message: light & fan
       enabled: false
+      action: notify.mobile_app_toms_iphone
   - if:
     - condition: trigger
       id:
@@ -1314,38 +1385,38 @@
             id:
             - office_motion
         then:
-        - service: fan.set_percentage
-          data:
+        - data:
             percentage: '{{ fan_speed }}'
           target:
             entity_id: fan.office_ceiling_fan
+          action: fan.set_percentage
         else:
-        - service: fan.turn_off
-          data: {}
+        - data: {}
           target:
             entity_id: fan.office_ceiling_fan
-      - service: notify.mobile_app_toms_iphone
-        data:
+          action: fan.turn_off
+      - data:
           title: Fan Speed Update
           message: '{{ fan_speed }} ({{ temp }}°)'
         enabled: false
+        action: notify.mobile_app_toms_iphone
   mode: single
 - id: '1689773551816'
   alias: 'Event Handler: Open Garage Doors'
   description: ''
-  trigger:
-  - platform: event
-    event_type:
+  triggers:
+  - event_type:
     - mobile_app_notification_action
     - ios.action_fired
-  condition:
+    trigger: event
+  conditions:
   - condition: template
     value_template: "{{\n  trigger.event.data.action == 'OPEN_RIGHT_GARAGE_DOOR' or
       trigger.event.data.actionName == 'OPEN_RIGHT_GARAGE_DOOR' or\n  trigger.event.data.action
       == 'OPEN_LEFT_GARAGE_DOOR' or trigger.event.data.actionName == 'OPEN_LEFT_GARAGE_DOOR'
       or\n  trigger.event.data.action == 'OPEN_GARAGE_DOORS' or trigger.event.data.actionName
       == 'OPEN_GARAGE_DOORS'\n}}"
-  action:
+  actions:
   - variables:
       action: "{% if trigger.event.data.action is defined %}\n  {{ trigger.event.data.action
         }}\n{% else %}\n  {{ trigger.event.data.actionName }}\n{% endif %}\n"
@@ -1355,59 +1426,59 @@
         value_template: '{{ action == ''OPEN_RIGHT_GARAGE_DOOR'' or action == ''OPEN_GARAGE_DOORS''
           }}'
       then:
-      - service: cover.open_cover
-        data: {}
+      - data: {}
         target:
           entity_id: cover.wrapped_right_garage
+        action: cover.open_cover
     - if:
       - condition: template
         value_template: '{{ action == ''OPEN_LEFT_GARAGE_DOOR'' or action == ''OPEN_GARAGE_DOORS''
           }}'
       then:
-      - service: cover.open_cover
-        data: {}
+      - data: {}
         target:
           entity_id: cover.wrapped_left_garage
+        action: cover.open_cover
   mode: single
 - id: '1690424019295'
   alias: Abode Test
   description: ''
-  trigger:
-  - platform: event
-    event_type: abode_alarm
+  triggers:
+  - event_type: abode_alarm
     event_data: {}
-  - platform: event
-    event_type: abode_alarm_end
+    trigger: event
+  - event_type: abode_alarm_end
     event_data: {}
-  - platform: event
-    event_type: abode_automation
+    trigger: event
+  - event_type: abode_automation
     event_data: {}
-  - platform: event
-    event_type: abode_panel_fault
+    trigger: event
+  - event_type: abode_panel_fault
     event_data: {}
-  - platform: event
-    event_type: abode_panel_restore
+    trigger: event
+  - event_type: abode_panel_restore
     event_data: {}
-  - platform: event
-    event_type: abode_disarm
+    trigger: event
+  - event_type: abode_disarm
     event_data: {}
-  - platform: event
-    event_type: abode_arm
+    trigger: event
+  - event_type: abode_arm
     event_data: {}
-  - platform: event
-    event_type: abode_arm_fault
+    trigger: event
+  - event_type: abode_arm_fault
     event_data: {}
-  - platform: event
-    event_type: abode_test
+    trigger: event
+  - event_type: abode_test
     event_data: {}
-  - platform: event
-    event_type: abode_capture
+    trigger: event
+  - event_type: abode_capture
     event_data: {}
-  - platform: event
-    event_type: abode_device
+    trigger: event
+  - event_type: abode_device
     event_data: {}
-  condition: []
-  action:
+    trigger: event
+  conditions: []
+  actions:
   - event: '{{ trigger.event.event_type | replace(''abode'', ''alarm'') }}'
     event_data:
       device_id: '{{ trigger.event.data.device_id }}'
@@ -1426,22 +1497,22 @@
 - id: '1691811863982'
   alias: Reset Ad Filter
   description: ''
-  trigger:
-  - platform: state
-    entity_id:
+  triggers:
+  - entity_id:
     - switch.ad_filter
     to: 'off'
-  condition: []
-  action:
+    trigger: state
+  conditions: []
+  actions:
   - wait_for_trigger:
-    - platform: state
-      entity_id:
+    - entity_id:
       - switch.ad_filter
       to: 'on'
       for:
         hours: 0
         minutes: 0
         seconds: 0
+      trigger: state
     timeout:
       hours: 0
       minutes: 2
@@ -1451,28 +1522,28 @@
     - condition: template
       value_template: '{{ wait.trigger == none }}'
     then:
-    - service: switch.turn_on
-      data: {}
+    - data: {}
       target:
         entity_id: switch.ad_filter
-    - service: notify.mobile_app_toms_iphone
-      data:
+      action: switch.turn_on
+    - data:
         message: Ad Filter Set to On
       enabled: false
+      action: notify.mobile_app_toms_iphone
   mode: restart
 - id: '1692025965540'
   alias: Watchman Report
   description: ''
-  trigger:
-  - platform: time
-    at: 09:00:00
-  condition: []
-  action:
-  - service: watchman.report
-    data:
+  triggers:
+  - at: 09:00:00
+    trigger: time
+  conditions: []
+  actions:
+  - data:
       create_file: true
       parse_config: false
       chunk_size: false
+    action: watchman.report
   - delay:
       hours: 0
       minutes: 0
@@ -1488,56 +1559,56 @@
         entity_id: sensor.watchman_missing_entities
         above: 0
     then:
-    - service: notify.mobile_app_toms_iphone
-      data:
+    - data:
         title: Watchman Report
         message: '{{ states(''sensor.watchman_missing_services'') }} missing services
 
           {{ states(''sensor.watchman_missing_entities'') }} missing entities
 
           '
+      action: notify.mobile_app_toms_iphone
   mode: single
 - id: '1692210763472'
   alias: Low Battery Location Notification
   description: ''
-  trigger:
-  - platform: numeric_state
-    entity_id: device_tracker.toms_iphone
+  triggers:
+  - entity_id: device_tracker.toms_iphone
     attribute: battery_level
     below: 5
     id: tom
-  - platform: numeric_state
-    entity_id: device_tracker.jamis_iphone
+    trigger: numeric_state
+  - entity_id: device_tracker.jamis_iphone
     attribute: battery_level
     below: 5
     id: jami
-  condition: []
-  action:
+    trigger: numeric_state
+  conditions: []
+  actions:
   - variables:
       lowDevice: '{{ trigger.id }}'
       title: '{{ lowDevice | title }}''s Battery Low'
       location: '{{ states(''sensor.'' ~ lowDevice ~ ''s_location'') }}'
       service: "{% if lowDevice == \"tom\" %}\n  notify.mobile_app_jamis_iphone\n{%
         else %}\n  notify.mobile_app_toms_iphone\n{% endif %}\n"
-  - service: '{{ service }}'
-    data:
+  - data:
       title: '{{ title }}'
       message: 'Location: {{ location }}'
+    action: '{{ service }}'
   mode: single
 - id: '1693174368442'
   alias: 'Thermostat: Fan on when cooling'
   description: ''
-  trigger:
-  - platform: state
-    entity_id:
+  triggers:
+  - entity_id:
     - climate.downstairs
     - climate.upstairs
     attribute: fan_mode
     to: 'off'
-  - platform: time_pattern
-    minutes: /15
-  condition: []
-  action:
+    trigger: state
+  - minutes: /15
+    trigger: time_pattern
+  conditions: []
+  actions:
   - if:
     - condition: state
       entity_id: climate.downstairs
@@ -1549,11 +1620,11 @@
       attribute: fan_mode
       state: 'off'
     then:
-    - service: climate.set_fan_mode
-      data:
+    - data:
         fan_mode: 'on'
       target:
         device_id: e74fe3309cf9ebdff5b8de50dc762cd2
+      action: climate.set_fan_mode
   - if:
     - condition: state
       entity_id: climate.upstairs
@@ -1565,23 +1636,67 @@
       attribute: fan_mode
       state: 'off'
     then:
-    - service: climate.set_fan_mode
-      data:
+    - data:
         fan_mode: 'on'
       target:
         device_id: bce5cbf2a20b1630b3fcd0c39f29f7ad
+      action: climate.set_fan_mode
   mode: single
 - id: '1703641301539'
   alias: Jami Home
   description: ''
-  trigger:
-  - platform: state
-    entity_id:
+  triggers:
+  - entity_id:
     - person.jami_fili
     to: home
-  condition: []
-  action:
-  - service: notify.mobile_app_toms_iphone
-    data:
+    trigger: state
+  conditions: []
+  actions:
+  - data:
       message: Jami is home
+    action: notify.mobile_app_toms_iphone
+  mode: single
+- id: '1728401605120'
+  alias: Office Notifications
+  description: ''
+  triggers:
+  - type: opened
+    device_id: 2624aa743e4fa8bc5273e929e4da82ac
+    entity_id: adc650251eb9f97b3702b9c368aecbb0
+    domain: binary_sensor
+    trigger: device
+  - type: opened
+    device_id: 3517866071a11dc4f80f9cabbdcc3945
+    entity_id: 6aac8a52c47808ebc5087455792e4f55
+    domain: binary_sensor
+    trigger: device
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 1
+  - type: opened
+    device_id: 41877507d137b6f6a8a07bc25f488036
+    entity_id: 3be8cb1f194c7623e6a28c7c714f89a6
+    domain: binary_sensor
+    trigger: device
+  conditions: []
+  actions:
+  - action: notify.mobile_app_toms_iphone
+    metadata: {}
+    data:
+      message: '{{ trigger.from_state.name }} was opened'
+  mode: single
+- id: '1736131482053'
+  alias: Cleanup Temporary Media Files
+  description: ''
+  triggers:
+  - trigger: time_pattern
+    hours: '*'
+    minutes: '0'
+    seconds: '0'
+  conditions: []
+  actions:
+  - action: shell_command.delete_tmp_media
+    metadata: {}
+    data: {}
   mode: single

@@ -1,5 +1,8 @@
 .HA_VERSION
+
+# Abode
 abodepy_cache.pickle
+/Abode/*
 
 # Custom integrations from HACS
 /custom_components/*

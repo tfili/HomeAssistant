@@ -4,6 +4,9 @@ default_config:
 homeassistant:
   # Packages
   packages: !include_dir_merge_named packages
+  allowlist_external_dirs:
+    - "/tmp"
+    - "/media"
 
   # 2FA
   auth_mfa_modules:
@@ -84,9 +87,14 @@ input_boolean: !include input_boolean.yaml
 notify: !include notify.yaml
 script: !include scripts.yaml
 #sensor: !include sensors.yaml
+shell_command: !include shell_command.yaml
 switch: !include switch.yaml
 template: !include_dir_list templates/
 weather: !include weather.yaml
 
-# Enable python scripts
+# Enable python scripts (built-in and pyscript)
 python_script:
+pyscript: !include pyscript/config.yaml
+
+# Enable battery notes integration
+battery_notes:
