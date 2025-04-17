@@ -190,7 +190,7 @@
   conditions: []
   actions:
   - data:
-      name: Google Light and Dark Theme
+      name: Google Theme
       mode: dark
     action: frontend.set_theme
 - id: '1617642446660'
@@ -711,6 +711,8 @@
         value_template: '{{ trigger.entity_id == ''binary_sensor.reeves_door_contact''
           }}'
     - condition: template
+      value_template: '{{ trigger.entity_id == ''binary_sensor.nursery_window'' }}'
+    - condition: template
       value_template: '{{ trigger.entity_id == ''binary_sensor.basement_egress_window''
         }}'
   actions:
@@ -718,7 +720,8 @@
       name: '{{ trigger.from_state.name | replace('' contact'', '''') }}'
       cameraEntity: "{% if trigger.entity_id == 'binary_sensor.abels_door_contact'
         %}\n    camera.abels_room\n{% elif trigger.entity_id == 'binary_sensor.reeves_door_contact'
-        %}\n  camera.reeves_room\n{% else %}\n  camera.basement\n{% endif %}\n"
+        %}\n  camera.reeves_room\n{% elif trigger.entity_id == 'binary_sensor.nursery_window'
+        %}\n  camera.ellis_room\n{% else %}\n  camera.basement\n{% endif %}\n"
   - action: google_generative_ai_conversation.generate_content
     metadata: {}
     data:
@@ -817,12 +820,12 @@
   description: ''
   triggers:
   - entity_id:
-    - sensor.apc_battery_charge
+    - sensor.office_ups_battery_charge
     below: 10
     trigger: numeric_state
   conditions:
   - condition: template
-    value_template: '{{ ''DISCHRG'' in sensor.apc_status_data }}'
+    value_template: '{{ ''DISCHRG'' in sensor.office_ups_status_data }}'
   actions:
   - data: {}
     action: hassio.host_shutdown
@@ -1055,17 +1058,28 @@
     target:
       entity_id: camera.front_door
     response_variable: snapshot_output
-  - action: google_generative_ai_conversation.generate_content
-    metadata: {}
-    data:
-      image_filename: "{% if snapshot_output[\"result\"] %}\n  {{ snapshot_localpath
-        }}\n{% else %}\n  null\n{% endif %}\n"
-      prompt: If you see a person or package in the picture, describe it. Otherwise
-        just say there is something at the front door.
-    response_variable: alert_message
+  - if:
+    - condition: template
+      value_template: '{{ snapshot_output["result"] }}'
+    then:
+    - action: google_generative_ai_conversation.generate_content
+      metadata: {}
+      data:
+        prompt: If you see a person or package in the picture, describe it. Otherwise
+          just say there is something at the front door.
+        image_filename: '{{ snapshot_localpath }}'
+      response_variable: ai_result
+    else:
+    - action: google_generative_ai_conversation.generate_content
+      metadata: {}
+      data:
+        prompt: Say that someone is at the front door in a funny way and keep it under
+          10 words
+      response_variable: ai_result
+  - variables:
+      alert_message: '{{ ai_result.text }}'
   - parallel:
-    - if: []
-      then:
+    - sequence:
       - data:
           target:
           - media_player.basement_echo
@@ -1073,8 +1087,17 @@
           - media_player.kitchen_echo_show
           data:
             type: tts
-          message: '{{ alert_message.text }}'
+          message: '{{ alert_message }}'
         action: notify.alexa_media
+      - condition: template
+        value_template: '{{ snapshot_output["result"] }}'
+      - action: media_player.play_media
+        metadata: {}
+        data:
+          media_content_type: image
+          media_content_id: '{{ snapshot_mediapath }}'
+        target:
+          device_id: b34fd4cc78ba62a9d84134e6605c7104
       - data:
           media_content_id: Show front door
           media_content_type: custom
@@ -1082,20 +1105,14 @@
           entity_id: media_player.kitchen_echo_show
         action: media_player.play_media
         enabled: false
-      - action: media_player.play_media
-        metadata: {}
-        data:
-          media_content_type: image/jpeg
-          media_content_id: '{{ snapshot_mediapath }}'
-        target:
-          device_id: b34fd4cc78ba62a9d84134e6605c7104
-    - if: []
-      then:
+    - sequence:
       - data:
           cache: true
           entity_id: media_player.office_display
-          message: '{{ alert_message.text }}'
+          message: '{{ alert_message }}'
         action: tts.cloud_say
+      - condition: template
+        value_template: '{{ snapshot_output["result"] }}'
       - wait_for_trigger:
         - entity_id:
           - media_player.office_display
@@ -1109,12 +1126,6 @@
           seconds: 5
           milliseconds: 0
         enabled: true
-      - data:
-          media_player: media_player.office_display
-        target:
-          entity_id: camera.front_door
-        action: camera.play_stream
-        enabled: false
       - action: media_player.play_media
         metadata: {}
         data:
@@ -1122,8 +1133,13 @@
           media_content_id: '{{ snapshot_mediapath }}'
         target:
           device_id: c2685da3baade91935397f4ed4c077b5
-    - if: []
-      then:
+      - data:
+          media_player: media_player.office_display
+        target:
+          entity_id: camera.front_door
+        action: camera.play_stream
+        enabled: false
+    - sequence:
       - if:
         - condition: state
           entity_id: light.cabinet
@@ -1180,7 +1196,7 @@
       metadata: {}
       data:
         title: Front Door
-        message: '{{ alert_message.text }}'
+        message: '{{ alert_message }}'
         data:
           image: "{% if snapshot_output[\"result\"] %}\n  {{ snapshot_mediapath }}\n{%
             else %}\n  null\n{% endif %}\n"
@@ -1268,7 +1284,10 @@
     to: armed_away
     id: alarm_away
     trigger: state
-  conditions: []
+  conditions:
+  - condition: state
+    entity_id: input_boolean.auto_office
+    state: 'on'
   actions:
   - variables:
       is_workday: '{{ now().weekday() < 5 and now().hour > 7 and now().hour < 18 }}'
@@ -1289,6 +1308,7 @@
         message: Lux {{ trigger.to_state.state }}
       enabled: false
       action: notify.mobile_app_toms_iphone
+    enabled: false
   - if:
     - condition: or
       conditions:
@@ -1318,6 +1338,7 @@
         message: Lux {{ states(sensor.office_motion_sensor_illuminance) }}
       enabled: false
       action: notify.mobile_app_toms_iphone
+    enabled: false
   - if:
     - condition: trigger
       id:
@@ -1345,6 +1366,7 @@
       target:
         entity_id: media_player.office_tv
       action: media_player.turn_off
+      enabled: false
     - data: {}
       target:
         entity_id: fan.office_ceiling_fan
@@ -1353,6 +1375,7 @@
       target:
         entity_id: light.office_ceiling_fan
       action: light.turn_off
+      enabled: false
     - data:
         title: Turn off
         message: light & fan
@@ -1665,6 +1688,7 @@
     entity_id: adc650251eb9f97b3702b9c368aecbb0
     domain: binary_sensor
     trigger: device
+    id: office_door
   - type: opened
     device_id: 3517866071a11dc4f80f9cabbdcc3945
     entity_id: 6aac8a52c47808ebc5087455792e4f55
@@ -1679,7 +1703,17 @@
     entity_id: 3be8cb1f194c7623e6a28c7c714f89a6
     domain: binary_sensor
     trigger: device
-  conditions: []
+  conditions:
+  - condition: not
+    conditions:
+    - condition: and
+      conditions:
+      - condition: trigger
+        id:
+        - office_door
+      - condition: state
+        entity_id: device_tracker.toms_iphone
+        state: home
   actions:
   - action: notify.mobile_app_toms_iphone
     metadata: {}
@@ -1699,4 +1733,277 @@
   - action: shell_command.delete_tmp_media
     metadata: {}
     data: {}
+  mode: single
+- id: '1740967733718'
+  alias: Reset Auto Office
+  description: ''
+  triggers:
+  - trigger: time
+    at: 00:00:00
+  conditions: []
+  actions:
+  - action: input_boolean.turn_on
+    metadata: {}
+    data: {}
+    target:
+      entity_id: input_boolean.auto_office
+  mode: single
+- id: '1740972506877'
+  alias: Tom Room Location
+  description: ''
+  triggers:
+  - trigger: state
+    entity_id:
+    - sensor.tom_s_iphone_presence
+  conditions:
+  - condition: template
+    value_template: '{{ trigger.from_state.state != trigger.to_state.state }}'
+  actions:
+  - action: notify.mobile_app_toms_iphone
+    metadata: {}
+    data:
+      title: You moved to a new room
+      message: '{{ trigger.from_state.state }} -> {{ trigger.to_state.state }}'
+  mode: single
+- id: '1744597787917'
+  alias: Office Light
+  description: ''
+  triggers:
+  - trigger: time_pattern
+    hours: '*'
+    minutes: /1
+    enabled: true
+  - type: occupied
+    device_id: 9e13626ee8b01b6a65ef08abfadfe6a1
+    entity_id: 7bb5d69b6da11b5cf6395ea36e7586ff
+    domain: binary_sensor
+    trigger: device
+  - trigger: state
+    entity_id:
+    - sensor.toms_location
+    to:
+  - trigger: state
+    entity_id:
+    - alarm_control_panel.wrapped_alarm
+    to: armed_away
+  conditions:
+  - condition: state
+    entity_id: input_boolean.auto_office
+    state: 'on'
+  actions:
+  - if:
+    - condition: or
+      conditions:
+      - condition: state
+        entity_id: binary_sensor.workday
+        state: 'on'
+      - type: is_occupied
+        condition: device
+        device_id: 9e13626ee8b01b6a65ef08abfadfe6a1
+        entity_id: 7bb5d69b6da11b5cf6395ea36e7586ff
+        domain: binary_sensor
+      - condition: state
+        entity_id: sensor.toms_location
+        state: office
+        enabled: true
+    - type: is_illuminance
+      condition: device
+      device_id: 9e13626ee8b01b6a65ef08abfadfe6a1
+      entity_id: bbcfea417d252db4795fc453cfa90823
+      domain: sensor
+      below: 30
+    - condition: not
+      conditions:
+      - condition: state
+        entity_id: alarm_control_panel.wrapped_alarm
+        state: armed_away
+    then:
+    - sequence:
+      - condition: state
+        entity_id: light.office_ceiling_fan
+        state: 'off'
+      - action: light.turn_on
+        metadata: {}
+        data: {}
+        target:
+          device_id: def02a729f138f86b72a0cecb8a6d653
+    else:
+    - if:
+      - condition: or
+        conditions:
+        - condition: and
+          conditions:
+          - condition: state
+            entity_id: binary_sensor.workday
+            state: 'off'
+          - type: is_not_occupied
+            condition: device
+            device_id: 9e13626ee8b01b6a65ef08abfadfe6a1
+            entity_id: 7bb5d69b6da11b5cf6395ea36e7586ff
+            domain: binary_sensor
+          - condition: not
+            conditions:
+            - condition: state
+              entity_id: sensor.toms_location
+              state: office
+              enabled: true
+        - type: is_illuminance
+          condition: device
+          device_id: 9e13626ee8b01b6a65ef08abfadfe6a1
+          entity_id: bbcfea417d252db4795fc453cfa90823
+          domain: sensor
+          above: 45
+      - condition: state
+        entity_id: light.office_ceiling_fan
+        state: 'on'
+      then:
+      - action: light.turn_off
+        metadata: {}
+        data: {}
+        target:
+          device_id: def02a729f138f86b72a0cecb8a6d653
+  mode: single
+- id: '1744600482795'
+  alias: Turn off TV
+  description: ''
+  triggers:
+  - type: not_occupied
+    device_id: 9e13626ee8b01b6a65ef08abfadfe6a1
+    entity_id: 7bb5d69b6da11b5cf6395ea36e7586ff
+    domain: binary_sensor
+    trigger: device
+    for:
+      hours: 0
+      minutes: 30
+      seconds: 0
+  conditions:
+  - condition: state
+    entity_id: input_boolean.auto_office
+    state: 'on'
+  - condition: not
+    conditions:
+    - condition: state
+      entity_id: binary_sensor.workday
+      state: ''
+  actions:
+  - type: turn_off
+    device_id: 441c37654d3d5676970a655a892a0a79
+    entity_id: 26628ecbd104f88bc1a3d178508e498a
+    domain: remote
+  mode: single
+- id: '1744601116209'
+  alias: Office Fan
+  description: ''
+  triggers:
+  - trigger: time_pattern
+    hours: '*'
+    minutes: /1
+    enabled: true
+  - type: occupied
+    device_id: 9e13626ee8b01b6a65ef08abfadfe6a1
+    entity_id: 7bb5d69b6da11b5cf6395ea36e7586ff
+    domain: binary_sensor
+    trigger: device
+  - trigger: state
+    entity_id:
+    - sensor.toms_location
+    to:
+  - trigger: state
+    entity_id:
+    - alarm_control_panel.wrapped_alarm
+    to: armed_away
+  conditions:
+  - condition: state
+    entity_id: input_boolean.auto_office
+    state: 'on'
+  actions:
+  - variables:
+      temp: '{{ states(''sensor.office_motion_sensor_temperature'') }}'
+      fan_speed: "{% if temp < 72 %}\n  0\n{% elif temp < 76 %}\n  33\n{% elif temp
+        < 80 %}\n  66\n{% else %}\n  100\n{% endif %}\n  \n"
+  - if:
+    - condition: or
+      conditions:
+      - condition: state
+        entity_id: binary_sensor.workday
+        state: 'on'
+      - type: is_occupied
+        condition: device
+        device_id: 9e13626ee8b01b6a65ef08abfadfe6a1
+        entity_id: 7bb5d69b6da11b5cf6395ea36e7586ff
+        domain: binary_sensor
+      - condition: state
+        entity_id: sensor.toms_location
+        state: office
+        enabled: true
+    - type: is_illuminance
+      condition: device
+      device_id: 9e13626ee8b01b6a65ef08abfadfe6a1
+      entity_id: bbcfea417d252db4795fc453cfa90823
+      domain: sensor
+      below: 40
+    - condition: not
+      conditions:
+      - condition: state
+        entity_id: alarm_control_panel.wrapped_alarm
+        state: armed_away
+    - condition: template
+      value_template: '{{ fan_speed > 0 }}'
+    then:
+    - sequence:
+      - condition: template
+        value_template: '{{ fan_speed != state_attr(''fan.office_ceiling_fan'', ''percentage'')
+          }}'
+      - data:
+          percentage: '{{ fan_speed }}'
+        target:
+          entity_id: fan.office_ceiling_fan
+        action: fan.set_percentage
+    else:
+    - sequence:
+      - condition: state
+        entity_id: fan.office_ceiling_fan
+        state: 'on'
+      - action: fan.turn_off
+        metadata: {}
+        data: {}
+        target:
+          device_id: def02a729f138f86b72a0cecb8a6d653
+  mode: single
+- id: '1744773707874'
+  alias: Blind Tilt
+  description: ''
+  triggers:
+  - trigger: time_pattern
+    hours: '*'
+    minutes: /10
+  conditions:
+  - condition: state
+    entity_id: input_boolean.auto_office
+    state: 'on'
+  actions:
+  - variables:
+      update_threshold: 5
+      tilt: "{% set az = state_attr(\"sun.sun\", \"azimuth\") %}\n{% set el = state_attr(\"sun.sun\",
+        \"elevation\") %}\n{% if el <= -5 %}\n  {# Overnight we want the to tilt the
+        blinds down #}\n  0\n{% elif az < 180 %}\n  {# When the sun is on the front
+        side of the house fully open the blinds #}\n  50\n{% else %}\n  {# During
+        the afternoon we want to tilt the blinds up #}\n  {{ 100 - (((el+5) * (5.0/6.5))
+        | round) }}\n{% endif %}\n"
+  - sequence:
+    - condition: template
+      value_template: '{{ (state_attr("cover.office_blinds", "current_tilt_position")
+        - tilt) | abs > update_threshold }}'
+    - action: cover.set_cover_tilt_position
+      metadata: {}
+      data:
+        tilt_position: '{{ tilt }}'
+      target:
+        entity_id: cover.office_blinds
+  - action: notify.mobile_app_toms_iphone
+    metadata: {}
+    data:
+      message: '{{ tilt }}'
+      title: Blind Position
+    enabled: false
   mode: single

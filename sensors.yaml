@@ -1,0 +1,6 @@
+- platform: mqtt_room
+  name: Tom's iPhone Presence
+  device_id: phone:toms-iphone
+  state_topic: "espresense/devices/phone:toms-iphone"
+  away_timeout: 60
+  

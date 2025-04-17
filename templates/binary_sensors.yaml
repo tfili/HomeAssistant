@@ -16,7 +16,7 @@ binary_sensor:
   # On if office UPS has low voltage
   - unique_id: office_ups_low_voltage
     state: >-
-      {{ states("sensor.apc_input_voltage")|int < 100 }}
+      {{ states("sensor.office_ups_input_voltage")|int < 100 }}
     attributes:
       friendly_name: "Office UPS low voltage"
 
