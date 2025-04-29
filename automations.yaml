@@ -203,12 +203,6 @@
     variables:
       motion_entity: input_boolean.motion_abels_room
     trigger: device
-  - device_id: 071987be0fcc0f04e764fa87ef7cfa08
-    domain: nest
-    type: camera_motion
-    variables:
-      motion_entity: input_boolean.motion_front_door
-    trigger: device
   - device_id: 1147fbae5177cd1c188b10b78454dbb7
     domain: nest
     type: camera_motion
@@ -226,12 +220,6 @@
     type: camera_motion
     variables:
       motion_entity: input_boolean.motion_ellis_room
-    trigger: device
-  - device_id: c0275b210992e5c0d0ac22bbb39308e5
-    domain: nest
-    type: camera_motion
-    variables:
-      motion_entity: input_boolean.motion_basement
     trigger: device
   conditions: []
   actions:
@@ -1035,13 +1023,22 @@
   alias: Doorbell
   description: ''
   triggers:
-  - event_type: nest_event
-    trigger: event
-  conditions:
-  - condition: template
-    value_template: '{{ trigger.event.data.device_id == ''071987be0fcc0f04e764fa87ef7cfa08''
-      and (trigger.event.data.type == ''doorbell_chime'' or trigger.event.data.type
-      == ''camera_person'') }}'
+  - type: turned_on
+    device_id: f52c61bad3164dfe6f6a95e93540644d
+    entity_id: 83c2b674720b107e2fb7d6341de7fd28
+    domain: binary_sensor
+    trigger: device
+  - type: turned_on
+    device_id: f52c61bad3164dfe6f6a95e93540644d
+    entity_id: f290d27fcd640d3ed6b00920de994693
+    domain: binary_sensor
+    trigger: device
+  - type: turned_on
+    device_id: f52c61bad3164dfe6f6a95e93540644d
+    entity_id: f0bf8ab2fdc79375fb36221cc7ce6929
+    domain: binary_sensor
+    trigger: device
+  conditions: []
   actions:
   - variables:
       light_state: '{{ states(''light.cabinet'') }}'
@@ -1056,8 +1053,9 @@
     data:
       filename: '{{ snapshot_localpath }}'
     target:
-      entity_id: camera.front_door
+      entity_id: camera.front_doorbell_fluent
     response_variable: snapshot_output
+    enabled: false
   - if:
     - condition: template
       value_template: '{{ snapshot_output["result"] }}'
@@ -1067,7 +1065,8 @@
       data:
         prompt: If you see a person or package in the picture, describe it. Otherwise
           just say there is something at the front door.
-        image_filename: '{{ snapshot_localpath }}'
+        filenames:
+        - '{{ snapshot_localpath }}'
       response_variable: ai_result
     else:
     - action: google_generative_ai_conversation.generate_content
@@ -1076,6 +1075,21 @@
         prompt: Say that someone is at the front door in a funny way and keep it under
           10 words
       response_variable: ai_result
+    enabled: false
+  - action: camera.snapshot
+    metadata: {}
+    data:
+      filename: '{{ snapshot_localpath }}'
+    target:
+      device_id: f52c61bad3164dfe6f6a95e93540644d
+  - action: google_generative_ai_conversation.generate_content
+    metadata: {}
+    data:
+      prompt: If you see a person or package in the picture, describe it. Otherwise
+        just say there is something at the front door.
+      filenames:
+      - '{{ snapshot_localpath }}'
+    response_variable: ai_result
   - variables:
       alert_message: '{{ ai_result.text }}'
   - parallel:
@@ -1091,6 +1105,7 @@
         action: notify.alexa_media
       - condition: template
         value_template: '{{ snapshot_output["result"] }}'
+        enabled: false
       - action: media_player.play_media
         metadata: {}
         data:
@@ -1113,6 +1128,7 @@
         action: tts.cloud_say
       - condition: template
         value_template: '{{ snapshot_output["result"] }}'
+        enabled: false
       - wait_for_trigger:
         - entity_id:
           - media_player.office_display
@@ -1135,10 +1151,10 @@
           device_id: c2685da3baade91935397f4ed4c077b5
       - data:
           media_player: media_player.office_display
-        target:
-          entity_id: camera.front_door
         action: camera.play_stream
         enabled: false
+        target:
+          device_id: f52c61bad3164dfe6f6a95e93540644d
     - sequence:
       - if:
         - condition: state
@@ -1200,6 +1216,14 @@
         data:
           image: "{% if snapshot_output[\"result\"] %}\n  {{ snapshot_mediapath }}\n{%
             else %}\n  null\n{% endif %}\n"
+      enabled: false
+    - action: notify.everyone
+      metadata: {}
+      data:
+        title: Front Door
+        message: '{{ alert_message }}'
+        data:
+          image: '{{ snapshot_mediapath }}'
   mode: single
 - id: '1689561875523'
   alias: Cesium Meeting
@@ -1806,6 +1830,10 @@
         entity_id: sensor.toms_location
         state: office
         enabled: true
+      enabled: false
+    - condition: state
+      entity_id: binary_sensor.office_occupied
+      state: 'on'
     - type: is_illuminance
       condition: device
       device_id: 9e13626ee8b01b6a65ef08abfadfe6a1
@@ -1847,6 +1875,10 @@
               entity_id: sensor.toms_location
               state: office
               enabled: true
+          enabled: false
+        - condition: state
+          entity_id: binary_sensor.office_occupied
+          state: 'off'
         - type: is_illuminance
           condition: device
           device_id: 9e13626ee8b01b6a65ef08abfadfe6a1
@@ -1876,15 +1908,27 @@
       hours: 0
       minutes: 30
       seconds: 0
+  - trigger: state
+    entity_id:
+    - binary_sensor.workday
+    from: 'on'
+    to: 'off'
   conditions:
   - condition: state
     entity_id: input_boolean.auto_office
     state: 'on'
-  - condition: not
-    conditions:
-    - condition: state
-      entity_id: binary_sensor.workday
-      state: ''
+  - condition: state
+    entity_id: binary_sensor.workday
+    state: 'off'
+  - type: is_not_occupied
+    condition: device
+    device_id: 9e13626ee8b01b6a65ef08abfadfe6a1
+    entity_id: 7bb5d69b6da11b5cf6395ea36e7586ff
+    domain: binary_sensor
+    for:
+      hours: 0
+      minutes: 30
+      seconds: 0
   actions:
   - type: turn_off
     device_id: 441c37654d3d5676970a655a892a0a79
@@ -1936,19 +1980,17 @@
         entity_id: sensor.toms_location
         state: office
         enabled: true
-    - type: is_illuminance
-      condition: device
-      device_id: 9e13626ee8b01b6a65ef08abfadfe6a1
-      entity_id: bbcfea417d252db4795fc453cfa90823
-      domain: sensor
-      below: 40
+      enabled: false
+    - condition: state
+      entity_id: binary_sensor.office_occupied
+      state: 'on'
+    - condition: template
+      value_template: '{{ fan_speed > 0 }}'
     - condition: not
       conditions:
       - condition: state
         entity_id: alarm_control_panel.wrapped_alarm
         state: armed_away
-    - condition: template
-      value_template: '{{ fan_speed > 0 }}'
     then:
     - sequence:
       - condition: template
@@ -1960,10 +2002,35 @@
           entity_id: fan.office_ceiling_fan
         action: fan.set_percentage
     else:
-    - sequence:
+    - if:
+      - condition: or
+        conditions:
+        - condition: and
+          conditions:
+          - condition: state
+            entity_id: binary_sensor.workday
+            state: 'off'
+          - type: is_not_occupied
+            condition: device
+            device_id: 9e13626ee8b01b6a65ef08abfadfe6a1
+            entity_id: 7bb5d69b6da11b5cf6395ea36e7586ff
+            domain: binary_sensor
+          - condition: not
+            conditions:
+            - condition: state
+              entity_id: sensor.toms_location
+              state: office
+              enabled: true
+          enabled: false
+        - condition: state
+          entity_id: binary_sensor.office_occupied
+          state: 'off'
+        - condition: template
+          value_template: '{{ fan_speed == 0 }}'
       - condition: state
         entity_id: fan.office_ceiling_fan
         state: 'on'
+      then:
       - action: fan.turn_off
         metadata: {}
         data: {}
@@ -1988,8 +2055,8 @@
         \"elevation\") %}\n{% if el <= -5 %}\n  {# Overnight we want the to tilt the
         blinds down #}\n  0\n{% elif az < 180 %}\n  {# When the sun is on the front
         side of the house fully open the blinds #}\n  50\n{% else %}\n  {# During
-        the afternoon we want to tilt the blinds up #}\n  {{ 100 - (((el+5) * (5.0/6.5))
-        | round) }}\n{% endif %}\n"
+        the afternoon we want to tilt the blinds up #}\n  {{ [100 - (((el/10)**2)
+        | round), 50] | max }}\n{% endif %}\n"
   - sequence:
     - condition: template
       value_template: '{{ (state_attr("cover.office_blinds", "current_tilt_position")

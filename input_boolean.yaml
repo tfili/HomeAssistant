@@ -2,14 +2,6 @@ motion_abels_room:
   name: Motion in Abels Room
   initial: false
 
-motion_backyard:
-  name: Motion in backyard
-  initial: false
-
-motion_front_door:
-  name: Motion out front
-  initial: false
-
 motion_reeves_room:
   name: Motion in Reeves Room
   initial: false
@@ -20,10 +12,6 @@ motion_morning_room:
 
 motion_ellis_room:
   name: Motion in Ellis Room
-  initial: false
-
-motion_basement:
-  name: Motion in basement
   initial: false
 
 mail_delivered:
