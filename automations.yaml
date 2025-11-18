@@ -193,49 +193,6 @@
       name: Google Theme
       mode: dark
     action: frontend.set_theme
-- id: '1617642446660'
-  alias: Set Nest Motion Entities
-  description: ''
-  triggers:
-  - device_id: 17221139504c939b70008ccefdd0be45
-    domain: nest
-    type: camera_motion
-    variables:
-      motion_entity: input_boolean.motion_abels_room
-    trigger: device
-  - device_id: 1147fbae5177cd1c188b10b78454dbb7
-    domain: nest
-    type: camera_motion
-    variables:
-      motion_entity: input_boolean.motion_reeves_room
-    trigger: device
-  - device_id: a15c183382243d7f47e4dc6a3433ed8c
-    domain: nest
-    type: camera_motion
-    variables:
-      motion_entity: input_boolean.motion_morning_room
-    trigger: device
-  - device_id: 0285fc92583747d2a75e96f29502995f
-    domain: nest
-    type: camera_motion
-    variables:
-      motion_entity: input_boolean.motion_ellis_room
-    trigger: device
-  conditions: []
-  actions:
-  - data:
-      entity_id: '{{ motion_entity }}'
-    action: input_boolean.turn_on
-  - delay:
-      hours: 0
-      minutes: 0
-      seconds: 20
-      milliseconds: 0
-  - data:
-      entity_id: '{{ motion_entity }}'
-    action: input_boolean.turn_off
-  mode: queued
-  max: 10
 - id: '1618875855459'
   alias: 'Tag scan: Toggle Mudroom Lock'
   description: ''
@@ -401,6 +358,14 @@
       prompt: The dryer is done but folding needs to be done. Keep it cheeky and under
         10 words.
     response_variable: alert_message
+    enabled: false
+  - action: ai_task.generate_data
+    metadata: {}
+    data:
+      task_name: Generate message
+      instructions: The dryer is done but folding needs to be done. Keep it cheeky
+        and under 10 words.
+    response_variable: alert_message
   - data:
       target:
       - media_player.basement_echo
@@ -408,7 +373,7 @@
       - media_player.bedroom_echo
       data:
         type: tts
-      message: '{{alert_message.text}}'
+      message: '{{alert_message.data}}'
     action: notify.alexa_media
   mode: single
 - id: '1646407771689'
@@ -707,22 +672,24 @@
   - variables:
       name: '{{ trigger.from_state.name | replace('' contact'', '''') }}'
       cameraEntity: "{% if trigger.entity_id == 'binary_sensor.abels_door_contact'
-        %}\n    camera.abels_room\n{% elif trigger.entity_id == 'binary_sensor.reeves_door_contact'
-        %}\n  camera.reeves_room\n{% elif trigger.entity_id == 'binary_sensor.nursery_window'
-        %}\n  camera.ellis_room\n{% else %}\n  camera.basement\n{% endif %}\n"
-  - action: google_generative_ai_conversation.generate_content
+        %}\n    null\n{% elif trigger.entity_id == 'binary_sensor.reeves_door_contact'
+        %}\n  camera.reeves_room_fluent\n{% elif trigger.entity_id == 'binary_sensor.nursery_window'
+        %}\n  camera.ellis_room_fluent\n{% else %}\n  camera.back_door_fluent\n{%
+        endif %}\n"
+  - action: ai_task.generate_data
     metadata: {}
     data:
-      prompt: A door was opened. Reword this in a funny way. Keep it to 12 words and
-        family friendly.
+      instructions: A door was opened. Reword this in a funny way. Keep it to 12 words
+        and family friendly.
+      task_name: Generate Message
     response_variable: message_prompt
   - data:
-      message: '{{ name }} was opened. {{ message_prompt.text }}'
+      message: '{{ name }} was opened. {{ message_prompt.data }}'
       data:
         entity_id: '{{ cameraEntity }}'
     action: notify.everyone
   - data:
-      message: '{{ name }} was opened. {{ message_prompt.text }}'
+      message: '{{ name }} was opened. {{ message_prompt.data }}'
       target:
       - media_player.basement_echo
       - media_player.bedroom_echo
@@ -750,10 +717,6 @@
   description: ''
   triggers:
   - entity_id: person.tom_fili
-    zone: zone.home
-    event: enter
-    trigger: zone
-  - entity_id: person.jami_fili
     zone: zone.home
     event: enter
     trigger: zone
@@ -911,7 +874,9 @@
   - parallel:
     - data: {}
       target:
-        entity_id: lock.mud_room_lock
+        device_id:
+        - e58529ab6bcf0265daaf95c2a74a8f2b
+        - 49c47010dfc55acbbdf71af225bedec8
       action: lock.lock
     - data: {}
       action: script.close_garage_doors
@@ -961,7 +926,6 @@
           entity_id:
           - media_player.bar_tv
           - media_player.basement_projector
-          - media_player.gym_tv
           - media_player.office_tv
           - media_player.greatroom_tv
         action: media_player.turn_off
@@ -985,6 +949,18 @@
       - light.cabinet
       - light.kitchen_dimmer
     action: light.turn_on
+  - if:
+    - condition: state
+      entity_id: alarm_control_panel.abode_alarm
+      state:
+      - armed_away
+    then:
+    - device_id: 6cf7de2f629dae59e6d3a0b6f78c1881
+      domain: alarm_control_panel
+      entity_id: 4792260a092c87c4f3f86be4b1bc0952
+      type: arm_home
+    - variables:
+        should_set_away: true
   - data:
       entity_id: vacuum.downstairs_roomba
     response_variable: vacuum_success
@@ -999,11 +975,6 @@
       enabled: true
       response_variable: final_success
       action: script.start_vacuum_or_mop
-    - variables:
-        final_success: '{{ vacuum_success }}'
-        comment: This is temporary until the mop is working. Enable the above and
-          delete this.
-      enabled: false
     else:
     - variables:
         final_success: '{{ vacuum_success }}'
@@ -1012,6 +983,14 @@
       minutes: 10
       seconds: 0
       milliseconds: 0
+  - if:
+    - condition: template
+      value_template: '{{ should_set_away }}'
+    then:
+    - device_id: 6cf7de2f629dae59e6d3a0b6f78c1881
+      domain: alarm_control_panel
+      entity_id: 4792260a092c87c4f3f86be4b1bc0952
+      type: arm_away
   - data: {}
     target:
       entity_id:
@@ -1024,18 +1003,18 @@
   description: ''
   triggers:
   - type: turned_on
-    device_id: f52c61bad3164dfe6f6a95e93540644d
-    entity_id: 83c2b674720b107e2fb7d6341de7fd28
+    device_id: 05fa7309a2318d8bd3a1d3a5dea281e7
+    entity_id: 86777ba8afa257cc8c46ed9158ae820a
     domain: binary_sensor
     trigger: device
   - type: turned_on
-    device_id: f52c61bad3164dfe6f6a95e93540644d
-    entity_id: f290d27fcd640d3ed6b00920de994693
+    device_id: 05fa7309a2318d8bd3a1d3a5dea281e7
+    entity_id: 2d39b042e9e10d91b33c0e2e9868a4ac
     domain: binary_sensor
     trigger: device
   - type: turned_on
-    device_id: f52c61bad3164dfe6f6a95e93540644d
-    entity_id: f0bf8ab2fdc79375fb36221cc7ce6929
+    device_id: 05fa7309a2318d8bd3a1d3a5dea281e7
+    entity_id: ae435a6df511973ad4db4536ae990956
     domain: binary_sensor
     trigger: device
   conditions: []
@@ -1056,32 +1035,13 @@
       entity_id: camera.front_doorbell_fluent
     response_variable: snapshot_output
     enabled: false
-  - if:
-    - condition: template
-      value_template: '{{ snapshot_output["result"] }}'
-    then:
-    - action: google_generative_ai_conversation.generate_content
-      metadata: {}
-      data:
-        prompt: If you see a person or package in the picture, describe it. Otherwise
-          just say there is something at the front door.
-        filenames:
-        - '{{ snapshot_localpath }}'
-      response_variable: ai_result
-    else:
-    - action: google_generative_ai_conversation.generate_content
-      metadata: {}
-      data:
-        prompt: Say that someone is at the front door in a funny way and keep it under
-          10 words
-      response_variable: ai_result
-    enabled: false
   - action: camera.snapshot
     metadata: {}
     data:
       filename: '{{ snapshot_localpath }}'
     target:
-      device_id: f52c61bad3164dfe6f6a95e93540644d
+      device_id: 05fa7309a2318d8bd3a1d3a5dea281e7
+    enabled: false
   - action: google_generative_ai_conversation.generate_content
     metadata: {}
     data:
@@ -1090,8 +1050,28 @@
       filenames:
       - '{{ snapshot_localpath }}'
     response_variable: ai_result
+    enabled: false
+  - action: ai_task.generate_data
+    metadata: {}
+    data:
+      instructions: If you see a person or package in the picture, describe it. Otherwise
+        just say there is something at the front door.
+      task_name: Alert Notification
+      attachments:
+        media_content_id: media-source://camera/camera.front_doorbell_fluent
+        media_content_type: application/vnd.apple.mpegurl
+        metadata:
+          title: Front Doorbell Fluent
+          thumbnail: /api/camera_proxy/camera.front_doorbell_fluent
+          media_class: video
+          children_media_class:
+          navigateIds:
+          - {}
+          - media_content_type: app
+            media_content_id: media-source://camera
+    response_variable: ai_result
   - variables:
-      alert_message: '{{ ai_result.text }}'
+      alert_message: '{{ ai_result.data }}'
   - parallel:
     - sequence:
       - data:
@@ -1103,32 +1083,26 @@
             type: tts
           message: '{{ alert_message }}'
         action: notify.alexa_media
-      - condition: template
-        value_template: '{{ snapshot_output["result"] }}'
-        enabled: false
       - action: media_player.play_media
-        metadata: {}
-        data:
-          media_content_type: image
-          media_content_id: '{{ snapshot_mediapath }}'
+        data: {}
         target:
-          device_id: b34fd4cc78ba62a9d84134e6605c7104
+          device_id:
+          - c2685da3baade91935397f4ed4c077b5
+        enabled: false
       - data:
-          media_content_id: Show front door
-          media_content_type: custom
+          media:
+            media_content_id: Show front door fluent
+            media_content_type: custom
+            metadata: {}
         target:
           entity_id: media_player.kitchen_echo_show
         action: media_player.play_media
-        enabled: false
+        enabled: true
     - sequence:
       - data:
-          cache: true
           entity_id: media_player.office_display
           message: '{{ alert_message }}'
         action: tts.cloud_say
-      - condition: template
-        value_template: '{{ snapshot_output["result"] }}'
-        enabled: false
       - wait_for_trigger:
         - entity_id:
           - media_player.office_display
@@ -1142,19 +1116,13 @@
           seconds: 5
           milliseconds: 0
         enabled: true
-      - action: media_player.play_media
-        metadata: {}
-        data:
-          media_content_type: image/jpeg
-          media_content_id: '{{ snapshot_mediapath }}'
-        target:
-          device_id: c2685da3baade91935397f4ed4c077b5
       - data:
           media_player: media_player.office_display
         action: camera.play_stream
-        enabled: false
+        enabled: true
         target:
-          device_id: f52c61bad3164dfe6f6a95e93540644d
+          entity_id: camera.front_doorbell_fluent
+      enabled: false
     - sequence:
       - if:
         - condition: state
@@ -1214,16 +1182,12 @@
         title: Front Door
         message: '{{ alert_message }}'
         data:
-          image: "{% if snapshot_output[\"result\"] %}\n  {{ snapshot_mediapath }}\n{%
-            else %}\n  null\n{% endif %}\n"
-      enabled: false
-    - action: notify.everyone
-      metadata: {}
-      data:
-        title: Front Door
-        message: '{{ alert_message }}'
-        data:
-          image: '{{ snapshot_mediapath }}'
+          image: /api/camera_proxy/camera.front_doorbell_fluent
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 5
+      milliseconds: 0
   mode: single
 - id: '1689561875523'
   alias: Cesium Meeting
@@ -1615,33 +1579,6 @@
           '
       action: notify.mobile_app_toms_iphone
   mode: single
-- id: '1692210763472'
-  alias: Low Battery Location Notification
-  description: ''
-  triggers:
-  - entity_id: device_tracker.toms_iphone
-    attribute: battery_level
-    below: 5
-    id: tom
-    trigger: numeric_state
-  - entity_id: device_tracker.jamis_iphone
-    attribute: battery_level
-    below: 5
-    id: jami
-    trigger: numeric_state
-  conditions: []
-  actions:
-  - variables:
-      lowDevice: '{{ trigger.id }}'
-      title: '{{ lowDevice | title }}''s Battery Low'
-      location: '{{ states(''sensor.'' ~ lowDevice ~ ''s_location'') }}'
-      service: "{% if lowDevice == \"tom\" %}\n  notify.mobile_app_jamis_iphone\n{%
-        else %}\n  notify.mobile_app_toms_iphone\n{% endif %}\n"
-  - data:
-      title: '{{ title }}'
-      message: 'Location: {{ location }}'
-    action: '{{ service }}'
-  mode: single
 - id: '1693174368442'
   alias: 'Thermostat: Fan on when cooling'
   description: ''
@@ -1688,20 +1625,6 @@
       target:
         device_id: bce5cbf2a20b1630b3fcd0c39f29f7ad
       action: climate.set_fan_mode
-  mode: single
-- id: '1703641301539'
-  alias: Jami Home
-  description: ''
-  triggers:
-  - entity_id:
-    - person.jami_fili
-    to: home
-    trigger: state
-  conditions: []
-  actions:
-  - data:
-      message: Jami is home
-    action: notify.mobile_app_toms_iphone
   mode: single
 - id: '1728401605120'
   alias: Office Notifications
@@ -1772,23 +1695,6 @@
     target:
       entity_id: input_boolean.auto_office
   mode: single
-- id: '1740972506877'
-  alias: Tom Room Location
-  description: ''
-  triggers:
-  - trigger: state
-    entity_id:
-    - sensor.tom_s_iphone_presence
-  conditions:
-  - condition: template
-    value_template: '{{ trigger.from_state.state != trigger.to_state.state }}'
-  actions:
-  - action: notify.mobile_app_toms_iphone
-    metadata: {}
-    data:
-      title: You moved to a new room
-      message: '{{ trigger.from_state.state }} -> {{ trigger.to_state.state }}'
-  mode: single
 - id: '1744597787917'
   alias: Office Light
   description: ''
@@ -1830,10 +1736,7 @@
         entity_id: sensor.toms_location
         state: office
         enabled: true
-      enabled: false
-    - condition: state
-      entity_id: binary_sensor.office_occupied
-      state: 'on'
+      enabled: true
     - type: is_illuminance
       condition: device
       device_id: 9e13626ee8b01b6a65ef08abfadfe6a1
@@ -1869,16 +1772,17 @@
             device_id: 9e13626ee8b01b6a65ef08abfadfe6a1
             entity_id: 7bb5d69b6da11b5cf6395ea36e7586ff
             domain: binary_sensor
+            for:
+              hours: 0
+              minutes: 5
+              seconds: 0
           - condition: not
             conditions:
             - condition: state
               entity_id: sensor.toms_location
               state: office
               enabled: true
-          enabled: false
-        - condition: state
-          entity_id: binary_sensor.office_occupied
-          state: 'off'
+          enabled: true
         - type: is_illuminance
           condition: device
           device_id: 9e13626ee8b01b6a65ef08abfadfe6a1
@@ -1980,10 +1884,11 @@
         entity_id: sensor.toms_location
         state: office
         enabled: true
-      enabled: false
+      enabled: true
     - condition: state
       entity_id: binary_sensor.office_occupied
       state: 'on'
+      enabled: false
     - condition: template
       value_template: '{{ fan_speed > 0 }}'
     - condition: not
@@ -2021,10 +1926,11 @@
               entity_id: sensor.toms_location
               state: office
               enabled: true
-          enabled: false
+          enabled: true
         - condition: state
           entity_id: binary_sensor.office_occupied
           state: 'off'
+          enabled: false
         - condition: template
           value_template: '{{ fan_speed == 0 }}'
       - condition: state
@@ -2073,4 +1979,78 @@
       message: '{{ tilt }}'
       title: Blind Position
     enabled: false
+  mode: single
+- id: '1746156521863'
+  alias: Filament storage warnings
+  description: ''
+  triggers:
+  - type: temperature
+    device_id: fcb856a2e4ca723864b3b8c06a314493
+    entity_id: d2df209fb3b8a0bd99199adc9fbbdf24
+    domain: sensor
+    trigger: device
+    above: 80
+  - type: humidity
+    device_id: fcb856a2e4ca723864b3b8c06a314493
+    entity_id: 95d50a51b02a5b68bac57d2e387053a2
+    domain: sensor
+    trigger: device
+    above: 40
+  conditions: []
+  actions:
+  - action: notify.mobile_app_toms_iphone
+    metadata: {}
+    data:
+      title: Filament storage warning
+      message: 'Temperature: {{ states("sensor.filament_case_temperature") }}
+
+        Humidity: {{ states("sensor.filament_case_humidity") }}
+
+        '
+  mode: single
+- id: '1754016720948'
+  alias: Start YouTubeTV in bedroom
+  description: ''
+  triggers:
+  - type: turned_on
+    device_id: 827ca6fe96319cfe438ae1bbdb9dd006
+    entity_id: 27784362b7f894a3b7c1b169c548b86f
+    domain: remote
+    trigger: device
+  conditions: []
+  actions:
+  - action: media_player.select_source
+    metadata: {}
+    data:
+      source: com.amazon.firetv.youtube.tv
+    target:
+      entity_id:
+      - media_player.bedroom_tv
+  mode: single
+- id: '1762974870993'
+  alias: Tom's Area Change
+  description: ''
+  triggers:
+  - trigger: state
+    entity_id:
+    - device_tracker.tom_s_phone_ble_bermuda_tracker
+    - sensor.tom_s_phone_ble_area
+  conditions:
+  - condition: template
+    value_template: '{{ trigger.from_state.state != trigger.to_state.state }}'
+  actions:
+  - action: notify.everyone
+    metadata: {}
+    data:
+      message: '{% if is_state("device_tracker.tom_s_phone_ble_bermuda_tracker", "home")
+        %}
+
+        {{ states("sensor.tom_s_phone_ble_area") }}
+
+        {% else %}
+
+        {{ states("device_tracker.tom_s_phone_ble_bermuda_tracker") }}
+
+        {% endif %}'
+      title: Tom Location Changed
   mode: single

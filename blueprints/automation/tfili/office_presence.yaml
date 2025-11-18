@@ -1,0 +1,99 @@
+blueprint:
+  name: Office Presence
+  description: Based on office presence change a devices state
+  domain: automation
+
+triggers:
+  - trigger: time_pattern
+    hours: "*"
+    minutes: /1
+    enabled: true
+  - trigger: device
+    type: occupied
+    device_id: 9e13626ee8b01b6a65ef08abfadfe6a1
+    entity_id: 7bb5d69b6da11b5cf6395ea36e7586ff
+    domain: binary_sensor
+  - trigger: state
+    entity_id:
+      - sensor.toms_location
+    to:
+  - trigger: state
+    entity_id:
+      - alarm_control_panel.wrapped_alarm
+    to: armed_away
+
+conditions:
+  - condition: state
+    entity_id: input_boolean.auto_office
+    state: "on"
+
+actions:
+  - if:
+      - condition: or
+        conditions:
+          - condition: state
+            entity_id: binary_sensor.workday
+            state: "on"
+          - type: is_occupied
+            condition: device
+            device_id: 9e13626ee8b01b6a65ef08abfadfe6a1
+            entity_id: 7bb5d69b6da11b5cf6395ea36e7586ff
+            domain: binary_sensor
+          - condition: state
+            entity_id: sensor.toms_location
+            state: office
+      - type: is_illuminance
+        condition: device
+        device_id: 9e13626ee8b01b6a65ef08abfadfe6a1
+        entity_id: bbcfea417d252db4795fc453cfa90823
+        domain: sensor
+        below: 30
+      - condition: not
+        conditions:
+          - condition: state
+            entity_id: alarm_control_panel.wrapped_alarm
+            state: armed_away
+    then:
+      - sequence:
+          - condition: state
+            entity_id: light.office_ceiling_fan
+            state: "off"
+          - action: light.turn_on
+            metadata: {}
+            data: {}
+            target:
+              device_id: def02a729f138f86b72a0cecb8a6d653
+    else:
+      - if:
+          - condition: or
+            conditions:
+              - condition: and
+                conditions:
+                  - condition: state
+                    entity_id: binary_sensor.workday
+                    state: "off"
+                  - type: is_not_occupied
+                    condition: device
+                    device_id: 9e13626ee8b01b6a65ef08abfadfe6a1
+                    entity_id: 7bb5d69b6da11b5cf6395ea36e7586ff
+                    domain: binary_sensor
+                  - condition: not
+                    conditions:
+                      - condition: state
+                        entity_id: sensor.toms_location
+                        state: office
+              - type: is_illuminance
+                condition: device
+                device_id: 9e13626ee8b01b6a65ef08abfadfe6a1
+                entity_id: bbcfea417d252db4795fc453cfa90823
+                domain: sensor
+                above: 45
+          - condition: state
+            entity_id: light.office_ceiling_fan
+            state: "on"
+        then:
+          - action: light.turn_off
+            metadata: {}
+            data: {}
+            target:
+              device_id: def02a729f138f86b72a0cecb8a6d653

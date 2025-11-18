@@ -1,6 +1,6 @@
 """Adds MQTT discovery support for Shellies Gen2+ devices."""
 
-VERSION = "3.16.0"
+VERSION = "4.0.0"
 
 ATTR_BATTERY_POWERED = "battery_powered"
 ATTR_BINARY_SENSORS = "binary_sensors"
@@ -21,6 +21,7 @@ ATTR_FW_ID = "fw_id"
 ATTR_GEN = "gen"
 ATTR_ID = "id"
 ATTR_INPUT = "input"
+ATTR_INPUTS = "inputs"
 ATTR_INPUT_BINARY_SENSORS = "inputs_binary_sensors"
 ATTR_INPUT_EVENTS = "input_events"
 ATTR_INPUT_SENSORS = "input_sensors"
@@ -72,11 +73,13 @@ DEVICE_CLASS_BUTTON = "button"
 DEVICE_CLASS_CONNECTIVITY = "connectivity"
 DEVICE_CLASS_CURRENT = "current"
 DEVICE_CLASS_ENERGY = "energy"
+DEVICE_CLASS_ENUM = "enum"
 DEVICE_CLASS_FREQUENCY = "frequency"
 DEVICE_CLASS_HUMIDITY = "humidity"
 DEVICE_CLASS_ILLUMINANCE = "illuminance"
 DEVICE_CLASS_MOISTURE = "moisture"
 DEVICE_CLASS_MOTION = "motion"
+DEVICE_CLASS_OCCUPANCY = "occupancy"
 DEVICE_CLASS_PLUG = "plug"
 DEVICE_CLASS_POWER = "power"
 DEVICE_CLASS_POWER_FACTOR = "power_factor"
@@ -175,6 +178,7 @@ KEY_MODE = "mode"
 KEY_MODEL = "mdl"
 KEY_MODEL_ID = "mdl_id"
 KEY_NAME = "name"
+KEY_OPTIONS = "ops"
 KEY_ORIGIN = "o"
 KEY_PAYLOAD = "pl"
 KEY_PAYLOAD_AVAILABLE = "pl_avail"
@@ -258,12 +262,16 @@ MODEL_WALL_DISPLAY = "ShellyWallDisplay"
 MODEL_PRO_RGBWW_PM = "shellyprorgbwwpm"
 # Gen3 devices
 MODEL_1_G3 = "shelly1g3"
+MODEL_1L_G3 = "shelly1lg3"
 MODEL_1PM_G3 = "shelly1pmg3"
 MODEL_1_MINI_G3 = "shelly1minig3"
 MODEL_1PM_MINI_G3 = "shelly1pmminig3"
+MODEL_2L_G3 = "shelly2lg3"
 MODEL_2PM_G3 = "shelly2pmg3"
+MODEL_3EM_63_G3 = "shelly3em63g3"
 MODEL_AZ_PLUG = "shellyazplug"
 MODEL_BLU_GATEWAY_G3 = "shellyblugwg3"
+MODEL_DUO_BULB_G3 = "shellyduobulbg3"
 MODEL_EM_G3 = "shellyemg3"
 MODEL_HT_G3 = "shellyhtg3"
 MODEL_I4_G3 = "shellyi4g3"
@@ -282,10 +290,16 @@ MODEL_1PM_MINI_G4 = "shelly1pmminig4"
 MODEL_2PM_G4 = "shelly2pmg4"
 MODEL_I4_G4 = "shellyi4g4"
 MODEL_FLOOD_G4 = "shellyfloodg4"
+MODEL_POWER_STRIP_G4 = "shellypstripg4"
+MODEL_PRESENCE_G4 = "shellypresence"
 # BLU devices
+MODEL_BLU_BUTTON1 = "SBBT-002C"
 MODEL_BLU_HT = "SBHT-003C"
 MODEL_BLU_MOTION = "SBMO-003Z"
+MODEL_BLU_RC_BUTTON_4 = "SBBT-004CUS"
 MODEL_BLU_TRV = "SBTR-001AEU"
+MODEL_BLU_WALL_SWITCH_4 = "SBBT-004CEU"
+MODEL_GENERIC_BTHOME_DEVICE = "Generic BTHome Device"
 # Powered by Shelly devices
 MODEL_OGEMRAY_25A = "ogemray25a"
 MODEL_ST1820 = "st1820"
@@ -308,6 +322,7 @@ SENSOR_CLOUD = "cloud"
 SENSOR_COUNTER = "counter"
 SENSOR_COUNTER_VALUE = "counter_value"
 SENSOR_CURRENT = "current"
+SENSOR_DETECTED = "detected"
 SENSOR_DEVICE_TEMPERATURE = "device_temperature"
 SENSOR_ENERGY = "energy"
 SENSOR_ETH_IP = "eth_ip"
@@ -317,6 +332,7 @@ SENSOR_FLOOD = "flood"
 SENSOR_FREQUENCY = "frequency"
 SENSOR_HUMIDITY = "humidity"
 SENSOR_ILLUMINANCE = "illuminance"
+SENSOR_ILLUMINANCE_LEVEL = "illuminance_level"
 SENSOR_INPUT = "input"
 SENSOR_LAST_RESTART = "last_restart"
 SENSOR_MOTION = "motion"
@@ -327,6 +343,7 @@ SENSOR_OVERVOLTAGE = "overvoltage"
 SENSOR_POWER = "power"
 SENSOR_POWER_FACTOR = "power_factor"
 SENSOR_POWER_SUPPLY = "power_supply"
+SENSOR_PRESENCE = "presence"
 SENSOR_RETURNED_ENERGY = "returned_energy"
 SENSOR_SIGNAL_STRENGTH = "signal_strength"
 SENSOR_SMOKE = "smoke"
@@ -419,6 +436,7 @@ TOPIC_STATUS_FLOOD = "~status/flood:0"
 TOPIC_STATUS_PM1 = "~status/pm1:0"
 TOPIC_STATUS_CCT = "~status/cct:{id}"
 TOPIC_STATUS_RGB = "~status/rgb:{id}"
+TOPIC_STATUS_PRESENCE = "~status/presence"
 TOPIC_STATUS_RPC = "~status/rpc"
 TOPIC_STATUS_SMOKE = "~status/smoke:0"
 TOPIC_STATUS_SYS = "~status/sys"
@@ -446,6 +464,7 @@ TPL_CLOUD = "{%if value_json.cloud.connected%}ON{%else%}OFF{%endif%}"
 TPL_CLOUD_INDEPENDENT = "{%if value_json.connected%}ON{%else%}OFF{%endif%}"
 TPL_CURRENT = "{{value_json.current}}"
 TPL_CURRENT_TEMPERATURE = "{{value_json.current_C}}"
+TPL_DETECTED_OBJECTS = "{{value_json.num_objects}}"
 TPL_EMETER_ACTIVE_POWER = "{{value_json.act_power}}"
 TPL_EMETER_PHASE_ACTIVE_POWER = "{{{{value_json.{phase}_act_power}}}}"
 TPL_EMETER_APPARENT_POWER = "{{value_json.aprt_power}}"
@@ -486,6 +505,7 @@ TPL_FIRMWARE_STABLE_ATTRS_INDEPENDENT = (
 )
 TPL_HUMIDITY = "{{value_json.rh}}"
 TPL_ILLUMINANCE = "{{value_json.lux}}"
+TPL_ILLUMINANCE_LEVEL = "{{value_json.illumination}}"
 TPL_INPUT = "{%if value_json.state%}ON{%else%}OFF{%endif%}"
 TPL_INSTALLED_FIRMWARE = "{{value_json.sys.installed_version}}"
 TPL_INSTALLED_FIRMWARE_SYS = "{{value_json.ver}}"
@@ -493,6 +513,7 @@ TPL_MQTT_CONNECTED = "{%if value_json.mqtt.connected%}online{%else%}offline{%end
 TPL_VALUE_ONLINE = "{%if value_json.value%}online{%else%}offline{%endif%}"
 TPL_POWER = "{{value_json.apower}}"
 TPL_POWER_FACTOR = "{{value_json.pf*100}}"
+TPL_PRESENCE = "{%if value_json.num_objects > 0%}ON{%else%}OFF{%endif%}"
 TPL_RELAY_OVERPOWER = (
     "{%if ^overpower^ in value_json.get(^errors^,[])%}ON{%else%}OFF{%endif%}"
 )
@@ -569,13 +590,27 @@ VALUE_TRIGGER = "trigger"
 BTH_HUMIDITY = 46
 BTH_MOTION = 33
 BTH_TEMPERATURE = 69
+GENERIC_BTH_HUMIDITY = 3
+GENERIC_BTH_BATTERY = 1
+GENERIC_BTH_TEMPERATURE = 2
 
-BTH_DEV_MAP = {8: MODEL_BLU_TRV}
+BTH_DEV_MAP = {
+    0: MODEL_GENERIC_BTHOME_DEVICE,
+    1: MODEL_BLU_BUTTON1,
+    3: MODEL_BLU_HT,
+    5: MODEL_BLU_MOTION,
+    6: MODEL_BLU_WALL_SWITCH_4,
+    7: MODEL_BLU_RC_BUTTON_4,
+    8: MODEL_BLU_TRV,
+}
 
 BTH_IDX_MAP = {
     BTH_HUMIDITY: SENSOR_HUMIDITY,
     BTH_MOTION: SENSOR_MOTION,
     BTH_TEMPERATURE: SENSOR_TEMPERATURE,
+    GENERIC_BTH_HUMIDITY: SENSOR_HUMIDITY,
+    GENERIC_BTH_BATTERY: SENSOR_BATTERY,
+    GENERIC_BTH_TEMPERATURE: SENSOR_TEMPERATURE,
 }
 
 DEVICE_TRIGGER_MAP = {
@@ -694,6 +729,15 @@ DESCRIPTION_SENSOR_BTH_DEV_BATTERY = {
     KEY_UNIT: UNIT_PERCENT,
     KEY_VALUE_TEMPLATE: TPL_BATTERY,
 }
+DESCRIPTION_SENSOR_GENERIC_BTH_DEV_BATTERY = {
+    KEY_DEVICE_CLASS: DEVICE_CLASS_BATTERY,
+    KEY_ENABLED_BY_DEFAULT: True,
+    KEY_ENTITY_CATEGORY: ENTITY_CATEGORY_DIAGNOSTIC,
+    KEY_NAME: "Battery",
+    KEY_STATE_TOPIC: TOPIC_STATUS_BTH_SENSOR,
+    KEY_UNIT: UNIT_PERCENT,
+    KEY_VALUE_TEMPLATE: TPL_BTH_SENSOR,
+}
 DESCRIPTION_SENSOR_EXTERNAL_POWER = {
     KEY_DEVICE_CLASS: DEVICE_CLASS_POWER,
     KEY_ENABLED_BY_DEFAULT: True,
@@ -709,6 +753,13 @@ DESCRIPTION_SENSOR_CLOUD = {
     KEY_NAME: "Cloud",
     KEY_STATE_TOPIC: TOPIC_STATUS_RPC,
     KEY_VALUE_TEMPLATE: TPL_CLOUD,
+}
+DESCRIPTION_SENSOR_PRESENCE = {
+    KEY_DEVICE_CLASS: DEVICE_CLASS_OCCUPANCY,
+    KEY_ENABLED_BY_DEFAULT: True,
+    KEY_NAME: "Occupancy",
+    KEY_STATE_TOPIC: TOPIC_STATUS_PRESENCE,
+    KEY_VALUE_TEMPLATE: TPL_PRESENCE,
 }
 DESCRIPTION_SENSOR_POWER_SUPPLY = {
     KEY_DEVICE_CLASS: DEVICE_CLASS_PLUG,
@@ -1517,6 +1568,24 @@ DESCRIPTION_SENSOR_ILLUMINANCE = {
     KEY_UNIT: UNIT_LUX,
     KEY_VALUE_TEMPLATE: TPL_ILLUMINANCE,
 }
+DESCRIPTION_SENSOR_DETECTED = {
+    KEY_ENABLED_BY_DEFAULT: True,
+    KEY_NAME: "Detected",
+    KEY_STATE_CLASS: STATE_CLASS_MEASUREMENT,
+    KEY_STATE_TOPIC: TOPIC_STATUS_PRESENCE,
+    KEY_VALUE_TEMPLATE: TPL_DETECTED_OBJECTS,
+    KEY_ICON: "mdi:account-group",
+    KEY_UNIT: "objects",
+}
+DESCRIPTION_SENSOR_ILLUMINANCE_LEVEL = {
+    KEY_DEVICE_CLASS: DEVICE_CLASS_ENUM,
+    KEY_ENABLED_BY_DEFAULT: True,
+    KEY_NAME: "Illuminance level",
+    KEY_STATE_TOPIC: TOPIC_ILLUMINANCE.format(id=0),
+    KEY_VALUE_TEMPLATE: TPL_ILLUMINANCE_LEVEL,
+    KEY_OPTIONS: ["dark", "twilight", "bright"],
+    KEY_ICON: "mdi:brightness-5",
+}
 DESCRIPTION_SENSOR_HUMIDITY = {
     KEY_DEVICE_CLASS: DEVICE_CLASS_HUMIDITY,
     KEY_ENABLED_BY_DEFAULT: True,
@@ -1553,6 +1622,16 @@ DESCRIPTION_SENSOR_BTH_MOTION = {
     KEY_NAME: "Motion",
     KEY_STATE_TOPIC: TOPIC_STATUS_BTH_SENSOR,
     KEY_VALUE_TEMPLATE: TPL_BTH_BINARY_SENSOR,
+}
+DESCRIPTION_SENSOR_TEMPERATURE = {
+    KEY_DEVICE_CLASS: DEVICE_CLASS_TEMPERATURE,
+    KEY_ENABLED_BY_DEFAULT: True,
+    KEY_NAME: "Temperature",
+    KEY_STATE_CLASS: STATE_CLASS_MEASUREMENT,
+    KEY_STATE_TOPIC: TOPIC_TEMPERATURE.format(id=0),
+    KEY_SUGGESTED_DISPLAY_PRECISION: 1,
+    KEY_UNIT: UNIT_CELSIUS,
+    KEY_VALUE_TEMPLATE: TPL_TEMPERATURE_INDEPENDENT,
 }
 DESCRIPTION_SENSOR_TEMPERATURE = {
     KEY_DEVICE_CLASS: DEVICE_CLASS_TEMPERATURE,
@@ -1823,6 +1902,42 @@ SUPPORTED_MODELS = {
             NUMBER_VALVE_POSITION: DESCRIPTION_NUMBER_BLU_TRV_VALVE_POSITION,
         },
     },
+    MODEL_BLU_BUTTON1: {
+        ATTR_NAME: "Shelly BLU Button1",
+        ATTR_MODEL_ID: MODEL_BLU_BUTTON1,
+        ATTR_SENSORS: {
+            SENSOR_SIGNAL_STRENGTH: DESCRIPTION_SENSOR_BTH_DEV_SIGNAL_STRENGTH,
+            SENSOR_BATTERY: DESCRIPTION_SENSOR_BTH_DEV_BATTERY,
+        },
+        ATTR_INPUTS: 1,
+    },
+    MODEL_BLU_RC_BUTTON_4: {
+        ATTR_NAME: "Shelly BLU RC Button 4",
+        ATTR_MODEL_ID: MODEL_BLU_RC_BUTTON_4,
+        ATTR_SENSORS: {
+            SENSOR_SIGNAL_STRENGTH: DESCRIPTION_SENSOR_BTH_DEV_SIGNAL_STRENGTH,
+            SENSOR_BATTERY: DESCRIPTION_SENSOR_BTH_DEV_BATTERY,
+        },
+        ATTR_INPUTS: 4,
+    },
+    MODEL_BLU_WALL_SWITCH_4: {
+        ATTR_NAME: "Shelly BLU Wall Switch 4",
+        ATTR_MODEL_ID: MODEL_BLU_WALL_SWITCH_4,
+        ATTR_SENSORS: {
+            SENSOR_SIGNAL_STRENGTH: DESCRIPTION_SENSOR_BTH_DEV_SIGNAL_STRENGTH,
+            SENSOR_BATTERY: DESCRIPTION_SENSOR_BTH_DEV_BATTERY,
+        },
+        ATTR_INPUTS: 4,
+    },
+    MODEL_GENERIC_BTHOME_DEVICE: {
+        ATTR_NAME: MODEL_GENERIC_BTHOME_DEVICE,
+        ATTR_SENSORS: {
+            SENSOR_TEMPERATURE: DESCRIPTION_SENSOR_BTH_TEMPERATURE,
+            SENSOR_HUMIDITY: DESCRIPTION_SENSOR_BTH_HUMIDITY,
+            SENSOR_SIGNAL_STRENGTH: DESCRIPTION_SENSOR_BTH_DEV_SIGNAL_STRENGTH,
+            SENSOR_BATTERY: DESCRIPTION_SENSOR_GENERIC_BTH_DEV_BATTERY,
+        },
+    },
     MODEL_BLU_HT: {
         ATTR_NAME: "Shelly BLU H&T",
         ATTR_MODEL_ID: "SBHT-003C",
@@ -1909,6 +2024,38 @@ SUPPORTED_MODELS = {
             UPDATE_FIRMWARE_BETA: DESCRIPTION_UPDATE_FIRMWARE_BETA,
         },
         ATTR_MIN_FIRMWARE_DATE: 20240331,
+    },
+    MODEL_1L_G3: {
+        ATTR_NAME: "Shelly 1L Gen3",
+        ATTR_MODEL_ID: "S3SW-0A1X1EUL",
+        ATTR_GEN: 3,
+        ATTR_BINARY_SENSORS: {SENSOR_CLOUD: DESCRIPTION_SENSOR_CLOUD},
+        ATTR_BUTTONS: {BUTTON_RESTART: DESCRIPTION_BUTTON_RESTART},
+        ATTR_INPUT_BINARY_SENSORS: {SENSOR_INPUT: DESCRIPTION_SENSOR_INPUT},
+        ATTR_INPUT_EVENTS: [
+            EVENT_BUTTON_DOWN,
+            EVENT_BUTTON_UP,
+            EVENT_DOUBLE_PUSH,
+            EVENT_LONG_PUSH,
+            EVENT_SINGLE_PUSH,
+            EVENT_TRIPLE_PUSH,
+        ],
+        ATTR_RELAYS: 1,
+        ATTR_RELAY_SENSORS: {
+            SENSOR_TEMPERATURE: DESCRIPTION_SENSOR_RELAY_TEMPERATURE_STATUS
+        },
+        ATTR_RELAY_BINARY_SENSORS: {SENSOR_OVERTEMP: DESCRIPTION_SENSOR_OVERTEMP},
+        ATTR_SENSORS: {
+            SENSOR_LAST_RESTART: DESCRIPTION_SENSOR_LAST_RESTART,
+            SENSOR_SSID: DESCRIPTION_SENSOR_SSID,
+            SENSOR_WIFI_IP: DESCRIPTION_SENSOR_WIFI_IP,
+            SENSOR_WIFI_SIGNAL: DESCRIPTION_SENSOR_WIFI_SIGNAL,
+        },
+        ATTR_UPDATES: {
+            UPDATE_FIRMWARE: DESCRIPTION_UPDATE_FIRMWARE,
+            UPDATE_FIRMWARE_BETA: DESCRIPTION_UPDATE_FIRMWARE_BETA,
+        },
+        ATTR_MIN_FIRMWARE_DATE: 20250319,
     },
     MODEL_1_G4: {
         ATTR_NAME: "Shelly 1 Gen4",
@@ -2605,6 +2752,36 @@ SUPPORTED_MODELS = {
         },
         ATTR_MIN_FIRMWARE_DATE: 20230803,
     },
+    MODEL_2L_G3: {
+        ATTR_NAME: "Shelly 2L Gen3",
+        ATTR_MODEL_ID: "S3SW-0A2X4EUL",
+        ATTR_GEN: 3,
+        ATTR_BINARY_SENSORS: {SENSOR_CLOUD: DESCRIPTION_SENSOR_CLOUD},
+        ATTR_BUTTONS: {BUTTON_RESTART: DESCRIPTION_BUTTON_RESTART},
+        ATTR_INPUT_BINARY_SENSORS: {SENSOR_INPUT: DESCRIPTION_SENSOR_INPUT},
+        ATTR_INPUT_EVENTS: [
+            EVENT_BUTTON_DOWN,
+            EVENT_BUTTON_UP,
+            EVENT_DOUBLE_PUSH,
+            EVENT_LONG_PUSH,
+            EVENT_SINGLE_PUSH,
+            EVENT_TRIPLE_PUSH,
+        ],
+        ATTR_RELAYS: 2,
+        ATTR_RELAY_BINARY_SENSORS: {SENSOR_OVERTEMP: DESCRIPTION_SENSOR_OVERTEMP},
+        ATTR_RELAY_SENSORS: {SENSOR_TEMPERATURE: DESCRIPTION_SENSOR_RELAY_TEMPERATURE},
+        ATTR_SENSORS: {
+            SENSOR_LAST_RESTART: DESCRIPTION_SENSOR_LAST_RESTART,
+            SENSOR_SSID: DESCRIPTION_SENSOR_SSID,
+            SENSOR_WIFI_IP: DESCRIPTION_SENSOR_WIFI_IP,
+            SENSOR_WIFI_SIGNAL: DESCRIPTION_SENSOR_WIFI_SIGNAL,
+        },
+        ATTR_UPDATES: {
+            UPDATE_FIRMWARE: DESCRIPTION_UPDATE_FIRMWARE,
+            UPDATE_FIRMWARE_BETA: DESCRIPTION_UPDATE_FIRMWARE_BETA,
+        },
+        ATTR_MIN_FIRMWARE_DATE: 20250319,
+    },
     MODEL_2PM_G3: {
         ATTR_NAME: "Shelly 2PM Gen3",
         ATTR_MODEL_ID: "S3SW-002P16EU",
@@ -3124,6 +3301,61 @@ SUPPORTED_MODELS = {
         },
         ATTR_MIN_FIRMWARE_DATE: 20230803,
     },
+    MODEL_POWER_STRIP_G4: {
+        ATTR_NAME: "Shelly Power Strip Gen4",
+        ATTR_MODEL_ID: "S4PL-00416EU",
+        ATTR_GEN: 4,
+        ATTR_BINARY_SENSORS: {SENSOR_CLOUD: DESCRIPTION_SENSOR_CLOUD},
+        ATTR_BUTTONS: {BUTTON_RESTART: DESCRIPTION_BUTTON_RESTART},
+        ATTR_RELAYS: 4,
+        ATTR_RELAY_BINARY_SENSORS: {
+            SENSOR_OVERPOWER: DESCRIPTION_SENSOR_OVERPOWER,
+            SENSOR_OVERTEMP: DESCRIPTION_SENSOR_OVERTEMP,
+            SENSOR_OVERVOLTAGE: DESCRIPTION_SENSOR_OVERVOLTAGE,
+        },
+        ATTR_RELAY_SENSORS: {
+            SENSOR_CURRENT: DESCRIPTION_SENSOR_CURRENT,
+            SENSOR_ENERGY: DESCRIPTION_SENSOR_ENERGY,
+            SENSOR_FREQUENCY: DESCRIPTION_SENSOR_FREQUENCY,
+            SENSOR_POWER: DESCRIPTION_SENSOR_POWER,
+            SENSOR_POWER_FACTOR: DESCRIPTION_SENSOR_POWER_FACTOR,
+            SENSOR_RETURNED_ENERGY: DESCRIPTION_SENSOR_RETURNED_ENERGY,
+            SENSOR_VOLTAGE: DESCRIPTION_SENSOR_VOLTAGE,
+        },
+        ATTR_SENSORS: {
+            SENSOR_LAST_RESTART: DESCRIPTION_SENSOR_LAST_RESTART,
+            SENSOR_SSID: DESCRIPTION_SENSOR_SSID,
+            SENSOR_WIFI_IP: DESCRIPTION_SENSOR_WIFI_IP,
+            SENSOR_WIFI_SIGNAL: DESCRIPTION_SENSOR_WIFI_SIGNAL,
+        },
+        ATTR_UPDATES: {
+            UPDATE_FIRMWARE: DESCRIPTION_UPDATE_FIRMWARE,
+            UPDATE_FIRMWARE_BETA: DESCRIPTION_UPDATE_FIRMWARE_BETA,
+        },
+        ATTR_MIN_FIRMWARE_DATE: 20250804,
+    },
+    MODEL_PRESENCE_G4: {
+        ATTR_NAME: "Shelly Presence Gen4",
+        ATTR_MODEL_ID: "S4SN-0U61X",
+        ATTR_GEN: 4,
+        ATTR_BINARY_SENSORS: {
+            SENSOR_CLOUD: DESCRIPTION_SENSOR_CLOUD,
+            SENSOR_PRESENCE: DESCRIPTION_SENSOR_PRESENCE,
+        },
+        ATTR_SENSORS: {
+            SENSOR_DETECTED: DESCRIPTION_SENSOR_DETECTED,
+            SENSOR_ILLUMINANCE_LEVEL: DESCRIPTION_SENSOR_ILLUMINANCE_LEVEL,
+            SENSOR_LAST_RESTART: DESCRIPTION_SENSOR_LAST_RESTART,
+            SENSOR_SSID: DESCRIPTION_SENSOR_SSID,
+            SENSOR_WIFI_IP: DESCRIPTION_SENSOR_WIFI_IP,
+            SENSOR_WIFI_SIGNAL: DESCRIPTION_SENSOR_WIFI_SIGNAL,
+        },
+        ATTR_UPDATES: {
+            UPDATE_FIRMWARE: DESCRIPTION_UPDATE_FIRMWARE,
+            UPDATE_FIRMWARE_BETA: DESCRIPTION_UPDATE_FIRMWARE_BETA,
+        },
+        ATTR_MIN_FIRMWARE_DATE: 20250915,
+    },
     MODEL_PRO_1: {
         ATTR_NAME: "Shelly Pro 1",
         ATTR_MODEL_ID: "SPSW-001XE16EU",
@@ -3522,6 +3754,43 @@ SUPPORTED_MODELS = {
         },
         ATTR_MIN_FIRMWARE_DATE: 20241011,
     },
+    MODEL_3EM_63_G3: {
+        ATTR_NAME: "Shelly 3EM-63 G3",
+        ATTR_MODEL_ID: "S3EM-003CXCEU63",
+        ATTR_EMETERS: 1,
+        ATTR_EMETER_PHASES: ["a", "b", "c"],
+        ATTR_BINARY_SENSORS: {SENSOR_CLOUD: DESCRIPTION_SENSOR_CLOUD},
+        ATTR_BUTTONS: {BUTTON_RESTART: DESCRIPTION_BUTTON_RESTART},
+        ATTR_SENSORS: {
+            SENSOR_ETH_IP: DESCRIPTION_SENSOR_ETH_IP,
+            SENSOR_LAST_RESTART: DESCRIPTION_SENSOR_LAST_RESTART,
+            SENSOR_SSID: DESCRIPTION_SENSOR_SSID,
+            SENSOR_WIFI_IP: DESCRIPTION_SENSOR_WIFI_IP,
+            SENSOR_WIFI_SIGNAL: DESCRIPTION_SENSOR_WIFI_SIGNAL,
+            SENSOR_N_CURRENT: DESCRIPTION_SENSOR_N_CURRENT,
+            SENSOR_DEVICE_TEMPERATURE: DESCRIPTION_SENSOR_DEVICE_TEMPERATURE,
+            SENSOR_TOTAL_CURRENT: DESCRIPTION_SENSOR_TOTAL_CURRENT,
+            SENSOR_TOTAL_ACTIVE_POWER: DESCRIPTION_SENSOR_EMETER_TOTAL_ACTIVE_POWER,
+            SENSOR_TOTAL_APPARENT_POWER: DESCRIPTION_SENSOR_EMETER_TOTAL_APPARENT_POWER,
+            SENSOR_TOTAL_ACTIVE_ENERGY: DESCRIPTION_SENSOR_EMETER0_TOTAL_ACTIVE_ENERGY,
+            SENSOR_TOTAT_ACTIVE_RETURNED_ENERGY: DESCRIPTION_SENSOR_EMETER0_TOTAL_ACTIVE_RETURNED_ENERGY,
+        },
+        ATTR_EMETER_SENSORS: {
+            SENSOR_ACTIVE_POWER: DESCRIPTION_SENSOR_EMETER_PHASE_ACTIVE_POWER,
+            SENSOR_APPARENT_POWER: DESCRIPTION_SENSOR_EMETER_PHASE_APPARENT_POWER,
+            SENSOR_CURRENT: DESCRIPTION_SENSOR_EMETER_PHASE_CURRENT,
+            SENSOR_POWER_FACTOR: DESCRIPTION_SENSOR_EMETER_PHASE_POWER_FACTOR,
+            SENSOR_TOTAL_ACTIVE_ENERGY: DESCRIPTION_SENSOR_EMETER_PHASE_TOTAL_ACTIVE_ENERGY,
+            SENSOR_TOTAT_ACTIVE_RETURNED_ENERGY: DESCRIPTION_SENSOR_EMETER_PHASE_TOTAL_ACTIVE_RETURNED_ENERGY,
+            SENSOR_VOLTAGE: DESCRIPTION_SENSOR_EMETER_PHASE_VOLTAGE,
+            SENSOR_FREQUENCY: DESCRIPTION_SENSOR_EMETER_PHASE_FREQUENCY,
+        },
+        ATTR_UPDATES: {
+            UPDATE_FIRMWARE: DESCRIPTION_UPDATE_FIRMWARE,
+            UPDATE_FIRMWARE_BETA: DESCRIPTION_UPDATE_FIRMWARE_BETA,
+        },
+        ATTR_MIN_FIRMWARE_DATE: 20250520,
+    },
     MODEL_PRO_3EM_3CT63_MONOPHASE: {
         ATTR_NAME: "Shelly Pro 3EM-3CT63",
         ATTR_MODEL_ID: "SPEM-003CEBEU63",
@@ -3706,6 +3975,27 @@ SUPPORTED_MODELS = {
             UPDATE_FIRMWARE_BETA: DESCRIPTION_UPDATE_FIRMWARE_BETA,
         },
         ATTR_MIN_FIRMWARE_DATE: 20240816,
+    },
+    MODEL_DUO_BULB_G3: {
+        ATTR_NAME: "Shelly Duo Bulb Gen3",
+        ATTR_MODEL_ID: "S3BL-D010009AEU",
+        ATTR_GEN: 3,
+        ATTR_BINARY_SENSORS: {SENSOR_CLOUD: DESCRIPTION_SENSOR_CLOUD},
+        ATTR_CCT_SENSORS: {
+            SENSOR_ENERGY: DESCRIPTION_SENSOR_CCT_ENERGY,
+            SENSOR_POWER: DESCRIPTION_SENSOR_CCT_POWER,
+        },
+        ATTR_SENSORS: {
+            SENSOR_LAST_RESTART: DESCRIPTION_SENSOR_LAST_RESTART,
+            SENSOR_SSID: DESCRIPTION_SENSOR_SSID,
+            SENSOR_WIFI_IP: DESCRIPTION_SENSOR_WIFI_IP,
+            SENSOR_WIFI_SIGNAL: DESCRIPTION_SENSOR_WIFI_SIGNAL,
+        },
+        ATTR_UPDATES: {
+            UPDATE_FIRMWARE: DESCRIPTION_UPDATE_FIRMWARE,
+            UPDATE_FIRMWARE_BETA: DESCRIPTION_UPDATE_FIRMWARE_BETA,
+        },
+        ATTR_MIN_FIRMWARE_DATE: 20250909,
     },
     MODEL_WALL_DISPLAY: {
         ATTR_NAME: "Shelly Wall Display",
@@ -4335,6 +4625,13 @@ def get_cct_light(cct_id: int):
     light_name = (
         device_config[f"cct:{cct_id}"][ATTR_NAME] or f"CCT light {cct_id}"
     ).replace("'", "_")
+
+    min_ct = 2700
+    max_ct = 6500
+    if "ct_range" in device_config[f"cct:{cct_id}"]:
+        min_ct = device_config[f"cct:{cct_id}"]["ct_range"][0]
+        max_ct = device_config[f"cct:{cct_id}"]["ct_range"][1]
+
     payload = {
         KEY_SCHEMA: "template",
         KEY_NAME: light_name,
@@ -4345,8 +4642,8 @@ def get_cct_light(cct_id: int):
         KEY_STATE_TEMPLATE: "{%if value_json.output%}on{%else%}off{%endif%}",
         KEY_BRIGHTNESS_TEMPLATE: "{{value_json.brightness|float|multiply(2.55)|round}}",
         KEY_COLOR_TEMP_TEMPLATE: "{{(1000000/value_json.ct)|round}}",
-        KEY_MAX_MIREDS: round(1000000 / device_config[f"cct:{cct_id}"]["ct_range"][0]),
-        KEY_MIN_MIREDS: round(1000000 / device_config[f"cct:{cct_id}"]["ct_range"][1]),
+        KEY_MAX_MIREDS: round(1000000 / min_ct),
+        KEY_MIN_MIREDS: round(1000000 / max_ct),
         KEY_AVAILABILITY: availability,
         KEY_UNIQUE_ID: f"{device_id}-cct-{cct_id}".lower(),
         KEY_QOS: qos,
@@ -4568,6 +4865,8 @@ def get_sensor(
     else:
         payload[KEY_STATE_TOPIC] = description[KEY_STATE_TOPIC]
 
+    if options := description.get(KEY_OPTIONS):
+        payload[KEY_OPTIONS] = options
     if description.get(KEY_UNIT):
         payload[KEY_UNIT] = description[KEY_UNIT]
     if description.get(KEY_ICON):
@@ -4686,6 +4985,54 @@ def get_binary_sensor(
         payload[KEY_ENTITY_CATEGORY] = description[KEY_ENTITY_CATEGORY]
     if description.get(KEY_STATE_CLASS):
         payload[KEY_STATE_CLASS] = description[KEY_STATE_CLASS]
+
+    return topic, payload
+
+
+def get_bthome_event(input_id, bt_id, device_id_prefix):
+    """Create configuration for BTHome device event entity."""
+    topic = encode_config_topic(
+        f"{disc_prefix}/event/{device_id_prefix}-{bt_id}-{input_id}/config"
+    )
+
+    payload = {
+        KEY_NAME: f"Button {input_id}",
+        KEY_STATE_TOPIC: TOPIC_EVENTS_RPC,
+        KEY_EVENT_TYPES: [
+            EVENT_SINGLE_PUSH,
+            EVENT_DOUBLE_PUSH,
+            EVENT_LONG_PUSH,
+            EVENT_TRIPLE_PUSH,
+        ],
+        KEY_VALUE_TEMPLATE: f"{{%if value_json.params.events.0.component==^bthomedevice:{bt_id}^ and value_json.params.events.0.idx is defined and value_json.params.events.0.idx=={input_id} and value_json.params.events.0.event is defined%}}{{{{{{^event_type^:value_json.params.events.0.event}}|to_json}}}}{{%endif%}}",
+        KEY_UNIQUE_ID: f"{device_id_prefix}-{bt_id}-{input_id}".lower(),
+        KEY_QOS: qos,
+        KEY_AVAILABILITY: availability,
+        KEY_DEVICE: device_info,
+        KEY_ORIGIN: origin_info,
+        KEY_DEFAULT_TOPIC: default_topic,
+        KEY_DEVICE_CLASS: DEVICE_CLASS_BUTTON,
+    }
+
+    return topic, payload
+
+
+def get_bthome_input(input_id, bt_id, device_id_prefix, event):
+    """Create configuration for BTHome device input event automation."""
+    topic = encode_config_topic(
+        f"{disc_prefix}/device_automation/{device_id_prefix}-{bt_id}-{input_id}/{event}/config"
+    )
+
+    payload = {
+        KEY_AUTOMATION_TYPE: VALUE_TRIGGER,
+        KEY_TOPIC: f"{default_topic}events/rpc",
+        KEY_PAYLOAD: f"bthomedevice:{bt_id}_{input_id}_{event}",
+        KEY_VALUE_TEMPLATE: "{{value_json.params.events.0.component}}_{{value_json.params.events.0.idx}}_{{value_json.params.events.0.event}}",
+        KEY_QOS: qos,
+        KEY_DEVICE: device_info,
+        KEY_TYPE: DEVICE_TRIGGER_MAP[event],
+        KEY_SUBTYPE: f"button_{input_id + 1}",
+    }
 
     return topic, payload
 
@@ -5273,16 +5620,15 @@ if "components" in device_config:
 
     via_device = format_mac(device_id.rsplit("-", 1)[-1])
 
+    original_device_id = device_id
+
     for device, config in bthome_devices.items():
         btdevice_id = device.split(":")[-1]
         if f"blutrv:{btdevice_id}" in blutrv_devices:
             continue
 
         if not (model := config["meta"]["ui"].get("local_name")):
-            logger.warning(  # noqa: F821
-                "device %s doesn't present MODEL ID, update device's firmware", device
-            )
-            continue
+            model = BTH_DEV_MAP.get(config.get("model_id", MODEL_GENERIC_BTHOME_DEVICE))
 
         if model not in SUPPORTED_MODELS:
             logger.warning(  # noqa: F821
@@ -5299,16 +5645,18 @@ if "components" in device_config:
             config[ATTR_NAME]
             or f"{SUPPORTED_MODELS[model][ATTR_NAME]} {mac.upper().replace(':', '')}"
         ).replace("'", "_")
-        device_id += f"-{mac.replace(':', '')}"
+
+        device_id = f"{original_device_id}-{mac.replace(':', '')}"
         device_info = {
             KEY_CONNECTIONS: [["bluetooth", mac]],
             KEY_IDENTIFIERS: [mac],
             KEY_NAME: device_name,
             KEY_MODEL: SUPPORTED_MODELS[model][ATTR_NAME],
-            KEY_MODEL_ID: SUPPORTED_MODELS[model][ATTR_MODEL_ID],
             KEY_MANUFACTURER: ATTR_MANUFACTURER,
             KEY_VIA_DEVICE: via_device,
         }
+        if model_id := SUPPORTED_MODELS[model].get(ATTR_MODEL_ID):
+            device_info[KEY_MODEL_ID] = model_id
 
         binary_sensors = SUPPORTED_MODELS[model].get(ATTR_BINARY_SENSORS, {})
         sensors = SUPPORTED_MODELS[model].get(ATTR_SENSORS, {})
@@ -5336,6 +5684,25 @@ if "components" in device_config:
                 binary_sensor, description, bt_id=btsensor_id or btdevice_id
             )
             config_data[topic] = payload
+
+        bth_inputs = SUPPORTED_MODELS[model].get(ATTR_INPUTS, 0)
+
+        for input_id in range(bth_inputs):
+            # Create event entity for button presses
+            topic, payload = get_bthome_event(input_id, btdevice_id, device_id)
+            config_data[topic] = payload
+
+            # Create device automation triggers for each supported event type
+            for event in [
+                EVENT_SINGLE_PUSH,
+                EVENT_DOUBLE_PUSH,
+                EVENT_LONG_PUSH,
+                EVENT_TRIPLE_PUSH,
+            ]:
+                topic, payload = get_bthome_input(
+                    input_id, btdevice_id, device_id, event
+                )
+                config_data[topic] = payload
 
     for thermostat, config in blutrv_devices.items():
         model = BTH_DEV_MAP.get(config.get("model_id"))

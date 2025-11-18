@@ -3,22 +3,19 @@ binary_sensor:
   - unique_id: garage_open_at_night
     state: >-
       {{ is_state("sun.sun", "below_horizon") and (is_state("cover.left_garage_door", "open") or is_state("cover.right_garage_door", "open")) }}
-    attributes:
-      friendly_name: "Garage doors"
+    name: "Garage doors"
 
   # On if the alarm isn't set and we are 10 miles from home
   - unique_id: alarm_not_set
     state: >-
       {{ states("sensor.home_proximity_nearest_distance")|int > 52800 and is_state("alarm_control_panel.abode_alarm", "disarmed") }}
-    attributes:
-      friendly_name: "Alarm"
+    name: "Alarm"
 
   # On if office UPS has low voltage
   - unique_id: office_ups_low_voltage
     state: >-
       {{ states("sensor.office_ups_input_voltage")|int < 100 }}
-    attributes:
-      friendly_name: "Office UPS low voltage"
+    name: "Office UPS low voltage"
 
   # On if the Lomi is running
   - unique_id: lomi_running
@@ -27,5 +24,4 @@ binary_sensor:
     delay_off: 
       seconds: 10
     state: "{{ states('sensor.lomi_plug_power')|int(0) > 5 }}" 
-    attributes:
-      friendly_name: "Lomi"
+    name: "Lomi"

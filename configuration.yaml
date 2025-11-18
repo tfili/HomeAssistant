@@ -23,8 +23,6 @@ homeassistant:
       trusted_users:
         192.168.0.4:
           - 9c546e5ab33f47fcbd2103594668aaaf # tom
-        192.168.0.5:
-          - 7e537ada4de44808a33c00cbf425c4e0 # jami
         192.168.0.0/24:
           - 74a1a86c82c44c3db9e8263156846c35 # Kiosk
 
@@ -32,6 +30,11 @@ homeassistant:
   customize_domain:
     automation:
       initial_state: true
+
+http:
+  use_x_forwarded_for: true
+  trusted_proxies:
+    - 192.168.0.4
 
 logger:
   default: warning
@@ -54,7 +57,7 @@ wake_on_lan:
 # Recorder
 recorder:
   # MariaDB
-  db_url: mysql://homeassistant:vcQh9QYWaWqexC86FyqYechwKgHS9mqr@core-mariadb/homeassistant?charset=utf8mb4
+  db_url: mysql://homeassistant:vcQh9QYWaWqexC86FyqYechwKgHS9mqr@mariadb.home.filidelphia.com/homeassistant?charset=utf8mb4
   # Exclude history some entities
   exclude:
     domains:

@@ -23,7 +23,6 @@ morning_room_door:
       entity_id: alert.morning_room_door
   notifiers:
     - mobile_app_toms_iphone
-    - mobile_app_jamis_iphone
 
 front_door:
   name: Front Door Ajar
@@ -50,7 +49,6 @@ front_door:
       entity_id: alert.front_door
   notifiers:
     - mobile_app_toms_iphone
-    - mobile_app_jamis_iphone
 
 mud_room_door:
   name: Mud Room Door Ajar
@@ -77,7 +75,6 @@ mud_room_door:
       entity_id: alert.mud_room_door
   notifiers:
     - mobile_app_toms_iphone
-    - mobile_app_jamis_iphone
 
 mailbox:
   name: Mailbox Ajar
@@ -104,7 +101,6 @@ mailbox:
       entity_id: alert.mailbox
   notifiers:
     - mobile_app_toms_iphone
-    - mobile_app_jamis_iphone
 
 garage_doors:
   name: Garage Door Ajar
@@ -130,7 +126,6 @@ garage_doors:
       entity_id: alert.garage_doors
   notifiers:
     - mobile_app_toms_iphone
-    - mobile_app_jamis_iphone
 
 mail_delivered:
   name: Mail Delivered
@@ -184,7 +179,6 @@ alarm_not_set:
       entity_id: alert.alarm_not_set
   notifiers:
     - mobile_app_toms_iphone
-    - mobile_app_jamis_iphone
 
 office_ups_low_voltage:
   name: Office UPS Low Voltage

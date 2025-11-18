@@ -1,4 +1,5 @@
 .HA_VERSION
+.ha_run.lock
 
 # Abode
 abodepy_cache.pickle
