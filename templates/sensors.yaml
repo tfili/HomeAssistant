@@ -2,8 +2,8 @@ sensor:
   - name: Tom's Location
     unique_id: toms_location_template_sensor
     state: >
-      {% if(is_state("device_tracker.toms_iphone","home") and not is_state("sensor.tom_s_iphone_presence","not_home")) %}
-        {{ states("sensor.tom_s_iphone_presence") }}
+      {% if(is_state("device_tracker.tom_s_phone_ble_bermuda_tracker","home")) %}
+        {{ states("sensor.tom_s_phone_ble_area") }}
       {% else %}
-        {{ states("device_tracker.toms_iphone") }}
+        {{ states("device_tracker.tom_s_phone_ble_bermuda_tracker") | replace("_", " ") | title }}
       {% endif %}

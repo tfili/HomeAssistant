@@ -8,6 +8,9 @@ homeassistant:
     - "/tmp"
     - "/media"
 
+  media_dirs:
+    media: /media
+
   # 2FA
   auth_mfa_modules:
     - type: totp
@@ -89,11 +92,8 @@ automation: !include automations.yaml
 input_boolean: !include input_boolean.yaml
 notify: !include notify.yaml
 script: !include scripts.yaml
-sensor: !include sensors.yaml
 shell_command: !include shell_command.yaml
-switch: !include switch.yaml
 template: !include_dir_list templates/
-weather: !include weather.yaml
 
 # Enable python scripts (built-in and pyscript)
 python_script:

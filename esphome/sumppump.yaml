@@ -1,0 +1,38 @@
+substitutions:
+  wifi_ssid: !secret wifi_ssid
+  wifi_password: !secret wifi_password
+  encryption_key: !secret sump_pump_key
+  ota_password: !secret sump_pump_ota
+
+esphome:
+  name: sumppump
+  platform: ESP8266
+  board: nodemcuv2
+    
+wifi:
+  ssid: ${wifi_ssid}
+  password: ${wifi_password}
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+  password: ${encryption_key}
+
+ota:
+  password: ${ota_password}
+
+sensor:
+  - platform: ultrasonic
+    trigger_pin: D1
+    echo_pin: D2
+    name: "Water Tank Level"
+    unit_of_measurement: "%"
+    accuracy_decimals: 0
+    update_interval: 10s
+    pulse_time: 20us
+    timeout: 2m
+    filters:
+      - lambda: return ((((x*100)-20)-(123-20))/(123-20))*-100;
+      - filter_out: nan

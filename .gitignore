@@ -44,10 +44,7 @@ home-assistant.log.*
 webostv.conf
 
 # Nest event images
-/nest/event_media/**/*.jpg
+/media
 
 # Watchman report
 /watchman_report.txt
-
-# Temporarily ignore esphome
-/esphome/*

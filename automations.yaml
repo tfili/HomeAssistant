@@ -309,6 +309,7 @@
       device_ids:
       - shellies/lomi-plug
       - shellies/basement-wine-rack-dimmer
+      - shellies/bathroom-nightlight
   - repeat:
       for_each: '{{ device_ids }}'
       sequence:
@@ -602,7 +603,7 @@
     action: alert.turn_off
   mode: single
 - id: '1689010815681'
-  alias: Turn on porch & driveway lights
+  alias: Sunrise/Sunset Lights
   description: ''
   triggers:
   - event: sunset
@@ -624,6 +625,7 @@
         entity_id:
         - light.porch_lights
         - light.driveway_lights
+        - light.bathroom_nightlight
       action: light.turn_on
     else:
     - data: {}
@@ -631,6 +633,7 @@
         entity_id:
         - light.porch_lights
         - light.driveway_lights
+        - light.bathroom_nightlight
       action: light.turn_off
   mode: single
 - id: '1689021667956'
@@ -907,6 +910,7 @@
             - light.basement_lights
             - light.kitchen_dimmer
             - light.cabinet
+            device_id: 1e81806b7b9df2a87664f6ab50861df9
           action: light.turn_off
         - data:
             num_repeats: 1
@@ -1083,12 +1087,6 @@
             type: tts
           message: '{{ alert_message }}'
         action: notify.alexa_media
-      - action: media_player.play_media
-        data: {}
-        target:
-          device_id:
-          - c2685da3baade91935397f4ed4c077b5
-        enabled: false
       - data:
           media:
             media_content_id: Show front door fluent
@@ -1122,7 +1120,7 @@
         enabled: true
         target:
           entity_id: camera.front_doorbell_fluent
-      enabled: false
+      enabled: true
     - sequence:
       - if:
         - condition: state
@@ -2053,4 +2051,24 @@
 
         {% endif %}'
       title: Tom Location Changed
+  mode: single
+- id: '1763877473077'
+  alias: Startup Hacks
+  description: Hacks that happen on startup
+  triggers:
+  - trigger: homeassistant
+    event: start
+  conditions: []
+  actions:
+  - if:
+    - condition: state
+      entity_id: light.wine_rack
+      state:
+      - unknown
+    then:
+    - action: light.turn_off
+      metadata: {}
+      data: {}
+      target:
+        entity_id: light.wine_rack
   mode: single
