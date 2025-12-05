@@ -727,12 +727,12 @@
   - condition: not
     conditions:
     - condition: state
-      entity_id: alarm_control_panel.wrapped_alarm
+      entity_id: alarm_control_panel.alarm
       state: disarmed
   actions:
   - data: {}
     target:
-      entity_id: alarm_control_panel.wrapped_alarm
+      entity_id: alarm_control_panel.alarm
     action: alarm_control_panel.alarm_disarm
   mode: single
 - id: '1689027625322'
@@ -750,7 +750,7 @@
   actions:
   - data: {}
     target:
-      entity_id: alarm_control_panel.wrapped_alarm
+      entity_id: alarm_control_panel.alarm
     action: alarm_control_panel.alarm_arm_away
   mode: single
 - id: '1689097272905'
@@ -789,7 +789,7 @@
   description: ''
   triggers:
   - entity_id:
-    - alarm_control_panel.wrapped_alarm
+    - alarm_control_panel.alarm
     to: disarmed
     for:
       hours: 0
@@ -853,11 +853,11 @@
   description: ''
   triggers:
   - entity_id:
-    - alarm_control_panel.wrapped_alarm
+    - alarm_control_panel.alarm
     to: armed_away
     trigger: state
   - entity_id:
-    - alarm_control_panel.wrapped_alarm
+    - alarm_control_panel.alarm
     to: armed_home
     trigger: state
   - event_type: alarm_tasks_no_arm
@@ -1266,7 +1266,7 @@
     id: temp_change
     trigger: state
   - entity_id:
-    - alarm_control_panel.wrapped_alarm
+    - alarm_control_panel.alarm
     to: armed_away
     id: alarm_away
     trigger: state
@@ -1334,7 +1334,7 @@
     - condition: or
       conditions:
       - condition: state
-        entity_id: alarm_control_panel.wrapped_alarm
+        entity_id: alarm_control_panel.alarm
         state: armed_away
       - condition: and
         conditions:
@@ -1437,7 +1437,7 @@
       then:
       - data: {}
         target:
-          entity_id: cover.wrapped_right_garage
+          entity_id: cover.right_garage_door
         action: cover.open_cover
     - if:
       - condition: template
@@ -1446,62 +1446,41 @@
       then:
       - data: {}
         target:
-          entity_id: cover.wrapped_left_garage
+          entity_id: cover.left_garage_door
         action: cover.open_cover
   mode: single
 - id: '1690424019295'
   alias: Abode Test
   description: ''
   triggers:
-  - event_type: abode_alarm
-    event_data: {}
-    trigger: event
-  - event_type: abode_alarm_end
-    event_data: {}
-    trigger: event
   - event_type: abode_automation
     event_data: {}
     trigger: event
-  - event_type: abode_panel_fault
-    event_data: {}
-    trigger: event
-  - event_type: abode_panel_restore
-    event_data: {}
-    trigger: event
-  - event_type: abode_disarm
-    event_data: {}
-    trigger: event
-  - event_type: abode_arm
-    event_data: {}
-    trigger: event
-  - event_type: abode_arm_fault
-    event_data: {}
-    trigger: event
-  - event_type: abode_test
-    event_data: {}
-    trigger: event
-  - event_type: abode_capture
-    event_data: {}
-    trigger: event
+    enabled: true
+    id: automation
   - event_type: abode_device
     event_data: {}
     trigger: event
+    enabled: true
+    id: device
   conditions: []
   actions:
-  - event: '{{ trigger.event.event_type | replace(''abode'', ''alarm'') }}'
-    event_data:
-      device_id: '{{ trigger.event.data.device_id }}'
-      device_name: '{{ trigger.event.data.device_name }}'
-      device_type: '{{ trigger.event.data.device_type }}'
-      event_code: '{{ trigger.event.data.event_code }}'
-      event_name: '{{ trigger.event.data.event_name }}'
-      event_type: '{{ trigger.event.data.event_type }}'
-      event_utc: '{{ trigger.event.data.event_utc }}'
-      user_name: '{{ trigger.event.data.user_name }}'
-      app_type: '{{ trigger.event.data.app_type }}'
-      event_by: '{{ trigger.event.data.event_by }}'
-      date: '{{ trigger.event.data.date }}'
-      time: '{{ trigger.event.data.time }}'
+  - variables:
+      garage_door: "{% if 'Right' in trigger.event.device_name %}\n  right\n{% else
+        %}\n  left\n{% endif %}\n"
+      new_state: "{% if trigger.id == \"automation\" %}\n  {% if 'Open' in trigger.event.device_name
+        %}\n    opening\n  {% else %}\n    closing\n  {% endif %}\n{% elif trigger.id
+        == \"automation\" %}\n  {% if trigger.event.event_code == '5150' %}\n    open\n
+        \ {% elif trigger.event.event_code == '5151' %}\n    closed\n  {% endif %}\n{%
+        else %}\n  {{ states(\"cover.abode_\" ~ garage_door ~ \"_garage_door\") }}\n{%
+        endif %}\n"
+  - condition: template
+    value_template: '{{ new_state != "" }}'
+  - action: notify.mobile_app_toms_iphone
+    metadata: {}
+    data:
+      message: '{{ new_state }} - {{ garage_door }}'
+      title: Garage Update
   mode: single
 - id: '1691811863982'
   alias: Reset Ad Filter
@@ -1712,7 +1691,7 @@
     to:
   - trigger: state
     entity_id:
-    - alarm_control_panel.wrapped_alarm
+    - alarm_control_panel.alarm
     to: armed_away
   conditions:
   - condition: state
@@ -1744,7 +1723,7 @@
     - condition: not
       conditions:
       - condition: state
-        entity_id: alarm_control_panel.wrapped_alarm
+        entity_id: alarm_control_panel.alarm
         state: armed_away
     then:
     - sequence:
@@ -1856,7 +1835,7 @@
     to:
   - trigger: state
     entity_id:
-    - alarm_control_panel.wrapped_alarm
+    - alarm_control_panel.alarm
     to: armed_away
   conditions:
   - condition: state
@@ -1892,7 +1871,7 @@
     - condition: not
       conditions:
       - condition: state
-        entity_id: alarm_control_panel.wrapped_alarm
+        entity_id: alarm_control_panel.alarm
         state: armed_away
     then:
     - sequence:

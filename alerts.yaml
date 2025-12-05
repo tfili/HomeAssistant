@@ -155,7 +155,7 @@ alarm_not_set:
   message: >
     Alarm has not been set for {{ ((as_timestamp(now())-as_timestamp(states.binary_sensor.template_alarm_not_set.last_changed)) / 60) | round }} minutes
   done_message: >
-    {% if is_state("alarm_control_panel.wrapped_alarm", "disarmed") %}
+    {% if is_state("alarm_control_panel.alarm", "disarmed") %}
     Alarm notification dismissed
     {% else %}
     Alarm has been set

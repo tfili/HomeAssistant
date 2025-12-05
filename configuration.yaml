@@ -5,8 +5,7 @@ homeassistant:
   # Packages
   packages: !include_dir_merge_named packages
   allowlist_external_dirs:
-    - "/tmp"
-    - "/media"
+    - /tmp
 
   media_dirs:
     media: /media

@@ -4,22 +4,22 @@ close_garage_doors:
   - parallel:
     - if:
       - condition: state
-        entity_id: cover.wrapped_left_garage
+        entity_id: cover.left_garage_door
         state: open
       then:
       - action: cover.close_cover
         data: {}
         target:
-          entity_id: cover.wrapped_left_garage
+          entity_id: cover.left_garage_door
     - if:
       - condition: state
-        entity_id: cover.wrapped_right_garage
+        entity_id: cover.right_garage_door
         state: open
       then:
       - action: cover.close_cover
         data: {}
         target:
-          entity_id: cover.wrapped_right_garage
+          entity_id: cover.right_garage_door
   mode: single
   icon: mdi:garage
 alarm_tasks_no_arm:

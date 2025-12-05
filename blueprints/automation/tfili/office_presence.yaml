@@ -19,7 +19,7 @@ triggers:
     to:
   - trigger: state
     entity_id:
-      - alarm_control_panel.wrapped_alarm
+      - alarm_control_panel.alarm
     to: armed_away
 
 conditions:
@@ -51,7 +51,7 @@ actions:
       - condition: not
         conditions:
           - condition: state
-            entity_id: alarm_control_panel.wrapped_alarm
+            entity_id: alarm_control_panel.alarm
             state: armed_away
     then:
       - sequence:
