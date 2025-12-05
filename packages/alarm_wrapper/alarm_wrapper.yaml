@@ -64,6 +64,8 @@ alarm_wrapper:
       conditions: []
       actions:
         - variables:
+            # 6055: Arming Away w/ Fault
+            # 6064: Arming Home w/ Fault
             new_state: |
               {% if trigger.id == "arming" %}
                 {% if trigger.event.data.event_code == "6055" or trigger.event.data.event_code == "6065" %}
