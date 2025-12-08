@@ -1449,39 +1449,6 @@
           entity_id: cover.left_garage_door
         action: cover.open_cover
   mode: single
-- id: '1690424019295'
-  alias: Abode Test
-  description: ''
-  triggers:
-  - event_type: abode_automation
-    event_data: {}
-    trigger: event
-    enabled: true
-    id: automation
-  - event_type: abode_device
-    event_data: {}
-    trigger: event
-    enabled: true
-    id: device
-  conditions: []
-  actions:
-  - variables:
-      garage_door: "{% if 'Right' in trigger.event.device_name %}\n  right\n{% else
-        %}\n  left\n{% endif %}\n"
-      new_state: "{% if trigger.id == \"automation\" %}\n  {% if 'Open' in trigger.event.device_name
-        %}\n    opening\n  {% else %}\n    closing\n  {% endif %}\n{% elif trigger.id
-        == \"automation\" %}\n  {% if trigger.event.event_code == '5150' %}\n    open\n
-        \ {% elif trigger.event.event_code == '5151' %}\n    closed\n  {% endif %}\n{%
-        else %}\n  {{ states(\"cover.abode_\" ~ garage_door ~ \"_garage_door\") }}\n{%
-        endif %}\n"
-  - condition: template
-    value_template: '{{ new_state != "" }}'
-  - action: notify.mobile_app_toms_iphone
-    metadata: {}
-    data:
-      message: '{{ new_state }} - {{ garage_door }}'
-      title: Garage Update
-  mode: single
 - id: '1691811863982'
   alias: Reset Ad Filter
   description: ''
@@ -1541,7 +1508,7 @@
     - condition: or
       conditions:
       - condition: numeric_state
-        entity_id: sensor.watchman_missing_services
+        entity_id: sensor.watchman_missing_actions
         above: 0
       - condition: numeric_state
         entity_id: sensor.watchman_missing_entities
@@ -1549,7 +1516,7 @@
     then:
     - data:
         title: Watchman Report
-        message: '{{ states(''sensor.watchman_missing_services'') }} missing services
+        message: '{{ states(''sensor.watchman_missing_actions'') }} missing actions
 
           {{ states(''sensor.watchman_missing_entities'') }} missing entities
 
