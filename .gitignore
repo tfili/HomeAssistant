@@ -69,7 +69,6 @@ backup/
 #############################
 # Development / editor / OS temp files
 #############################
-.vscode/
 .DS_Store
 Thumbs.db
 *.swp
