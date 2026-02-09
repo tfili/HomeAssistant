@@ -3,7 +3,7 @@
 
 # Abode
 abodepy_cache.pickle
-/Abode/*
+/Abode/
 
 # Custom integrations from HACS
 /custom_components/*
@@ -18,10 +18,10 @@ abodepy_cache.pickle
 .google.token
 
 # NabuCasa files
-/.cloud/*
+.cloud/*
 
 # UI configured integrations
-/.storage/*
+.storage/*
 
 # Never save secrets in git
 secrets.yaml
@@ -32,9 +32,16 @@ home-assistant_v2.db*
 # Lovelace cards from HACS
 /www/community/*
 
+# images
+/image/*
+/images/*
+
 # Daily mail delivery gif
-/www/mail_and_packages/*
-/images/mail_and_packages/*
+/www/mail_and_packages/
+/images/mail_and_packages/
+
+# www media files
+/www/media/
 
 # HomeAssistant log files
 home-assistant.log
@@ -43,8 +50,26 @@ home-assistant.log.*
 # webostv config db
 webostv.conf
 
-# Nest event images
-/media
-
 # Watchman report
 /watchman_report.txt
+
+# SQLite DBs
+*.db
+*.sqlite
+
+# Backups
+backups/
+backup/
+
+# Trash
+.Trash-*/
+
+pycache/
+*.pyc
+.pytest_cache/
+.DS_Store
+Thumbs.db
+*.swp
+*~
+node_modules/
+.pio/

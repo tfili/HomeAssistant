@@ -1,18 +1,2 @@
-motion_abels_room:
-  name: Motion in Abels Room
-  initial: false
-
-motion_reeves_room:
-  name: Motion in Reeves Room
-  initial: false
-
-motion_morning_room:
-  name: Motion in morning room
-  initial: false
-
-motion_ellis_room:
-  name: Motion in Ellis Room
-  initial: false
-
 mail_delivered:
   name: Mail delivered

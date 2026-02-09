@@ -1,0 +1,70 @@
+cover:
+  - name: Bedroom Left Blind
+    unique_id: c220a148-c97d-4a8c-875b-cd850cfd248a
+    position: |
+      {{ state_attr("cover.bedroom_left_blind", "current_position") }}
+    device_class: shade
+    open_cover:
+      - action: cover.open_cover
+        target:
+          entity_id: cover.bedroom_left_blind
+    close_cover:
+      - action: cover.close_cover
+        target:
+          entity_id: cover.bedroom_left_blind
+    stop_cover:
+      - action: cover.stop_cover
+        target:
+          entity_id: cover.bedroom_left_blind
+    set_cover_position:
+      - action: cover.set_cover_position
+        target:
+          entity_id: cover.bedroom_left_blind
+        data:
+          position: "{{ position }}"
+  - name: Bedroom Right Blind
+    unique_id: e8849d39-bd94-415f-a6f4-7bfee28b03a2
+    position: |
+      {{ state_attr("cover.bedroom_right_blind", "current_position") }}
+    device_class: shade
+    open_cover:
+      - action: cover.open_cover
+        target:
+          entity_id: cover.bedroom_right_blind
+    close_cover:
+      - action: cover.close_cover
+        target:
+          entity_id: cover.bedroom_right_blind
+    stop_cover:
+      - action: cover.stop_cover
+        target:
+          entity_id: cover.bedroom_right_blind
+    set_cover_position:
+      - action: cover.set_cover_position
+        target:
+          entity_id: cover.bedroom_right_blind
+        data:
+          position: "{{ position }}"
+  - name: Bathroom Blinds
+    unique_id: bab474fe-dc2c-468a-8b1c-c294cc35cf69
+    position: |
+      {{ state_attr("cover.bathroom_blinds", "current_position") }}
+    device_class: shade
+    open_cover:
+      - action: cover.open_cover
+        target:
+          entity_id: cover.bathroom_blinds
+    close_cover:
+      - action: cover.close_cover
+        target:
+          entity_id: cover.bathroom_blinds
+    stop_cover:
+      - action: cover.stop_cover
+        target:
+          entity_id: cover.bathroom_blinds
+    set_cover_position:
+      - action: cover.set_cover_position
+        target:
+          entity_id: cover.bathroom_blinds
+        data:
+          position: "{{ position }}"

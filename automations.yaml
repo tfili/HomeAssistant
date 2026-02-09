@@ -309,7 +309,9 @@
       device_ids:
       - shellies/lomi-plug
       - shellies/basement-wine-rack-dimmer
-      - shellies/bathroom-nightlight
+      - shellies/washer-plug
+      - shellies/left-bedroom-lamp
+      - shellies/right-bedroom-lamp
   - repeat:
       for_each: '{{ device_ids }}'
       sequence:
@@ -625,7 +627,7 @@
         entity_id:
         - light.porch_lights
         - light.driveway_lights
-        - light.bathroom_nightlight
+        - light.bathroom_smart_plug_socket_4
       action: light.turn_on
     else:
     - data: {}
@@ -633,7 +635,7 @@
         entity_id:
         - light.porch_lights
         - light.driveway_lights
-        - light.bathroom_nightlight
+        - light.bathroom_smart_plug_socket_4
       action: light.turn_off
   mode: single
 - id: '1689021667956'
@@ -642,43 +644,76 @@
   triggers:
   - entity_id:
     - binary_sensor.abels_door_contact
-    - binary_sensor.reeves_door_contact
-    - binary_sensor.basement_egress_window
-    from: 'off'
-    to: 'on'
+    from:
+    - 'off'
+    to:
+    - 'on'
     trigger: state
+    id: abel
+  - entity_id:
+    - binary_sensor.reeves_door_contact
+    from:
+    - 'off'
+    to:
+    - 'on'
+    trigger: state
+    id: reeves
+  - entity_id:
+    - binary_sensor.ellis_door_contact
+    from:
+    - 'off'
+    to:
+    - 'on'
+    trigger: state
+    id: ellis
+  - entity_id:
+    - binary_sensor.basement_egress_window
+    - binary_sensor.nursery_window
+    from:
+    - 'off'
+    to:
+    - 'on'
+    trigger: state
+    id: always_notify
   conditions:
   - condition: or
     conditions:
+    - condition: trigger
+      id:
+      - always_notify
     - condition: and
       conditions:
       - condition: state
         entity_id: input_boolean.abels_door_notification
         state: 'on'
-      - condition: template
-        value_template: '{{ trigger.entity_id == ''binary_sensor.abels_door_contact''
-          }}'
+      - condition: trigger
+        id:
+        - abel
     - condition: and
       conditions:
       - condition: state
         entity_id: input_boolean.reeves_door_notification
         state: 'on'
-      - condition: template
-        value_template: '{{ trigger.entity_id == ''binary_sensor.reeves_door_contact''
-          }}'
-    - condition: template
-      value_template: '{{ trigger.entity_id == ''binary_sensor.nursery_window'' }}'
-    - condition: template
-      value_template: '{{ trigger.entity_id == ''binary_sensor.basement_egress_window''
-        }}'
+      - condition: trigger
+        id:
+        - reeves
+    - condition: and
+      conditions:
+      - condition: state
+        entity_id: input_boolean.ellis_door_notification
+        state:
+        - 'on'
+      - condition: trigger
+        id:
+        - ellis
   actions:
   - variables:
       name: '{{ trigger.from_state.name | replace('' contact'', '''') }}'
       cameraEntity: "{% if trigger.entity_id == 'binary_sensor.abels_door_contact'
         %}\n    null\n{% elif trigger.entity_id == 'binary_sensor.reeves_door_contact'
         %}\n  camera.reeves_room_fluent\n{% elif trigger.entity_id == 'binary_sensor.nursery_window'
-        %}\n  camera.ellis_room_fluent\n{% else %}\n  camera.back_door_fluent\n{%
-        endif %}\n"
+        or trigger.entity_id == 'binary_sensor.ellis_door_contact' %}\n  camera.ellis_room_fluent\n{%
+        else %}\n  camera.back_door_fluent\n{% endif %}\n"
   - action: ai_task.generate_data
     metadata: {}
     data:
@@ -908,9 +943,12 @@
           target:
             entity_id:
             - light.basement_lights
-            - light.kitchen_dimmer
-            - light.cabinet
-            device_id: 1e81806b7b9df2a87664f6ab50861df9
+            - light.laundry_room
+            device_id:
+            - e7578ec53a0bb1ce09889feb706f3675
+            - fa6acccda34e58da7c2469ac2df71c16
+            - 2f2b4b90085f1aefc5819d96cb910ead
+            - 06377561fa34ea1757a7a610684c781e
           action: light.turn_off
         - data:
             num_repeats: 1
@@ -1191,224 +1229,24 @@
   alias: Cesium Meeting
   description: ''
   triggers:
-  - event: start
-    offset: -0:1:0
-    entity_id: calendar.tom_cesium_com
-    id: calendar_meeting
-    trigger: calendar
   - allowed_methods:
     - POST
-    - PUT
-    local_only: false
+    local_only: true
     webhook_id: q4fryupTsZLO8QE5MIyp6ekXzohLkjmb
     trigger: webhook
   conditions: []
   actions:
-  - parallel:
-    - if:
-      - condition: state
-        entity_id: media_player.office_tv
-        state:
-        - playing
-        - unavailable
-      then:
-      - data: {}
-        target:
-          entity_id: media_player.office_tv
-        action: media_player.media_pause
-    - if:
-      - condition: trigger
-        id:
-        - calendar_meeting
-      then:
-      - data:
-          cache: false
-          entity_id: media_player.office_display
-          message: '{{ trigger.calendar_event.summary }}'
-        action: tts.cloud_say
-  mode: single
-- id: '1689562922595'
-  alias: Office
-  description: ''
-  triggers:
-  - at: 07:00:00
-    id: start_work
-    trigger: time
-  - at: '18:00:00'
-    id: end_work
-    trigger: time
-  - entity_id:
-    - binary_sensor.office_motion_sensor_occupancy
-    to: 'on'
-    id: office_motion
-    trigger: state
-  - entity_id:
-    - sensor.office_motion_sensor_illuminance
-    below: 25
-    id: lux_below_25
-    trigger: numeric_state
-  - entity_id:
-    - sensor.office_motion_sensor_illuminance
-    above: 40
-    id: lux_above_40
-    trigger: numeric_state
-  - entity_id:
-    - binary_sensor.office_motion_sensor_occupancy
-    to: 'off'
-    for:
-      hours: 0
-      minutes: 30
-      seconds: 0
-    id: office_clear_for_30
-    trigger: state
-  - entity_id:
-    - sensor.office_motion_sensor_temperature
-    id: temp_change
-    trigger: state
-  - entity_id:
-    - alarm_control_panel.alarm
-    to: armed_away
-    id: alarm_away
-    trigger: state
-  conditions:
-  - condition: state
-    entity_id: input_boolean.auto_office
-    state: 'on'
-  actions:
-  - variables:
-      is_workday: '{{ now().weekday() < 5 and now().hour > 7 and now().hour < 18 }}'
   - if:
-    - condition: trigger
-      id:
-      - lux_above_40
     - condition: state
-      entity_id: light.office_ceiling_fan
-      state: 'on'
-    then:
-    - data: {}
-      target:
-        entity_id: light.office_ceiling_fan
-      action: light.turn_off
-    - data:
-        title: Turn off light
-        message: Lux {{ trigger.to_state.state }}
-      enabled: false
-      action: notify.mobile_app_toms_iphone
-    enabled: false
-  - if:
-    - condition: or
-      conditions:
-      - condition: and
-        conditions:
-        - condition: trigger
-          id:
-          - lux_below_25
-        - condition: template
-          value_template: '{{ is_workday }}'
-      - condition: and
-        conditions:
-        - condition: trigger
-          id:
-          - office_motion
-          - start_work
-        - condition: numeric_state
-          entity_id: sensor.office_motion_sensor_illuminance
-          below: 25
-    then:
-    - data: {}
-      target:
-        entity_id: light.office_ceiling_fan
-      action: light.turn_on
-    - data:
-        title: Turn on light
-        message: Lux {{ states(sensor.office_motion_sensor_illuminance) }}
-      enabled: false
-      action: notify.mobile_app_toms_iphone
-    enabled: false
-  - if:
-    - condition: trigger
-      id:
-      - end_work
-      - office_clear_for_30
-      - alarm_away
-    - condition: or
-      conditions:
-      - condition: state
-        entity_id: alarm_control_panel.alarm
-        state: armed_away
-      - condition: and
-        conditions:
-        - condition: template
-          value_template: '{{ not is_workday }}'
-        - condition: state
-          entity_id: binary_sensor.office_motion_sensor_occupancy
-          state: 'off'
-          for:
-            hours: 0
-            minutes: 30
-            seconds: 0
+      entity_id: media_player.office_tv
+      state:
+      - playing
+      - unavailable
     then:
     - data: {}
       target:
         entity_id: media_player.office_tv
-      action: media_player.turn_off
-      enabled: false
-    - data: {}
-      target:
-        entity_id: fan.office_ceiling_fan
-      action: fan.turn_off
-    - data: {}
-      target:
-        entity_id: light.office_ceiling_fan
-      action: light.turn_off
-      enabled: false
-    - data:
-        title: Turn off
-        message: light & fan
-      enabled: false
-      action: notify.mobile_app_toms_iphone
-  - if:
-    - condition: trigger
-      id:
-      - temp_change
-      - start_work
-      - office_motion
-    then:
-    - variables:
-        temp: '{{ states(''sensor.office_motion_sensor_temperature'') }}'
-        fan_speed: "{% if temp < 72 %}\n  0\n{% elif temp < 76 %}\n  33\n{% elif temp
-          < 80 %}\n  66\n{% else %}\n  100\n{% endif %}\n  \n"
-    - if:
-      - condition: template
-        value_template: '{{ fan_speed != state_attr(''fan.office_ceiling_fan'', ''percentage'')
-          }}'
-      then:
-      - if:
-        - condition: template
-          value_template: '{{ fan_speed > 0 }}'
-        - condition: or
-          conditions:
-          - condition: template
-            value_template: '{{ is_workday }}'
-          - condition: trigger
-            id:
-            - office_motion
-        then:
-        - data:
-            percentage: '{{ fan_speed }}'
-          target:
-            entity_id: fan.office_ceiling_fan
-          action: fan.set_percentage
-        else:
-        - data: {}
-          target:
-            entity_id: fan.office_ceiling_fan
-          action: fan.turn_off
-      - data:
-          title: Fan Speed Update
-          message: '{{ fan_speed }} ({{ temp }}°)'
-        enabled: false
-        action: notify.mobile_app_toms_iphone
+      action: media_player.media_pause
   mode: single
 - id: '1689773551816'
   alias: 'Event Handler: Open Garage Doors'
@@ -1611,20 +1449,6 @@
     data:
       message: '{{ trigger.from_state.name }} was opened'
   mode: single
-- id: '1736131482053'
-  alias: Cleanup Temporary Media Files
-  description: ''
-  triggers:
-  - trigger: time_pattern
-    hours: '*'
-    minutes: '0'
-    seconds: '0'
-  conditions: []
-  actions:
-  - action: shell_command.delete_tmp_media
-    metadata: {}
-    data: {}
-  mode: single
 - id: '1740967733718'
   alias: Reset Auto Office
   description: ''
@@ -1638,6 +1462,11 @@
     data: {}
     target:
       entity_id: input_boolean.auto_office
+  - action: automation.turn_on
+    metadata: {}
+    target:
+      entity_id: automation.office_blinds_lux_glare_and_night_control
+    data: {}
   mode: single
 - id: '1744597787917'
   alias: Office Light
@@ -1686,12 +1515,19 @@
       device_id: 9e13626ee8b01b6a65ef08abfadfe6a1
       entity_id: bbcfea417d252db4795fc453cfa90823
       domain: sensor
-      below: 30
+      below: 40
     - condition: not
       conditions:
       - condition: state
         entity_id: alarm_control_panel.alarm
         state: armed_away
+    - condition: numeric_state
+      entity_id: cover.office_blinds
+      attribute: current_tilt_position
+      below: 51
+      alias: If office blinds are at 50 (fully open) or 0 (fully closed down - night
+        mode)
+      enabled: true
     then:
     - sequence:
       - condition: state
@@ -1724,7 +1560,8 @@
             conditions:
             - condition: state
               entity_id: sensor.toms_location
-              state: office
+              state:
+              - Office
               enabled: true
           enabled: true
         - type: is_illuminance
@@ -1732,7 +1569,7 @@
           device_id: 9e13626ee8b01b6a65ef08abfadfe6a1
           entity_id: bbcfea417d252db4795fc453cfa90823
           domain: sensor
-          above: 45
+          above: 50
       - condition: state
         entity_id: light.office_ceiling_fan
         state: 'on'
@@ -1868,7 +1705,8 @@
             conditions:
             - condition: state
               entity_id: sensor.toms_location
-              state: office
+              state:
+              - Office
               enabled: true
           enabled: true
         - condition: state
@@ -1886,43 +1724,6 @@
         data: {}
         target:
           device_id: def02a729f138f86b72a0cecb8a6d653
-  mode: single
-- id: '1744773707874'
-  alias: Blind Tilt
-  description: ''
-  triggers:
-  - trigger: time_pattern
-    hours: '*'
-    minutes: /10
-  conditions:
-  - condition: state
-    entity_id: input_boolean.auto_office
-    state: 'on'
-  actions:
-  - variables:
-      update_threshold: 5
-      tilt: "{% set az = state_attr(\"sun.sun\", \"azimuth\") %}\n{% set el = state_attr(\"sun.sun\",
-        \"elevation\") %}\n{% if el <= -5 %}\n  {# Overnight we want the to tilt the
-        blinds down #}\n  0\n{% elif az < 180 %}\n  {# When the sun is on the front
-        side of the house fully open the blinds #}\n  50\n{% else %}\n  {# During
-        the afternoon we want to tilt the blinds up #}\n  {{ [100 - (((el/10)**2)
-        | round), 50] | max }}\n{% endif %}\n"
-  - sequence:
-    - condition: template
-      value_template: '{{ (state_attr("cover.office_blinds", "current_tilt_position")
-        - tilt) | abs > update_threshold }}'
-    - action: cover.set_cover_tilt_position
-      metadata: {}
-      data:
-        tilt_position: '{{ tilt }}'
-      target:
-        entity_id: cover.office_blinds
-  - action: notify.mobile_app_toms_iphone
-    metadata: {}
-    data:
-      message: '{{ tilt }}'
-      title: Blind Position
-    enabled: false
   mode: single
 - id: '1746156521863'
   alias: Filament storage warnings
@@ -2018,3 +1819,299 @@
       target:
         entity_id: light.wine_rack
   mode: single
+- id: '1765761770064'
+  alias: Bedroom Button Lights
+  description: ''
+  triggers:
+  - domain: mqtt
+    device_id: 9589caadd93d7aec87a9852727d8cf38
+    type: action
+    subtype: single
+    trigger: device
+  conditions: []
+  actions:
+  - action: light.toggle
+    metadata: {}
+    target:
+      entity_id: light.bedroom_lamps
+    data: {}
+  mode: single
+- id: '1765765522506'
+  alias: Bedroom Button Alarm
+  description: ''
+  triggers:
+  - domain: mqtt
+    device_id: 9589caadd93d7aec87a9852727d8cf38
+    type: action
+    subtype: double
+    trigger: device
+  conditions: []
+  actions:
+  - if:
+    - condition: state
+      entity_id: alarm_control_panel.alarm
+      state:
+      - disarmed
+    then:
+    - action: alarm_control_panel.alarm_arm_away
+      metadata: {}
+      target:
+        entity_id: alarm_control_panel.alarm
+      data: {}
+    else:
+    - action: alarm_control_panel.alarm_disarm
+      metadata: {}
+      target:
+        entity_id: alarm_control_panel.alarm
+      data: {}
+  mode: single
+- id: '1767372986962'
+  alias: Turn off Laundry Lights
+  description: ''
+  triggers:
+  - trigger: light.turned_on
+    target:
+      entity_id: light.laundry_room
+    options:
+      behavior: any
+  - trigger: light.turned_off
+    target:
+      entity_id: light.laundry_room
+    options:
+      behavior: any
+  - trigger: homeassistant
+    event: start
+  conditions: []
+  actions:
+  - condition: state
+    state:
+    - 'on'
+    entity_id: light.laundry_room
+  - delay:
+      hours: 1
+      minutes: 0
+      seconds: 0
+      milliseconds: 0
+  - action: light.turn_off
+    metadata: {}
+    target:
+      entity_id: light.laundry_room
+    data: {}
+  mode: restart
+- id: '1767491887606'
+  alias: Due Reminders Notification
+  description: ''
+  triggers:
+  - at: 09:00:00
+    trigger: time
+  conditions: []
+  actions:
+  - variables:
+      reminders: "{% set result = namespace(reminders=[]) %} {% for entity_id in device_entities('1551cc88d0785af1a8b57a94837187ce')
+        %}\n  {% if is_state(entity_id, \"on\") %}\n    {% set result.reminders =
+        result.reminders + [state_attr(entity_id, 'friendly_name') ~ ' (' ~ (state_attr(entity_id,
+        'next_due') | as_datetime).strftime('%B %d') ~ ')'] %}\n  {% endif %}\n{%
+        endfor %} {{result.reminders | sort | join(', ')}}"
+  - condition: template
+    value_template: '{{ reminders != '''' }}'
+  - data:
+      title: Due Reminders
+      message: '{{reminders}}
+
+        '
+      data:
+        url: /home-maintenance
+    action: notify.mobile_app_toms_iphone
+  mode: single
+- id: '1768368053833'
+  alias: Office Vent Smart Sync (Auto/Heat/Cool)
+  description: Syncs vent based on office temp vs thermostat setpoint, handling Auto
+    mode.
+  triggers:
+  - entity_id: sensor.office_motion_sensor_temperature
+    trigger: state
+  - entity_id: climate.downstairs
+    trigger: state
+  conditions: []
+  actions:
+  - variables:
+      office_temp: '{{ states(''sensor.office_motion_sensor_temperature'') | float(0)
+        }}'
+      target_temp: '{{ state_attr(''climate.downstairs'', ''temperature'') | float(0)
+        }}'
+      hvac_action: '{{ state_attr(''climate.downstairs'', ''hvac_action'') }}'
+      hvac_mode: '{{ states(''climate.downstairs'') }}'
+  - choose:
+    - conditions:
+      - condition: template
+        value_template: "{{ (hvac_action == 'heating' or hvac_mode == 'heat') and
+          \n   (office_temp < target_temp) }}\n"
+      sequence:
+      - action: cover.open_cover_tilt
+        target:
+          entity_id: cover.office_vent
+        data: {}
+    - conditions:
+      - condition: template
+        value_template: "{{ (hvac_action == 'cooling' or hvac_mode == 'cool') and
+          \n   (office_temp > target_temp) }}\n"
+      sequence:
+      - action: cover.open_cover_tilt
+        target:
+          entity_id: cover.office_vent
+        data: {}
+    default:
+    - action: cover.close_cover_tilt
+      target:
+        entity_id: cover.office_vent
+      data: {}
+  mode: restart
+- id: '1768959870221'
+  alias: 'Bedroom Blinds: Smart Control'
+  description: Controls bedroom blinds based on alarm status, time, sun, and webhooks.
+  triggers:
+  - trigger: sun
+    event: sunrise
+    offset: 00:01:00
+    id: open_request
+  - entity_id: alarm_control_panel.alarm
+    to: disarmed
+    id: open_request
+    trigger: state
+  - webhook_id: bedroom_blinds_open
+    id: open_request
+    trigger: webhook
+    allowed_methods:
+    - POST
+    local_only: false
+  - event: sunset
+    id: close_request
+    trigger: sun
+  - entity_id: alarm_control_panel.alarm
+    to: armed_away
+    id: close_request
+    trigger: state
+  - entity_id: alarm_control_panel.alarm
+    to: armed_home
+    id: close_request
+    trigger: state
+  actions:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: open_request
+        enabled: true
+      - condition: state
+        entity_id: alarm_control_panel.alarm
+        state:
+        - disarmed
+      - alias: The sun is up or is rising and will be up soon
+        condition: or
+        conditions:
+        - condition: state
+          entity_id: sun.sun
+          state: above_horizon
+        - condition: and
+          conditions:
+          - condition: numeric_state
+            entity_id: sun.sun
+            attribute: elevation
+            above: -18
+          - condition: state
+            entity_id: sun.sun
+            state:
+            - 'true'
+            attribute: rising
+      sequence:
+      - target:
+          entity_id: cover.bedroom_blinds
+        data:
+          position: 50
+        action: cover.set_cover_position
+    - conditions:
+      - condition: trigger
+        id: close_request
+      sequence:
+      - action: cover.close_cover
+        target:
+          entity_id:
+          - cover.bedroom_blinds
+        data: {}
+  mode: restart
+- id: '1769051394086'
+  alias: 'Office Blinds: Lux, Glare, and Night Control'
+  description: Tilts up (50-100) to reduce light/glare, closes to 0 at night
+  triggers:
+  - entity_id: sensor.office_motion_sensor_illuminance
+    trigger: state
+  - entity_id: sun.sun
+    trigger: state
+  - entity_id: sun.sun
+    to: below_horizon
+    trigger: state
+  actions:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: sun.sun
+        state: below_horizon
+      sequence:
+      - condition: numeric_state
+        entity_id: cover.office_blinds
+        attribute: current_tilt_position
+        above: 0
+      - action: cover.close_cover_tilt
+        target:
+          entity_id: cover.office_blinds
+        data: {}
+    - conditions:
+      - alias: If sun is at a low angle directed at the office window (West facing)
+        condition: template
+        value_template: "{{ state_attr('sun.sun', 'azimuth') > 180 and \n   state_attr('sun.sun',
+          'azimuth') < 260 and\n   state_attr('sun.sun', 'elevation') < 30 and\n   state_attr('sun.sun',
+          'elevation') > 10 }}\n"
+      sequence:
+      - action: cover.set_cover_tilt_position
+        target:
+          entity_id: cover.office_blinds
+        data:
+          tilt_position: 80
+    - conditions:
+      - condition: template
+        value_template: '{{ states(''sensor.office_motion_sensor_illuminance'') |
+          float > 50 }}'
+        alias: If office lux value is above 50
+      sequence:
+      - action: cover.set_cover_tilt_position
+        target:
+          entity_id: cover.office_blinds
+        data:
+          tilt_position: '{{ [state_attr(''cover.office_blinds'', ''current_tilt_position'')
+            | int + 10, 100] | min }}'
+    - conditions:
+      - condition: template
+        value_template: "{{ states('sensor.office_motion_sensor_illuminance') | float
+          < 40 and\n   state_attr('cover.office_blinds', 'current_tilt_position')
+          | int > 50 }}\n"
+        alias: If office lux value is below 40 and the blinds aren't fully open
+      sequence:
+      - action: cover.set_cover_tilt_position
+        target:
+          entity_id: cover.office_blinds
+        data:
+          tilt_position: '{{ [state_attr(''cover.office_blinds'', ''current_tilt_position'')
+            | int - 10, 50] | max }}'
+    - conditions:
+      - condition: numeric_state
+        entity_id: cover.office_blinds
+        attribute: current_tilt_position
+        below: 50
+        alias: If blinds are closed, open them fully
+      sequence:
+      - action: cover.set_cover_tilt_position
+        metadata: {}
+        target:
+          entity_id: cover.office_blinds
+        data:
+          tilt_position: 50
+  mode: restart

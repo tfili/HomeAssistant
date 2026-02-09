@@ -102,3 +102,26 @@ start_vacuum_or_mop:
     response_variable: result_value
   mode: single
   icon: mdi:robot-vacuum
+disarm_alarm:
+  sequence:
+  - action: alarm_control_panel.alarm_disarm
+    metadata: {}
+    target:
+      entity_id: alarm_control_panel.alarm
+    data: {}
+  - action: cover.open_cover
+    metadata: {}
+    target:
+      entity_id: cover.right_garage_door
+    data: {}
+  alias: Arrive Home
+  description: ''
+arm_alarm:
+  sequence:
+  - action: alarm_control_panel.alarm_arm_away
+    metadata: {}
+    target:
+      entity_id: alarm_control_panel.alarm
+    data: {}
+  alias: Arm Alarm
+  description: ''

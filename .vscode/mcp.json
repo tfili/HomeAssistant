@@ -1,0 +1,9 @@
+{
+	"servers": {
+		"ha-mcp": {
+			"url": "http://192.168.2.35:8086/mcp",
+			"type": "http"
+		}
+	},
+	"inputs": []
+}

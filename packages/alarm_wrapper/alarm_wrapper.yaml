@@ -10,6 +10,9 @@ alarm_wrapper:
         code_format: null
         icon: "mdi:security"
 
+      automation.wrapped_alarm_sync:
+        <<: *customize
+
       input_text.alarm_state:
         <<: *customize
 
@@ -33,7 +36,7 @@ alarm_wrapper:
                 entity_id: alarm_control_panel.abode_alarm
 
   automation:
-    - id: alarm_wrapper_sync
+    - id: "5987768829878"
       alias: Wrapped Alarm Sync
       description: ""
       triggers:
@@ -64,11 +67,13 @@ alarm_wrapper:
       conditions: []
       actions:
         - variables:
+            # 6051: Arming Away
+            # 6061: Arming Home
             # 6055: Arming Away w/ Fault
-            # 6064: Arming Home w/ Fault
+            # 6065: Arming Home w/ Fault
             new_state: |
               {% if trigger.id == "arming" %}
-                {% if trigger.event.data.event_code == "6055" or trigger.event.data.event_code == "6065" %}
+                {% if trigger.event.data.event_code == "6051" or trigger.event.data.event_code == "6061" or trigger.event.data.event_code == "6055" or trigger.event.data.event_code == "6065" %}
                   arming
                 {% endif %}
               {% elif trigger.id == "disarm" %}

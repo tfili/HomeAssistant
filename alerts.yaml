@@ -185,7 +185,7 @@ office_ups_low_voltage:
   message: >
     Office UPS has had low voltage for {{ ((as_timestamp(now())-as_timestamp(states.binary_sensor.office_ups_low_voltage.last_changed)) / 60) | round }} minutes
   done_message: "Office UPS voltage has been restored to normal"
-  entity_id: binary_sensor.template_office_ups_low_voltage
+  entity_id: binary_sensor.office_ups_low_voltage
   state: "on"
   repeat: 30
   can_acknowledge: true

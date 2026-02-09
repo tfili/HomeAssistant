@@ -2,17 +2,17 @@ weather:
   - name: "Green Meadow Station"
     unique_id: "green_meadow_station"
     condition_template: "{{ states('weather.forecast_home') }}"
-    temperature_template: "{{ states('sensor.green_meadow_station_temp') }}"
-    dew_point_template: "{{ states('sensor.green_meadow_station_dew_point') }}"
-    apparent_temperature_template: "{{ states('sensor.green_meadow_station_feels_like') }}"
+    temperature_template: "{{ states('sensor.greenmeadowweatherstation_temperatureoutdoor') }}"
+    dew_point_template: "{{ states('sensor.greenmeadowweatherstation_dewpoint') }}"
+    apparent_temperature_template: "{{ states('sensor.greenmeadowweatherstation_feelslike') }}"
     temperature_unit: "°F"
-    humidity_template: "{{ states('sensor.green_meadow_station_humidity') }}"
-    pressure_template: "{{ states('sensor.green_meadow_station_rel_pressure') }}"
+    humidity_template: "{{ states('sensor.greenmeadowweatherstation_humidityoutdoor') }}"
+    pressure_template: "{{ states('sensor.greenmeadowweatherstation_barometricpressurerelative') }}"
     pressure_unit: inHg
-    wind_speed_template: "{{ states('sensor.green_meadow_station_wind_speed') }}"
-    wind_gust_speed_template: "{{ states('sensor.green_meadow_station_wind_gust') }}"
+    wind_speed_template: "{{ states('sensor.greenmeadowweatherstation_windspeed') }}"
+    wind_gust_speed_template: "{{ states('sensor.greenmeadowweatherstation_windgust') }}"
     wind_speed_unit: mph
-    wind_bearing_template: "{{ states('sensor.green_meadow_station_wind_dir') }}"
+    wind_bearing_template: "{{ states('sensor.greenmeadowweatherstation_winddirection') }}"
     cloud_coverage_template: "{{ state_attr('weather.forecast_home', 'cloud_coverage') }}"
     visibility_unit: mi
     precipitation_unit: in

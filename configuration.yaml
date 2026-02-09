@@ -59,7 +59,7 @@ wake_on_lan:
 # Recorder
 recorder:
   # MariaDB
-  db_url: mysql://homeassistant:vcQh9QYWaWqexC86FyqYechwKgHS9mqr@mariadb.home.filidelphia.com/homeassistant?charset=utf8mb4
+  db_url: !secret mariadb_url
   # Exclude history some entities
   exclude:
     domains:

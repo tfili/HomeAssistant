@@ -1,0 +1,40 @@
+substitutions:
+  wifi_ssid: !secret wifi_ssid
+  wifi_password: !secret wifi_password
+  network_gateway: !secret network_gateway
+  network_subnet: !secret network_subnet
+  name: flex-room-proxy
+  friendly_name: Flex Room Proxy
+  comment: ESPHome proxy tuned for Bermuda
+  name_add_mac_suffix: "True"  # Adds the last 4 characters of the MAC address to the name.
+  baud_rate: "0"  # If you need serial debugging, override this to 115200 or similar.
+  ble_interval: 320ms
+  ble_window: 300ms
+  proxy_active_scan: "True"  # Set to false to avoid requesting scan info for device names etc
+  ota_password: !secret flex_room_proxy_ota
+  ip_address: !secret flex_room_proxy_ip
+
+packages:
+  Bermuda.include_common: github://agittins/bermuda-proxies/packages/bermuda-proxy-include-common.yaml
+
+esphome:
+  name: ${name}
+  friendly_name: ${friendly_name}
+  comment: ${comment}
+  name_add_mac_suffix: ${name_add_mac_suffix}
+
+esp32:
+  board: wemos_d1_mini32
+
+ota:
+  platform: esphome
+  password: ${ota_password}
+
+wifi:
+  ssid: ${wifi_ssid}
+  password: ${wifi_password}
+  manual_ip:
+    static_ip: ${ip_address}
+    gateway: ${network_gateway}
+    subnet: ${network_subnet}
+    dns1: ${network_gateway}

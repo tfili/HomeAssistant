@@ -11,6 +11,9 @@ garage_wrapper:
       cover.right_garage_door:
         <<: *customize
 
+      automation.wrapped_garage_sync:
+        <<: *customize
+
       input_text.left_garage_state:
         <<: *customize
 
@@ -73,7 +76,7 @@ garage_wrapper:
                 entity_id: cover.abode_right_garage_door
 
   automation:
-    - id: garage_wrapper_sync
+    - id: "3351850150162"
       alias: Wrapped Garage Sync
       description: ""
       triggers:

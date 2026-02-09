@@ -25,3 +25,12 @@ binary_sensor:
       seconds: 10
     state: "{{ states('sensor.lomi_plug_power')|int(0) > 5 }}" 
     name: "Lomi"
+
+  # On if the Washer is running
+  - unique_id: washer_running
+    icon: mdi:compost
+    device_class: power
+    delay_off: 
+      seconds: 10
+    state: "{{ states('sensor.washer_relay_0_power')|int(0) > 10 }}" 
+    name: "Washer"
