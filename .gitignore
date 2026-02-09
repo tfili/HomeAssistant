@@ -1,75 +1,94 @@
+#############################
+# Root Home Assistant .gitignore
+#############################
+# Edit with care.
+
+#############################
+# Runtime files
+#############################
+# HA runtime/version lock files
 .HA_VERSION
 .ha_run.lock
 
-# Abode
-abodepy_cache.pickle
-/Abode/
-
-# Custom integrations from HACS
-/custom_components/*
-
-# Text To Speech Cache
-/tts/*
-
-# Themes from HACS
-/themes/*
-
-# Google Calendar token
-.google.token
-
-# NabuCasa files
-.cloud/*
-
-# UI configured integrations
-.storage/*
-
-# Never save secrets in git
-secrets.yaml
-
-# Recorder Database
+#############################
+# Storage, DBs and logs
+#############################
+# UI / runtime-managed files
+.storage/
+# Recorder DB and other sqlite/db artifacts
 home-assistant_v2.db*
-
-# Lovelace cards from HACS
-/www/community/*
-
-# images
-/image/*
-/images/*
-
-# Daily mail delivery gif
-/www/mail_and_packages/
-/images/mail_and_packages/
-
-# www media files
-/www/media/
-
-# HomeAssistant log files
+*.db
+*.sqlite
+# Logs
 home-assistant.log
 home-assistant.log.*
 
-# webostv config db
-webostv.conf
+#############################
+# Credentials and cloud tokens
+#############################
+secrets.yaml
+.google.token
+.cloud/
 
-# Watchman report
+#############################
+# Media, caches and generated files
+#############################
+# Text-to-speech cache / generated audio
+/tts/
+# Image caches and generated media
+/image/
+/images/
+# www media and HACS-installed cards
+/www/media/
+/www/community/
+/www/mail_and_packages/
+# other generated/watchman artifacts
 /watchman_report.txt
 
-# SQLite DBs
-*.db
-*.sqlite
+#############################
+# Integrations and custom code
+#############################
+# Custom integrations: if you want to version-control your own custom
+# components, remove or narrow this rule (e.g. add negation !custom_components/your_component/)
+/custom_components/*
+/themes/*
 
-# Backups
+#############################
+# Platform / device specific
+#############################
+webostv.conf
+abodepy_cache.pickle
+/Abode/
+
+#############################
+# Backups and archives
+#############################
 backups/
 backup/
 
-# Trash
-.Trash-*/
-
-pycache/
-*.pyc
-.pytest_cache/
+#############################
+# Development / editor / OS temp files
+#############################
+.vscode/
 .DS_Store
 Thumbs.db
 *.swp
 *~
-node_modules/
+
+#############################
+# Python artifacts
+#############################
+__pycache__/
+*.pyc
+.pytest_cache/
+
+#############################
+# Build systems / toolchain
+#############################
+# PlatformIO / ESPHome artifacts
 .pio/
+
+#############################
+# Misc
+#############################
+.Trash-*/
