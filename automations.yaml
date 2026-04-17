@@ -3,8 +3,9 @@
   description: Set thermostats to Eco if more than 20 miles away and traveling away
     from home.
   triggers:
-  - entity_id: sensor.home_proximity_nearest_distance
-    above: 52800
+  - entity_id:
+    - sensor.home_proximity_nearest_distance
+    above: 105600
     trigger: numeric_state
   - entity_id: sensor.home_proximity_nearest_direction_of_travel
     trigger: state
@@ -16,7 +17,7 @@
       state: towards
   - condition: numeric_state
     entity_id: sensor.home_proximity_nearest_distance
-    above: 52800
+    above: 105600
   - condition: or
     conditions:
     - condition: state
@@ -48,8 +49,9 @@
   description: Set thermostats to Eco if more than 20 miles away and traveling towards
     from home.
   triggers:
-  - entity_id: sensor.home_proximity_nearest_distance
-    below: 52800
+  - entity_id:
+    - sensor.home_proximity_nearest_distance
+    below: 105600
     trigger: numeric_state
   - entity_id: sensor.home_proximity_nearest_direction_of_travel
     to: towards
@@ -57,7 +59,7 @@
   conditions:
   - condition: numeric_state
     entity_id: sensor.home_proximity_nearest_distance
-    below: 52800
+    below: 105600
   - condition: not
     conditions:
     - condition: state
@@ -891,10 +893,17 @@
     - alarm_control_panel.alarm
     to: armed_away
     trigger: state
+    id: away
   - entity_id:
     - alarm_control_panel.alarm
     to: armed_home
     trigger: state
+  - entity_id:
+    - alarm_control_panel.alarm
+    to:
+    - armed_night
+    trigger: state
+    id: night
   - event_type: alarm_tasks_no_arm
     trigger: event
   conditions:
@@ -934,9 +943,10 @@
             authenticationRequired: false
       action: notify.everyone
     - if:
-      - condition: template
-        value_template: '{{ trigger.platform == ''event'' or (trigger.platform ==
-          ''state'' and trigger.to_state.state == ''armed_away'') }}'
+      - condition: trigger
+        id:
+        - away
+        - night
       then:
       - parallel:
         - data: {}
@@ -971,6 +981,18 @@
           - media_player.office_tv
           - media_player.greatroom_tv
         action: media_player.turn_off
+    - if:
+      - condition: trigger
+        id:
+        - night
+      then:
+      - action: cover.close_cover
+        metadata: {}
+        target:
+          entity_id:
+          - cover.bedroom_blinds
+          - cover.bathroom_blinds_fixed
+        data: {}
   mode: single
 - id: '1689552243582'
   alias: 'Event Handler: Vacuum/Mop'
@@ -1059,6 +1081,11 @@
     entity_id: ae435a6df511973ad4db4536ae990956
     domain: binary_sensor
     trigger: device
+  - type: turned_on
+    device_id: 05fa7309a2318d8bd3a1d3a5dea281e7
+    entity_id: 61bb00b06370b7726199658726bb7964
+    domain: binary_sensor
+    trigger: device
   conditions: []
   actions:
   - variables:
@@ -1096,8 +1123,22 @@
   - action: ai_task.generate_data
     metadata: {}
     data:
-      instructions: If you see a person or package in the picture, describe it. Otherwise
-        just say there is something at the front door.
+      instructions: 'If you see a US postal service truck by the mailbox near the
+        street, say that the mail has been delivered.
+
+
+        If you see and Amazon, FedEx or UPS truck, say a that a package was delivered
+        and include the delivery service.
+
+
+        If you see a person approaching the house or package in the picture, describe
+        it but keep it short. If there is a person on the walking down the sidewalk,
+        return a blank string.
+
+
+        Otherwise inspect the photo and see if there is anything actually happening
+        that caused the motion sensor to trigger. If there is, say it but keep it
+        short, if not return a blank string.'
       task_name: Alert Notification
       attachments:
         media_content_id: media-source://camera/camera.front_doorbell_fluent
@@ -1113,7 +1154,9 @@
             media_content_id: media-source://camera
     response_variable: ai_result
   - variables:
-      alert_message: '{{ ai_result.data }}'
+      alert_message: '{{ ai_result.data | default('''') }}'
+  - condition: template
+    value_template: '{{ alert_message != "" }}'
   - parallel:
     - sequence:
       - data:
@@ -1527,7 +1570,7 @@
       below: 51
       alias: If office blinds are at 50 (fully open) or 0 (fully closed down - night
         mode)
-      enabled: true
+      enabled: false
     then:
     - sequence:
       - condition: state
@@ -1647,7 +1690,7 @@
     state: 'on'
   actions:
   - variables:
-      temp: '{{ states(''sensor.office_motion_sensor_temperature'') }}'
+      temp: '{{ states(''sensor.office_motion_sensor_temperature'') | int(70) }}'
       fan_speed: "{% if temp < 72 %}\n  0\n{% elif temp < 76 %}\n  33\n{% elif temp
         < 80 %}\n  66\n{% else %}\n  100\n{% endif %}\n  \n"
   - if:
@@ -1853,11 +1896,11 @@
       state:
       - disarmed
     then:
-    - action: alarm_control_panel.alarm_arm_away
+    - action: alarm_control_panel.alarm_arm_night
       metadata: {}
+      data: {}
       target:
         entity_id: alarm_control_panel.alarm
-      data: {}
     else:
     - action: alarm_control_panel.alarm_disarm
       metadata: {}
@@ -2115,3 +2158,46 @@
         data:
           tilt_position: 50
   mode: restart
+- id: '1770836460910'
+  alias: Notify on any script/automation error
+  description: Add a notification when a script or automation doesn't complete.
+  triggers:
+  - event_type: system_log_event
+    event_data:
+      level: ERROR
+    trigger: event
+  conditions:
+  - condition: template
+    value_template: '{% set ignore_list = ["homeassistant.components.stream.stream.camera."]
+      %}
+
+      {{ ignore_list|select(''in'', trigger.event.data.name)|list|length == 0 }}'
+  actions:
+  - action: notify.everyone
+    data:
+      title: Error
+      message: '{{ trigger.event.data.message }}'
+  - data:
+      title: Error Detected
+      message: 'An error occurred: {{ trigger.event.data.message }}'
+    action: persistent_notification.create
+  mode: single
+- id: '1770844293046'
+  alias: Restart Bluetooth proxies
+  description: ''
+  triggers:
+  - trigger: time
+    at: 01:00:00
+  - trigger: template
+    value_template: '{{ states(''sensor.bermuda_global_active_proxy_count'') != states(''sensor.bermuda_global_total_proxy_count'')
+      }}'
+    for:
+      hours: 0
+      minutes: 5
+      seconds: 0
+  conditions: []
+  actions:
+  - action: script.restart_esphome_proxies
+    metadata: {}
+    data: {}
+  mode: single

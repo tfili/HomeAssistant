@@ -1,5 +1,6 @@
 weather:
   - name: "Green Meadow Station"
+    availability: "{{ not (is_state('weather.forecast_home', 'unavailable') or is_state('sensor.greenmeadowweatherstation_temperatureoutdoor', 'unavailable')) }}"
     unique_id: "green_meadow_station"
     condition_template: "{{ states('weather.forecast_home') }}"
     temperature_template: "{{ states('sensor.greenmeadowweatherstation_temperatureoutdoor') }}"

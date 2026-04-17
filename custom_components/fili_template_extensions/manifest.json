@@ -1,0 +1,8 @@
+{
+  "domain": "fili_template_extensions",
+  "name": "Fili Template Extensions",
+  "documentation": "",
+  "dependencies": [],
+  "codeowners": ["@tfili"],
+  "version": "1.0.0"
+}

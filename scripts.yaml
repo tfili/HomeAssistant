@@ -125,3 +125,73 @@ arm_alarm:
     data: {}
   alias: Arm Alarm
   description: ''
+restart_esphome_proxies:
+  alias: Restart ESPhome Proxies
+  description: Find ESPhome proxy devices by name (defaults to devices with 'proxy'
+    in a friendly name) and press their restart button sequentially, waiting for the
+    device to become available again before proceeding.
+  fields:
+    name_contains:
+      description: Substring to match in device-related entity friendly names (default
+        'proxy')
+      example: proxy
+    restart_contains:
+      description: Substring to match the restart button (entity_id or friendly name)
+        (default 'restart')
+      example: restart
+    timeout:
+      description: Seconds to wait for device to become available after restarting
+        (default 10)
+      example: 180
+  sequence:
+  - variables:
+      buttons: "{% set rc = (restart_contains | default('restart')) | lower %} {%
+        set nc = (name_contains | default('proxy')) | lower %} {# Build list of candidate
+        restart button entity_ids #} {% set ns = namespace(result=[]) %} {% for b
+        in states.button %}\n  {% set bname = (b.name | default('') ) | lower %}\n
+        \ {% if (rc in b.entity_id or rc in bname) and (nc in b.entity_id or nc in
+        bname) %}\n    {% set ns.result = ns.result + [b.entity_id] %}\n  {% endif
+        %}\n{% endfor %} {{ ns.result }}\n"
+  - choose:
+    - conditions:
+      - condition: template
+        value_template: '{{ buttons | length == 0 }}'
+      sequence:
+      - action: persistent_notification.create
+        data:
+          title: Restart ESPhome Proxies
+          message: No restart buttons found matching the filters (name_contains={{
+            name_contains }}, restart_contains={{ restart_contains }})
+    default:
+    - repeat:
+        for_each: '{{ buttons }}'
+        sequence:
+        - action: logbook.log
+          data:
+            name: Restart ESPhome Proxies
+            message: Restarting {{ repeat.item }}
+        - action: button.press
+          target:
+            entity_id: '{{ repeat.item }}'
+          data: {}
+        - delay:
+            seconds: 1
+        - wait_template: '{{ not is_state(repeat.item, ''unavailable'') }}'
+          timeout:
+            seconds: '{{ timeout | default(10) | int }}'
+          continue_on_timeout: false
+    - action: persistent_notification.create
+      data:
+        title: Restart ESPhome Proxies
+        message: Finished processing {{ buttons | length }} device(s).
+fix_office_light_state:
+  sequence:
+  - action: bond.set_light_power_tracked_state
+    metadata: {}
+    data:
+      power_state: '{{ not states("light.office_ceiling_fan") }}
+
+        '
+      entity_id: light.office_ceiling_fan
+  alias: Fix office light state
+  description: ''

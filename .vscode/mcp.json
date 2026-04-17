@@ -1,7 +1,7 @@
 {
 	"servers": {
 		"ha-mcp": {
-			"url": "http://192.168.2.35:8086/mcp",
+			"url": "http://mcp-ha.iot.filidelphia.com:8086/mcp",
 			"type": "http"
 		}
 	},

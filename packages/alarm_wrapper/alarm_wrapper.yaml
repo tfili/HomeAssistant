@@ -21,13 +21,21 @@ alarm_wrapper:
         - unique_id: wrapped_alarm
           name: Alarm
           code_arm_required: false
-          state: '{{ states("input_text.alarm_state") }}'
+          state: "{{ states('input_text.alarm_state') }}"
+          availability: "{{ states('alarm_control_panel.abode_alarm') not in ('unknown', 'unavailable') }}"
           arm_away:
             - action: alarm_control_panel.alarm_arm_away
               target:
                 entity_id: alarm_control_panel.abode_alarm
           arm_home:
             - action: alarm_control_panel.alarm_arm_home
+              target:
+                entity_id: alarm_control_panel.abode_alarm
+          arm_night:
+            - action: input_boolean.turn_on
+              target:
+                entity_id: input_boolean.alarm_night_mode
+            - action: alarm_control_panel.alarm_arm_away
               target:
                 entity_id: alarm_control_panel.abode_alarm
           disarm:
@@ -71,7 +79,7 @@ alarm_wrapper:
             # 6061: Arming Home
             # 6055: Arming Away w/ Fault
             # 6065: Arming Home w/ Fault
-            new_state: |
+            new_state_real: |
               {% if trigger.id == "arming" %}
                 {% if trigger.event.data.event_code == "6051" or trigger.event.data.event_code == "6061" or trigger.event.data.event_code == "6055" or trigger.event.data.event_code == "6065" %}
                   arming
@@ -83,6 +91,12 @@ alarm_wrapper:
               {% else %}
                 {{ states("alarm_control_panel.abode_alarm") }}
               {% endif %}
+            new_state: |
+              {% if new_state_real == "armed_away" and is_state("input_boolean.alarm_night_mode", "on") %}
+                armed_night
+              {% else %}
+                {{ new_state_real }}
+              {% endif %}
         - condition: template
           value_template: '{{ new_state != "" }}'
         - action: input_text.set_value
@@ -90,9 +104,21 @@ alarm_wrapper:
             entity_id: input_text.alarm_state
           data:
             value: "{{ new_state }}"
+        - if:
+            - condition: template
+              value_template: "{{ new_state is match('(disarmed|armed_(away|home|night))') }}"
+          then:
+            - action: input_boolean.turn_off
+              target:
+                entity_id: input_boolean.alarm_night_mode
       mode: single
 
   input_text:
     alarm_state:
       name: Alarm State
       initial: Unknown
+
+  input_boolean:
+    alarm_night_mode:
+      name: Alarm Night Mode
+      initial: off

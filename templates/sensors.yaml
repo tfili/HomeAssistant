@@ -7,3 +7,4 @@ sensor:
       {% else %}
         {{ states("device_tracker.tom_s_phone_ble_bermuda_tracker") | replace("_", " ") | title }}
       {% endif %}
+    availability: "{{ not (is_state('device_tracker.tom_s_phone_ble_bermuda_tracker', 'unavailable') or is_state('sensor.tom_s_phone_ble_area', 'unavailable')) }}"

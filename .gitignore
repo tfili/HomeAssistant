@@ -51,6 +51,7 @@ secrets.yaml
 # Custom integrations: if you want to version-control your own custom
 # components, remove or narrow this rule (e.g. add negation !custom_components/your_component/)
 /custom_components/*
+!/custom_components/fili_*
 /themes/*
 
 #############################

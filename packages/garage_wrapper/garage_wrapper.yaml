@@ -28,7 +28,8 @@ garage_wrapper:
         - unique_id: 361f95e8-09b3-4e9b-bdeb-f99b8e743df6
           device_class: garage
           name: Left Garage Door
-          state: '{{ states("input_text.left_garage_state") }}'
+          state: "{{ states('input_text.left_garage_state') }}"
+          availability: "{{ states('cover.abode_left_garage_door') not in ('unknown', 'unavailable') }}"
           open_cover:
             - condition: state
               state:
@@ -53,7 +54,8 @@ garage_wrapper:
         - unique_id: b27b2e53-f414-4428-9050-db12cc5775a1
           device_class: garage
           name: Right Garage Door
-          state: '{{ states("input_text.right_garage_state") }}'
+          state: "{{ states('input_text.right_garage_state') }}"
+          availability: "{{ states('cover.abode_right_garage_door') not in ('unknown', 'unavailable') }}"
           open_cover:
             - condition: state
               state:
@@ -148,8 +150,8 @@ garage_wrapper:
   input_text:
     left_garage_state:
       name: Left garage state
-      initial: None
+      initial: Unknown
 
     right_garage_state:
       name: Right garage state
-      initial: None
+      initial: Unknown

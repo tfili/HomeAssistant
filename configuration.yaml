@@ -23,10 +23,8 @@ homeassistant:
       trusted_networks:
         - 192.168.0.0/24
       trusted_users:
-        192.168.0.4:
+        192.168.0.6:
           - 9c546e5ab33f47fcbd2103594668aaaf # tom
-        192.168.0.0/24:
-          - 74a1a86c82c44c3db9e8263156846c35 # Kiosk
 
   # On restart, set the automations enabled flags to previous values
   customize_domain:
@@ -40,8 +38,11 @@ http:
 
 logger:
   default: warning
-  logs:
-    homeassistant.components.mobile_app.notify: debug
+
+system_log:
+  fire_event: true
+
+fili_template_extensions:
 
 # HTTP Server settings
 # IP Banning blocks IOS app too easily so its disabled
@@ -60,6 +61,7 @@ wake_on_lan:
 recorder:
   # MariaDB
   db_url: !secret mariadb_url
+  purge_keep_days: 7
   # Exclude history some entities
   exclude:
     domains:
@@ -82,16 +84,18 @@ recorder:
       # Shelly Firmware updates
       - binary_sensor.*_firmware_update
       - button.*_update_firmware
+      - sensor.*_signal_strength
     entities:
       # Sun
       - sun.sun
+      # Very chatty sensors that are of little to no use
+      - sensor.bambu_p1s_wi_fi_signal
+      - sensor.greenmeadowweatherstation_eventdate
 
 alert: !include alerts.yaml
 automation: !include automations.yaml
-input_boolean: !include input_boolean.yaml
 notify: !include notify.yaml
 script: !include scripts.yaml
-shell_command: !include shell_command.yaml
 template: !include_dir_list templates/
 
 # Enable python scripts (built-in and pyscript)
