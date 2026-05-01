@@ -44,6 +44,8 @@ secrets.yaml
 /www/mail_and_packages/
 # other generated/watchman artifacts
 /watchman_report.txt
+# Image Logo Cache
+/.cache/
 
 #############################
 # Integrations and custom code

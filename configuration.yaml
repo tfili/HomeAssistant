@@ -88,6 +88,11 @@ recorder:
     entities:
       # Sun
       - sun.sun
+      # Sports
+      - sensor.mlb_philadelphia_phillies
+      - sensor.nfl_philadelphia_eagles
+      - sensor.nhl_philadelphia_flyers
+      - sensor.nba_philadelphia_76ers
       # Very chatty sensors that are of little to no use
       - sensor.bambu_p1s_wi_fi_signal
       - sensor.greenmeadowweatherstation_eventdate
