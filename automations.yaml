@@ -1231,12 +1231,19 @@
           minutes: 0
           seconds: 5
           milliseconds: 0
-      - data:
-          xy_color: '{{ color }}'
-          brightness: '{{ brightness }}'
-        target:
-          entity_id: light.cabinet
-        action: light.turn_on
+      - repeat:
+          until:
+          - condition: template
+            value_template: '{{ state_attr(''light.cabinet'', ''brightness'') == (brightness | default(none)) or repeat.index > 5 }}'
+          sequence:
+          - data:
+              xy_color: '{{ color }}'
+              brightness: '{{ brightness }}'
+            target:
+              entity_id: light.cabinet
+            action: light.turn_on
+          - delay:
+              milliseconds: 500
       - if:
         - condition: template
           value_template: '{{ light_state == ''off'' }}'
