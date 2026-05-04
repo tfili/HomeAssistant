@@ -1098,6 +1098,7 @@
       snapshot_localpath: /media/tmp/automations/doorbell/{{ snapshot_filename }}
       snapshot_mediapath: /media/local/tmp/automations/doorbell/{{ snapshot_filename
         }}
+      ai_result: {}
   - action: pyscript.safe_snapshot
     metadata: {}
     data:
@@ -2196,7 +2197,7 @@
     data: {}
   mode: single
 - id: '1777607853016'
-  alias: Phillies Score
+  alias: Philly Scores
   description: ''
   triggers:
   - trigger: state
@@ -2250,12 +2251,19 @@
           rgb_color: '{{ color2 }}'
       - delay:
           milliseconds: 500
-  - action: light.turn_on
-    target:
-      entity_id: light.cabinet
-    data:
-      brightness: '{{ original_brightness }}'
-      rgb_color: '{{ original_rgb }}'
+  - repeat:
+      until:
+      - condition: template
+        value_template: '{{ state_attr(''light.cabinet'', ''rgb_color'') == (original_rgb | default(none)) or repeat.index > 5 }}'
+      sequence:
+      - action: light.turn_on
+        target:
+          entity_id: light.cabinet
+        data:
+          brightness: '{{ original_brightness }}'
+          rgb_color: '{{ original_rgb }}'
+      - delay:
+          milliseconds: 500
   - if:
     - condition: template
       value_template: '{{ original_state == ''off'' }}'
