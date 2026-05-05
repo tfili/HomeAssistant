@@ -170,6 +170,7 @@
       attribute: current
       above: '0'
   actions:
+  - action: script.cabinet_light_lock_acquire
   - data: {}
     entity_id: light.cabinet
     action: light.turn_on
@@ -182,6 +183,7 @@
   - data: {}
     entity_id: light.cabinet
     action: light.turn_off
+  - action: script.cabinet_light_lock_release
   mode: restart
 - id: 5338138641074509ac3d115c3132d868
   alias: Set Default Theme
@@ -557,6 +559,7 @@
   - condition: template
     value_template: '{{ ''_press_release'' not in trigger.payload }}'
   actions:
+  - action: script.cabinet_light_lock_acquire
   - variables:
       payload: '{{ trigger.payload }}'
       serviceName: "{% if payload == 'off_press' or payload == 'off_hold_release'
@@ -568,6 +571,7 @@
     target:
       entity_id: light.cabinet
     action: '{{ serviceName }}'
+  - action: script.cabinet_light_lock_release
   mode: queued
   max: 10
 - id: '1689010045910'
@@ -871,20 +875,6 @@
             authenticationRequired: false
       action: notify.everyone
   mode: single
-- id: '1689187420027'
-  alias: 'Wake-on-LAN: Greatroom TV'
-  description: ''
-  triggers:
-  - entity_id: media_player.greatroom_tv
-    trigger: samsungtv.turn_on
-  conditions: []
-  actions:
-  - data:
-      broadcast_port: 9
-      mac: 10:2B:41:89:E8:54
-      broadcast_address: 192.168.0.255
-    action: wake_on_lan.send_magic_packet
-  mode: single
 - id: '1689189186005'
   alias: Alarm Armed
   description: ''
@@ -960,14 +950,6 @@
             - 2f2b4b90085f1aefc5819d96cb910ead
             - 06377561fa34ea1757a7a610684c781e
           action: light.turn_off
-        - data:
-            num_repeats: 1
-            delay_secs: 0.4
-            hold_secs: 0
-            command: KEY_HOME
-          target:
-            entity_id: remote.greatroom_tv
-          action: remote.send_command
       - delay:
           hours: 0
           minutes: 0
@@ -979,7 +961,6 @@
           - media_player.bar_tv
           - media_player.basement_projector
           - media_player.office_tv
-          - media_player.greatroom_tv
         action: media_player.turn_off
     - if:
       - condition: trigger
@@ -1006,6 +987,7 @@
     value_template: '{{ trigger.event.data.action == ''VACUUM_AND_MOP'' or trigger.event.data.action
       == ''VACUUM'' }}'
   actions:
+  - action: script.cabinet_light_lock_acquire
   - data:
       brightness_pct: 50
     target:
@@ -1061,6 +1043,7 @@
       - light.cabinet
       - light.kitchen_dimmer
     action: light.turn_off
+  - action: script.cabinet_light_lock_release
   mode: single
 - id: '1689557717000'
   alias: Doorbell
@@ -1090,6 +1073,7 @@
     enabled: false
   conditions: []
   actions:
+  - action: script.cabinet_light_lock_acquire
   - variables:
       light_state: '{{ states(''light.cabinet'') }}'
       snapshot_filename: '{{ now().strftime("%Y-%m-%dT%H:%M:%S.%f") }}.jpg
@@ -1264,6 +1248,7 @@
         message: '{{ alert_message }}'
         data:
           image: /api/camera_proxy/camera.front_doorbell_fluent
+  - action: script.cabinet_light_lock_release
   - delay:
       hours: 0
       minutes: 0
@@ -1666,109 +1651,162 @@
     domain: remote
   mode: single
 - id: '1744601116209'
-  alias: Office Fan
-  description: ''
+  alias: Office Temperature Control
+  description: Controls office fan and vent to maintain temperature within 1° of thermostat setpoint. Adjusts thermostat only if fan/vent cannot maintain temperature.
   triggers:
+  - trigger: state
+    entity_id: sensor.office_temperature
+  - trigger: state
+    entity_id: climate.downstairs
   - trigger: time_pattern
-    hours: '*'
-    minutes: /1
-    enabled: true
+    minutes: /5
   - type: occupied
     device_id: 9e13626ee8b01b6a65ef08abfadfe6a1
     entity_id: 7bb5d69b6da11b5cf6395ea36e7586ff
     domain: binary_sensor
     trigger: device
   - trigger: state
-    entity_id:
-    - sensor.toms_location
-    to:
+    entity_id: sensor.toms_location
   - trigger: state
-    entity_id:
-    - alarm_control_panel.alarm
-    to: armed_away
+    entity_id: alarm_control_panel.alarm
   conditions:
   - condition: state
     entity_id: input_boolean.auto_office
     state: 'on'
   actions:
   - variables:
-      temp: '{{ states(''sensor.office_motion_sensor_temperature'') | int(70) }}'
-      fan_speed: "{% if temp < 72 %}\n  0\n{% elif temp < 76 %}\n  33\n{% elif temp
-        < 80 %}\n  66\n{% else %}\n  100\n{% endif %}\n  \n"
-  - if:
-    - condition: or
-      conditions:
-      - condition: state
-        entity_id: binary_sensor.workday
-        state: 'on'
-      - type: is_occupied
-        condition: device
-        device_id: 9e13626ee8b01b6a65ef08abfadfe6a1
-        entity_id: 7bb5d69b6da11b5cf6395ea36e7586ff
-        domain: binary_sensor
-      - condition: state
-        entity_id: sensor.toms_location
-        state: office
-        enabled: true
-      enabled: true
-    - condition: state
-      entity_id: binary_sensor.office_occupied
-      state: 'on'
-      enabled: false
-    - condition: template
-      value_template: '{{ fan_speed > 0 }}'
-    - condition: not
-      conditions:
-      - condition: state
-        entity_id: alarm_control_panel.alarm
-        state: armed_away
-    then:
-    - sequence:
+      office_temp: '{{ states(''sensor.office_temperature'') | float(none) }}'
+      target_temp: '{{ state_attr(''climate.downstairs'', ''temperature'') | float(none) }}'
+      hvac_mode: '{{ states(''climate.downstairs'') }}'
+      hvac_action: '{{ state_attr(''climate.downstairs'', ''hvac_action'') }}'
+      is_heating: '{{ hvac_action in [''heating'', ''pre-heating''] }}'
+      is_cooling: '{{ hvac_action == ''cooling'' }}'
+      is_occupied: "{% set workday = is_state('binary_sensor.workday', 'on') %}\n{% set occupied = is_state_attr('binary_sensor.office_motion_sensor_occupancy', 'occupancy', true) %}\n{% set tom_in_office = is_state('sensor.toms_location', 'office') %}\n{% set alarm_away = is_state('alarm_control_panel.alarm', 'armed_away') %}\n{{ (workday or occupied or tom_in_office) and not alarm_away }}\n"
+      temp_diff: '{{ (office_temp - target_temp) if office_temp is not none and target_temp is not none else 0 }}'
+  - choose:
+    - conditions:
       - condition: template
-        value_template: '{{ fan_speed != state_attr(''fan.office_ceiling_fan'', ''percentage'')
-          }}'
-      - data:
-          percentage: '{{ fan_speed }}'
-        target:
-          entity_id: fan.office_ceiling_fan
-        action: fan.set_percentage
-    else:
-    - if:
-      - condition: or
-        conditions:
-        - condition: and
-          conditions:
-          - condition: state
-            entity_id: binary_sensor.workday
-            state: 'off'
-          - type: is_not_occupied
-            condition: device
-            device_id: 9e13626ee8b01b6a65ef08abfadfe6a1
-            entity_id: 7bb5d69b6da11b5cf6395ea36e7586ff
-            domain: binary_sensor
-          - condition: not
-            conditions:
-            - condition: state
-              entity_id: sensor.toms_location
-              state:
-              - Office
-              enabled: true
-          enabled: true
-        - condition: state
-          entity_id: binary_sensor.office_occupied
-          state: 'off'
-          enabled: false
-        - condition: template
-          value_template: '{{ fan_speed == 0 }}'
-      - condition: state
+        value_template: '{{ is_occupied and hvac_mode in [''heat'', ''cool'', ''auto''] and office_temp is not none and target_temp is not none }}'
+      sequence:
+      - choose:
+        - conditions:
+          - condition: template
+            value_template: '{{ temp_diff > 5 }}'
+          sequence:
+          - action: fan.set_percentage
+            target:
+              entity_id: fan.office_ceiling_fan
+            data:
+              percentage: 100
+          - choose:
+            - conditions:
+              - condition: template
+                value_template: '{{ hvac_mode == "cool" or is_cooling }}'
+              sequence:
+              - action: cover.open_cover_tilt
+                target:
+                  entity_id: cover.office_vent
+            default:
+            - action: cover.close_cover_tilt
+              target:
+                entity_id: cover.office_vent
+        - conditions:
+          - condition: template
+            value_template: '{{ temp_diff > 4 }}'
+          sequence:
+          - action: fan.set_percentage
+            target:
+              entity_id: fan.office_ceiling_fan
+            data:
+              percentage: 66
+          - choose:
+            - conditions:
+              - condition: template
+                value_template: '{{ hvac_mode == "cool" or is_cooling }}'
+              sequence:
+              - action: cover.open_cover_tilt
+                target:
+                  entity_id: cover.office_vent
+            default:
+            - action: cover.close_cover_tilt
+              target:
+                entity_id: cover.office_vent
+        - conditions:
+          - condition: template
+            value_template: '{{ temp_diff > 2 }}'
+          sequence:
+          - action: fan.set_percentage
+            target:
+              entity_id: fan.office_ceiling_fan
+            data:
+              percentage: 33
+          - choose:
+            - conditions:
+              - condition: template
+                value_template: '{{ hvac_mode == "cool" or is_cooling }}'
+              sequence:
+              - action: cover.open_cover_tilt
+                target:
+                  entity_id: cover.office_vent
+            default:
+            - action: cover.close_cover_tilt
+              target:
+                entity_id: cover.office_vent
+        - conditions:
+          - condition: template
+            value_template: '{{ temp_diff > 1 }}'
+          sequence:
+          - action: fan.turn_off
+            target:
+              entity_id: fan.office_ceiling_fan
+          - choose:
+            - conditions:
+              - condition: template
+                value_template: '{{ hvac_mode == "cool" or is_cooling }}'
+              sequence:
+              - action: cover.open_cover_tilt
+                target:
+                  entity_id: cover.office_vent
+            default:
+            - action: cover.close_cover_tilt
+              target:
+                entity_id: cover.office_vent
+        - conditions:
+          - condition: template
+            value_template: '{{ temp_diff >= -1 and temp_diff <= 1 }}'
+          sequence:
+          - action: fan.turn_off
+            target:
+              entity_id: fan.office_ceiling_fan
+          - action: cover.close_cover_tilt
+            target:
+              entity_id: cover.office_vent
+        - conditions:
+          - condition: template
+            value_template: '{{ temp_diff < -1 }}'
+          sequence:
+          - action: fan.turn_off
+            target:
+              entity_id: fan.office_ceiling_fan
+          - choose:
+            - conditions:
+              - condition: template
+                value_template: '{{ hvac_mode == "heat" or is_heating }}'
+              sequence:
+              - action: cover.open_cover_tilt
+                target:
+                  entity_id: cover.office_vent
+            default:
+            - action: cover.close_cover_tilt
+              target:
+                entity_id: cover.office_vent
+    default:
+    - action: fan.turn_off
+      target:
         entity_id: fan.office_ceiling_fan
-        state: 'on'
-      then:
-      - action: fan.turn_off
-        metadata: {}
-        data: {}
-        target:
-          device_id: def02a729f138f86b72a0cecb8a6d653
+    - action: cover.close_cover_tilt
+      target:
+        entity_id: cover.office_vent
   mode: single
 - id: '1746156521863'
   alias: Filament storage warnings
@@ -1968,49 +2006,6 @@
         url: /home-maintenance
     action: notify.mobile_app_toms_iphone
   mode: single
-- id: '1768368053833'
-  alias: Office Vent Smart Sync (Auto/Heat/Cool)
-  description: Syncs vent based on office temp vs thermostat setpoint, handling Auto
-    mode.
-  triggers:
-  - entity_id: sensor.office_motion_sensor_temperature
-    trigger: state
-  - entity_id: climate.downstairs
-    trigger: state
-  conditions: []
-  actions:
-  - variables:
-      office_temp: '{{ states(''sensor.office_motion_sensor_temperature'') | float(0)
-        }}'
-      target_temp: '{{ state_attr(''climate.downstairs'', ''temperature'') | float(0)
-        }}'
-      hvac_action: '{{ state_attr(''climate.downstairs'', ''hvac_action'') }}'
-      hvac_mode: '{{ states(''climate.downstairs'') }}'
-  - choose:
-    - conditions:
-      - condition: template
-        value_template: "{{ (hvac_action == 'heating' or hvac_mode == 'heat') and
-          \n   (office_temp < target_temp) }}\n"
-      sequence:
-      - action: cover.open_cover_tilt
-        target:
-          entity_id: cover.office_vent
-        data: {}
-    - conditions:
-      - condition: template
-        value_template: "{{ (hvac_action == 'cooling' or hvac_mode == 'cool') and
-          \n   (office_temp > target_temp) }}\n"
-      sequence:
-      - action: cover.open_cover_tilt
-        target:
-          entity_id: cover.office_vent
-        data: {}
-    default:
-    - action: cover.close_cover_tilt
-      target:
-        entity_id: cover.office_vent
-      data: {}
-  mode: restart
 - id: '1768959870221'
   alias: 'Bedroom Blinds: Smart Control'
   description: Controls bedroom blinds based on alarm status, time, sun, and webhooks.
@@ -2229,14 +2224,15 @@
     id: 76ers
   conditions: []
   actions:
+  - action: script.cabinet_light_lock_acquire
   - variables:
       original_state: '{{ states(''light.cabinet'') }}'
       original_brightness: '{{ state_attr(''light.cabinet'', ''brightness'') }}'
       original_rgb: '{{ state_attr(''light.cabinet'', ''rgb_color'') }}'
-      color1: '{% if trigger.id == "phillies" %}[111, 38, 61]{% elif trigger.id ==
+      color1: '{% if trigger.id == "phillies" %}[232, 24, 40]{% elif trigger.id ==
         "eagles" %}[4, 106, 56]{% elif trigger.id == "flyers" %}[247, 73, 2]{% elif
-        trigger.id == "76ers" %}[0, 107, 182]{% endif %}'
-      color2: '{% if trigger.id == "phillies" %}[107, 172, 228]{% elif trigger.id
+        trigger.id == "76ers" %}[0, 43, 92]{% endif %}'
+      color2: '{% if trigger.id == "phillies" %}[255, 255, 255]{% elif trigger.id
         == "eagles" %}[138, 141, 143]{% elif trigger.id == "flyers" %}[255, 255, 255]{%
         elif trigger.id == "76ers" %}[237, 23, 76]{% endif %}'
   - repeat:
@@ -2278,4 +2274,5 @@
     - action: light.turn_off
       target:
         entity_id: light.cabinet
+  - action: script.cabinet_light_lock_release
   mode: single

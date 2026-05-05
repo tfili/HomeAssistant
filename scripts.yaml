@@ -1,3 +1,40 @@
+cabinet_light_lock_acquire:
+  alias: Cabinet Light - Acquire Lock
+  description: Acquires the cabinet light mutex lock. Waits up to 12 seconds, auto-releases stale locks after 60 seconds.
+  sequence:
+  - repeat:
+      until:
+      - condition: template
+        value_template: '{{ not is_state("input_boolean.cabinet_light_lock", "on") or (as_timestamp(now()) - as_timestamp(state_attr("input_datetime.cabinet_light_lock_time", "timestamp") or 0)) > 60 or repeat.index > 12 }}'
+      sequence:
+      - delay:
+          seconds: 1
+  - if:
+    - condition: template
+      value_template: '{{ is_state("input_boolean.cabinet_light_lock", "on") and (as_timestamp(now()) - as_timestamp(state_attr("input_datetime.cabinet_light_lock_time", "timestamp") or 0)) > 60 }}'
+    then:
+    - action: input_boolean.turn_off
+      target:
+        entity_id: input_boolean.cabinet_light_lock
+  - action: input_boolean.turn_on
+    target:
+      entity_id: input_boolean.cabinet_light_lock
+  - action: input_datetime.set_datetime
+    data:
+      datetime: '{{ now().isoformat() }}'
+    target:
+      entity_id: input_datetime.cabinet_light_lock_time
+  mode: single
+
+cabinet_light_lock_release:
+  alias: Cabinet Light - Release Lock
+  description: Releases the cabinet light mutex lock.
+  sequence:
+  - action: input_boolean.turn_off
+    target:
+      entity_id: input_boolean.cabinet_light_lock
+  mode: single
+
 close_garage_doors:
   alias: Close Garage Doors
   sequence:

@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "homeassistant": {
+      "type": "http",
+      "url": "http://mcp-ha.iot.filidelphia.com:8086/mcp"
+    }
+  }
+}
