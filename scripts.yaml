@@ -1,17 +1,22 @@
 cabinet_light_lock_acquire:
   alias: Cabinet Light - Acquire Lock
-  description: Acquires the cabinet light mutex lock. Waits up to 12 seconds, auto-releases stale locks after 60 seconds.
+  description: Acquires the cabinet light mutex lock. Waits up to 12 seconds, auto-releases
+    stale locks after 60 seconds.
   sequence:
   - repeat:
       until:
       - condition: template
-        value_template: '{{ not is_state("input_boolean.cabinet_light_lock", "on") or (as_timestamp(now()) - as_timestamp(state_attr("input_datetime.cabinet_light_lock_time", "timestamp") or 0)) > 60 or repeat.index > 12 }}'
+        value_template: '{{ not is_state("input_boolean.cabinet_light_lock", "on")
+          or (as_timestamp(now()) - as_timestamp(state_attr("input_datetime.cabinet_light_lock_time",
+          "timestamp") or 0)) > 60 or repeat.index > 12 }}'
       sequence:
       - delay:
           seconds: 1
   - if:
     - condition: template
-      value_template: '{{ is_state("input_boolean.cabinet_light_lock", "on") and (as_timestamp(now()) - as_timestamp(state_attr("input_datetime.cabinet_light_lock_time", "timestamp") or 0)) > 60 }}'
+      value_template: '{{ is_state("input_boolean.cabinet_light_lock", "on") and (as_timestamp(now())
+        - as_timestamp(state_attr("input_datetime.cabinet_light_lock_time", "timestamp")
+        or 0)) > 60 }}'
     then:
     - action: input_boolean.turn_off
       target:
@@ -25,16 +30,19 @@ cabinet_light_lock_acquire:
     target:
       entity_id: input_datetime.cabinet_light_lock_time
   mode: single
-
 cabinet_light_lock_release:
   alias: Cabinet Light - Release Lock
   description: Releases the cabinet light mutex lock.
   sequence:
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 1
+      milliseconds: 0
   - action: input_boolean.turn_off
     target:
       entity_id: input_boolean.cabinet_light_lock
   mode: single
-
 close_garage_doors:
   alias: Close Garage Doors
   sequence:
@@ -166,7 +174,8 @@ restart_esphome_proxies:
   alias: Restart ESPhome Proxies
   description: Find ESPhome proxy devices by name (defaults to devices with 'proxy'
     in a friendly name) and press their restart button sequentially, waiting for the
-    device to become available again before proceeding.
+    device to become available again. Skips devices that are unavailable/offline (cannot
+    be restarted via button).
   fields:
     name_contains:
       description: Substring to match in device-related entity friendly names (default
@@ -182,13 +191,14 @@ restart_esphome_proxies:
       example: 180
   sequence:
   - variables:
-      buttons: "{% set rc = (restart_contains | default('restart')) | lower %} {%
-        set nc = (name_contains | default('proxy')) | lower %} {# Build list of candidate
-        restart button entity_ids #} {% set ns = namespace(result=[]) %} {% for b
-        in states.button %}\n  {% set bname = (b.name | default('') ) | lower %}\n
-        \ {% if (rc in b.entity_id or rc in bname) and (nc in b.entity_id or nc in
-        bname) %}\n    {% set ns.result = ns.result + [b.entity_id] %}\n  {% endif
-        %}\n{% endfor %} {{ ns.result }}\n"
+      buttons: "{% set rc = (restart_contains | default('restart')) | lower %}\n{%
+        set nc = (name_contains | default('proxy')) | lower %}\n{# Only include available
+        (non-offline) proxy restart buttons #}\n{% set ns = namespace(result=[]) %}\n{%
+        for b in states.button %}\n  {% set bname = (b.name | default('')) | lower
+        %}\n  {% if (rc in b.entity_id or rc in bname) and (nc in b.entity_id or nc
+        in bname) and not is_state(b.entity_id, 'unavailable') %}\n    {% set ns.result
+        = ns.result + [b.entity_id] %}\n  {% endif %}\n{% endfor %}\n{{ ns.result
+        }}\n"
   - choose:
     - conditions:
       - condition: template

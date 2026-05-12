@@ -10,7 +10,7 @@ substitutions:
   baud_rate: "0"  # If you need serial debugging, override this to 115200 or similar.
   ble_interval: 320ms
   ble_window: 300ms
-  proxy_active_scan: "True"  # Set to false to avoid requesting scan info for device names etc
+  proxy_active_scan: "False"  # Set to false to avoid requesting scan info for device names etc
   ota_password: !secret bedroom_proxy_ota
   ip_address: !secret bedroom_proxy_ip
 
