@@ -366,8 +366,8 @@
     trigger: webostv.turn_on
   actions:
   - data:
-      mac: !secret projector_mac
-      broadcast_address: !secret lan_broadcast_address
+      mac: B0:37:95:01:2B:92
+      broadcast_address: 192.168.0.255
     action: wake_on_lan.send_magic_packet
 - id: '1645034312500'
   alias: Dryer Complete
@@ -1106,10 +1106,10 @@
       - 160
       default_brightness: 180
       light_state: '{{ states(''light.cabinet'') }}'
-      brightness: '{{ state_attr(''light.cabinet'', ''brightness'') | default(default_brightness)
-        }}'
-      color: '{{ state_attr(''light.cabinet'', ''rgb_color'') | default(default_light_rgb)
-        }}'
+      brightness: '{{ state_attr(''light.cabinet'', ''brightness'') | default(default_brightness,
+        true) }}'
+      color: '{{ state_attr(''light.cabinet'', ''rgb_color'') | default(default_light_rgb,
+        true) }}'
       snapshot_filename: '{{ now().strftime("%Y-%m-%dT%H:%M:%S.%f") }}.jpg'
       snapshot_localpath: /media/tmp/automations/doorbell/{{ snapshot_filename }}
       snapshot_mediapath: /media/local/tmp/automations/doorbell/{{ snapshot_filename
@@ -2158,7 +2158,7 @@
           entity_id: cover.office_blinds
         data:
           tilt_position: '{{ [state_attr(''cover.office_blinds'', ''current_tilt_position'')
-            | int + 10, 100] | min }}'
+            | int + 10, 99] | min }}'
     - conditions:
       - condition: template
         value_template: "{{ states('sensor.office_motion_sensor_illuminance') | float
@@ -2197,7 +2197,8 @@
   conditions:
   - condition: template
     value_template: '{% set ignore_list = ["homeassistant.components.stream.stream.camera.","custom_components.mail_and_packages",
-      "homeassistant.components.cast.media_player"] %}
+      "homeassistant.components.cast.media_player", "homeassistant.components.roku.coordinator"]
+      %}
 
       {{ ignore_list|select(''in'', trigger.event.data.name)|list|length == 0 }}'
   actions:
@@ -2255,8 +2256,9 @@
     platform: state
   conditions:
   - condition: template
-    value_template: '{{ trigger.to_state.attributes.team_score is not none and trigger.from_state.attributes.team_score is not none and (trigger.to_state.attributes.team_score
-      | int) > (trigger.from_state.attributes.team_score | default(0) | int) }}'
+    value_template: '{{ trigger.to_state.attributes.team_score is not none and trigger.from_state.attributes.team_score
+      is not none and (trigger.to_state.attributes.team_score | int) > (trigger.from_state.attributes.team_score
+      | default(0) | int) }}'
   actions:
   - action: script.cabinet_light_lock_acquire
   - variables:
@@ -2266,10 +2268,10 @@
       - 160
       default_brightness: 180
       original_state: '{{ states(''light.cabinet'') }}'
-      original_brightness: '{{ state_attr(''light.cabinet'', ''brightness'') | default(default_brightness)
-        }}'
-      original_rgb: '{{ state_attr(''light.cabinet'', ''rgb_color'') | default(default_light_rgb)
-        }}'
+      original_brightness: '{{ state_attr(''light.cabinet'', ''brightness'') | default(default_brightness,
+        true) }}'
+      original_rgb: '{{ state_attr(''light.cabinet'', ''rgb_color'') | default(default_light_rgb,
+        true) }}'
       color1: '{% set colors = state_attr(trigger.entity_id, ''team_colors'') %}{%
         set hex = colors[0][1:] %}[{{ hex[0:2] | int(base=16) }}, {{ hex[2:4] | int(base=16)
         }}, {{ hex[4:6] | int(base=16) }}]'

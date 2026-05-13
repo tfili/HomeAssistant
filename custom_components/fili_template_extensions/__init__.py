@@ -1,12 +1,12 @@
 import logging
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers import template
+from homeassistant.helpers import TemplateEnvironment
 
 _LOGGER = logging.getLogger(__name__)
 DOMAIN = "fili_template_extensions" 
 
 # https://github.com/zvldz/ha_custom_filters/blob/master/custom_components/custom_filters/__init__.py
-_TemplateEnvironment = template.TemplateEnvironment
+# _TemplateEnvironment = template.TemplateEnvironment
 
 def setup(hass: HomeAssistant, config: dict):
     """Set up the component."""
@@ -30,17 +30,21 @@ def setup(hass: HomeAssistant, config: dict):
                 
         return True
 
-    # Register the filter
-    # template.TemplateEnvironment.filters["is_available"] = is_available
-    # template.TemplateEnvironment.tests["available"] = is_available
-
-    if "template.environment" in hass.data:
-        hass.data["template.environment"].filters["is_available"] = is_available
-        hass.data["template.environment"].tests["available"] = is_available
-        _LOGGER.warning("Template Environment is available")
-    else:
-        _LOGGER.error("Template Environment is NOT available")
+    # Constants
+    def warm_white_rgb():
+        return [245, 215, 160]
     
+    def cool_white_rgb():
+        return [200, 220, 255]
+
+    # Patch the class-level globals so all instances pick it up
+    for env in TemplateEnvironment._environments.values():
+        env.filters["is_available"] = is_available
+        env.tests["available"] = is_available
+        env.globals["warm_white_rgb"] = warm_white_rgb
+        env.globals["cool_white_rgb"] = cool_white_rgb
+
     _LOGGER.info("Filter 'is_available' has been injected into the Template Environment")
+    _LOGGER.info("Constants 'warm_white_rgb' and 'cool_white_rgb' have been injected into the Template Environment")
 
     return True
