@@ -1,7 +1,7 @@
 alarm_wrapper:
   homeassistant:
     customize:
-      package.node_anchors:
+      automation.wrapped_alarm_sync:
         customize: &customize
           package: "alarm_wrapper"
 
@@ -9,9 +9,6 @@ alarm_wrapper:
         <<: *customize
         code_format: null
         icon: "mdi:security"
-
-      automation.wrapped_alarm_sync:
-        <<: *customize
 
       input_text.alarm_state:
         <<: *customize

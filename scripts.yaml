@@ -231,6 +231,7 @@ restart_esphome_proxies:
       data:
         title: Restart ESPhome Proxies
         message: Finished processing {{ buttons | length }} device(s).
+      enabled: false
 fix_office_light_state:
   sequence:
   - action: bond.set_light_power_tracked_state

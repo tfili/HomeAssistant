@@ -31,6 +31,13 @@ secrets.yaml
 .cloud/
 
 #############################
+# MCP
+#############################
+/.ha_mcp/logs/*
+/.ha_mcp/backups/*
+/.ha_mcp/*.lock
+
+#############################
 # Media, caches and generated files
 #############################
 # Text-to-speech cache / generated audio
@@ -42,6 +49,7 @@ secrets.yaml
 /www/media/
 /www/community/
 /www/mail_and_packages/
+/mail_and_packages/
 # other generated/watchman artifacts
 /watchman_report.txt
 # Image Logo Cache
@@ -55,6 +63,7 @@ secrets.yaml
 /custom_components/*
 !/custom_components/fili_*
 /themes/*
+/custom_icons/*
 
 #############################
 # Platform / device specific

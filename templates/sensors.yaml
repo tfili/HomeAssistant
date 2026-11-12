@@ -1,10 +1,10 @@
 sensor:
-  - name: Tom's Location
-    unique_id: toms_location_template_sensor
-    state: >
-      {% if(is_state("device_tracker.tom_s_phone_ble_bermuda_tracker","home")) %}
-        {{ states("sensor.tom_s_phone_ble_area") }}
-      {% else %}
-        {{ states("device_tracker.tom_s_phone_ble_bermuda_tracker") | replace("_", " ") | title }}
-      {% endif %}
-    availability: "{{ not (is_state('device_tracker.tom_s_phone_ble_bermuda_tracker', 'unavailable') or is_state('sensor.tom_s_phone_ble_area', 'unavailable')) }}"
+ - name: Tom's Location
+   unique_id: toms_location_template_sensor
+   state: >
+     {% if(is_state("device_tracker.tom_s_phone_ble_bermuda_tracker","home")) %}
+       {{ states("input_text.tom_s_location_debounced") }}
+     {% else %}
+       {{ states("device_tracker.tom_s_phone_ble_bermuda_tracker") | replace("_", " ") | title }}
+     {% endif %}
+   availability: "{{ not (is_state('device_tracker.tom_s_phone_ble_bermuda_tracker', 'unavailable') or is_state('sensor.tom_s_phone_ble_area', 'unavailable')) }}"

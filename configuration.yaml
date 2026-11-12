@@ -31,11 +31,6 @@ homeassistant:
     automation:
       initial_state: true
 
-http:
-  use_x_forwarded_for: true
-  trusted_proxies:
-    - 192.168.0.4
-
 logger:
   default: warning
 
@@ -43,12 +38,6 @@ system_log:
   fire_event: true
 
 fili_template_extensions:
-
-# HTTP Server settings
-# IP Banning blocks IOS app too easily so its disabled
-# http:
-#   ip_ban_enabled: true
-#   login_attempts_threshold: 5
 
 # Lovelace configuration
 frontend:

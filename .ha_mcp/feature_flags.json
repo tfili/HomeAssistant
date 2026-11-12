@@ -1,0 +1,9 @@
+{
+  "enable_beta_features": true,
+  "enable_yaml_config_editing": true,
+  "enable_yaml_packages_automation": true,
+  "enable_yaml_packages_scene": true,
+  "enable_yaml_packages_script": true,
+  "enable_filesystem_tools": true,
+  "enable_dashboard_screenshot": true
+}

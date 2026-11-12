@@ -1,7 +1,7 @@
 garage_wrapper:
   homeassistant:
     customize:
-      package.node_anchors:
+      automation.wrapped_garage_sync:
         customize: &customize
           package: "garage_wrapper"
 
@@ -9,9 +9,6 @@ garage_wrapper:
         <<: *customize
 
       cover.right_garage_door:
-        <<: *customize
-
-      automation.wrapped_garage_sync:
         <<: *customize
 
       input_text.left_garage_state:
