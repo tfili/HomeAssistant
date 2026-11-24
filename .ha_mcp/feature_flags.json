@@ -6,5 +6,8 @@
   "enable_yaml_packages_script": true,
   "enable_filesystem_tools": true,
   "enable_dashboard_screenshot": true,
-  "enable_tool_search": true
+  "enable_tool_search": true,
+  "enable_yaml_edit_confirm": true,
+  "extra_yaml_write_keys": "alarm_wrapper,garage_wrapper",
+  "enable_tool_security_policies": false
 }

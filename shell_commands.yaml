@@ -1,0 +1,6 @@
+# WLED Commands
+wled_get_info: "curl -s \"http://{{ host }}/json\""
+wled_set_state: "curl -s -X POST -H \"Content-Type: application/json\" -d '{{ payload }}' \"http://{{ host }}/json/state\""
+# Read-only: returns the full presets.json (stage presets + any tb overrides).
+# Diagnostic use only -- nothing in holiday_lighting.py depends on this.
+wled_get_presets: "curl -s \"http://{{ host }}/presets.json\""

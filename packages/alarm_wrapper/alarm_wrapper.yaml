@@ -7,108 +7,111 @@ alarm_wrapper:
 
       alarm_control_panel.alarm:
         <<: *customize
-        code_format: null
+        code_format:
         icon: "mdi:security"
 
       input_text.alarm_state:
         <<: *customize
 
   template:
-    - alarm_control_panel:
-        - unique_id: wrapped_alarm
-          name: Alarm
-          code_arm_required: false
-          state: "{{ states('input_text.alarm_state') }}"
-          availability: "{{ states('alarm_control_panel.abode_alarm') not in ('unknown', 'unavailable') }}"
-          arm_away:
-            - action: alarm_control_panel.alarm_arm_away
-              target:
-                entity_id: alarm_control_panel.abode_alarm
-          arm_home:
-            - action: alarm_control_panel.alarm_arm_home
-              target:
-                entity_id: alarm_control_panel.abode_alarm
-          arm_night:
-            - action: input_boolean.turn_on
-              target:
-                entity_id: input_boolean.alarm_night_mode
-            - action: alarm_control_panel.alarm_arm_away
-              target:
-                entity_id: alarm_control_panel.abode_alarm
-          disarm:
-            - action: alarm_control_panel.alarm_disarm
-              target:
-                entity_id: alarm_control_panel.abode_alarm
+  - alarm_control_panel:
+    - unique_id: wrapped_alarm
+      name: Alarm
+      code_arm_required: false
+      state: "{{ states('input_text.alarm_state') }}"
+      availability: "{{ states('alarm_control_panel.abode_alarm') not in ('unknown', 'unavailable') }}"
+      arm_away:
+      - action: alarm_control_panel.alarm_arm_away
+        target:
+          entity_id: alarm_control_panel.abode_alarm
+      arm_home:
+      - action: alarm_control_panel.alarm_arm_home
+        target:
+          entity_id: alarm_control_panel.abode_alarm
+      arm_night:
+      - action: input_boolean.turn_on
+        target:
+          entity_id: input_boolean.alarm_night_mode
+      - action: alarm_control_panel.alarm_arm_away
+        target:
+          entity_id: alarm_control_panel.abode_alarm
+      disarm:
+      - action: alarm_control_panel.alarm_disarm
+        target:
+          entity_id: alarm_control_panel.abode_alarm
 
   automation:
-    - id: "5987768829878"
-      alias: Wrapped Alarm Sync
-      description: ""
-      triggers:
-        - event_type: abode_arm
-          event_data: {}
-          trigger: event
-          enabled: true
-          id: arming
-        - event_type: abode_arm_fault
-          event_data: {}
-          trigger: event
-          enabled: true
-          id: arming
-        - event_type: abode_disarm
-          event_data: {}
-          trigger: event
-          enabled: true
-          id: disarm
-        - trigger: state
-          entity_id:
-            - alarm_control_panel.abode_alarm
-          from: null
-          to: null
-          id: state_change
-        - trigger: homeassistant
-          event: start
-          id: ha_start
-      conditions: []
-      actions:
-        - variables:
-            # 6051: Arming Away
-            # 6061: Arming Home
-            # 6055: Arming Away w/ Fault
-            # 6065: Arming Home w/ Fault
-            new_state_real: |
-              {% if trigger.id == "arming" %}
-                {% if trigger.event.data.event_code == "6051" or trigger.event.data.event_code == "6061" or trigger.event.data.event_code == "6055" or trigger.event.data.event_code == "6065" %}
-                  arming
-                {% endif %}
-              {% elif trigger.id == "disarm" %}
-                disarmed
-              {% elif trigger.id == "state_change" %}
-                {{ trigger.to_state.state }}
-              {% else %}
-                {{ states("alarm_control_panel.abode_alarm") }}
-              {% endif %}
-            new_state: |
-              {% if new_state_real == "armed_away" and is_state("input_boolean.alarm_night_mode", "on") %}
-                armed_night
-              {% else %}
-                {{ new_state_real }}
-              {% endif %}
-        - condition: template
-          value_template: '{{ new_state != "" }}'
-        - action: input_text.set_value
-          target:
-            entity_id: input_text.alarm_state
-          data:
-            value: "{{ new_state }}"
-        - if:
-            - condition: template
-              value_template: "{{ new_state is match('(disarmed|armed_(away|home|night))') }}"
-          then:
-            - action: input_boolean.turn_off
-              target:
-                entity_id: input_boolean.alarm_night_mode
-      mode: single
+  - id: "5987768829878"
+    alias: Wrapped Alarm Sync
+    description: ""
+    triggers:
+    - event_type: abode_arm
+      event_data: {}
+      trigger: event
+      enabled: true
+      id: arming
+    - event_type: abode_arm_fault
+      event_data: {}
+      trigger: event
+      enabled: true
+      id: arming
+    - event_type: abode_disarm
+      event_data: {}
+      trigger: event
+      enabled: true
+      id: disarm
+    - trigger: state
+      entity_id:
+      - alarm_control_panel.abode_alarm
+      from:
+      to:
+      id: state_change
+    - trigger: homeassistant
+      event: start
+      id: ha_start
+    conditions: []
+    actions:
+    - variables:
+        new_state_real: |
+          {% if trigger.id == "disarm" %}
+            disarmed
+          {% elif trigger.id == "arming" %}
+            {% set event_name = trigger.event.data.event_name | default("", true) %}
+            {% if event_name.startswith("Hub Armed") %}
+              {{ states("alarm_control_panel.abode_alarm") }}
+            {% else %}
+              arming
+            {% endif %}
+          {% elif trigger.id == "state_change" %}
+            {% if trigger.to_state.state in ("armed_away", "armed_home") %}
+              arming
+            {% else %}
+              {{ trigger.to_state.state }}
+            {% endif %}
+          {% else %}
+            {{ states("alarm_control_panel.abode_alarm") }}
+          {% endif %}
+        new_state: |
+          {% if new_state_real == "armed_away" and is_state("input_boolean.alarm_night_mode", "on") %}
+            armed_night
+          {% else %}
+            {{ new_state_real }}
+          {% endif %}
+    - condition: template
+      value_template: '{{ new_state != "" }}'
+    - action: input_text.set_value
+      target:
+        entity_id: input_text.alarm_state
+      data:
+        value: "{{ new_state }}"
+    - if:
+      - condition: template
+        value_template: "{{ new_state == 'disarmed' }}"
+      then:
+      - action: input_boolean.turn_off
+        target:
+          entity_id: input_boolean.alarm_night_mode
+    mode: single
 
   input_text:
     alarm_state:

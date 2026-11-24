@@ -5,26 +5,26 @@ homeassistant:
   # Packages
   packages: !include_dir_merge_named packages
   allowlist_external_dirs:
-    - /tmp
+  - /tmp
 
   media_dirs:
     media: /media
 
   # 2FA
   auth_mfa_modules:
-    - type: totp
+  - type: totp
 
   # Let known users login from their phones
   # Let kiosk user login from local network
   # Any other scenario requires HA login
   auth_providers:
-    - type: homeassistant
-    - type: trusted_networks
-      trusted_networks:
-        - 192.168.0.0/24
-      trusted_users:
-        192.168.0.6:
-          - 9c546e5ab33f47fcbd2103594668aaaf # tom
+  - type: homeassistant
+  - type: trusted_networks
+    trusted_networks:
+    - 192.168.0.0/24
+    trusted_users:
+      192.168.0.6:
+      - 9c546e5ab33f47fcbd2103594668aaaf     # tom
 
   # On restart, set the automations enabled flags to previous values
   customize_domain:
@@ -54,37 +54,37 @@ recorder:
   # Exclude history some entities
   exclude:
     domains:
-      - calendar
-      - group
-      - remote
-      - update
-      - weather
+    - calendar
+    - group
+    - remote
+    - update
+    - weather
     entity_globs:
       # AdGuard
-      - sensor.adguard_*
-      - switch.adguard_*
+    - sensor.adguard_*
+    - switch.adguard_*
       # Alexa Media Player
-      - media_player.*_alexa_*
-      - sensor.*_alexa_*
-      - switch.*_alexa_*
+    - media_player.*_alexa_*
+    - sensor.*_alexa_*
+    - switch.*_alexa_*
       # Supervisor & Zigbee2MQTT
-      - binary_sensor.*_update_available
-      - sensor.*_version
+    - binary_sensor.*_update_available
+    - sensor.*_version
       # Shelly Firmware updates
-      - binary_sensor.*_firmware_update
-      - button.*_update_firmware
-      - sensor.*_signal_strength
+    - binary_sensor.*_firmware_update
+    - button.*_update_firmware
+    - sensor.*_signal_strength
     entities:
       # Sun
-      - sun.sun
+    - sun.sun
       # Sports
-      - sensor.mlb_philadelphia_phillies
-      - sensor.nfl_philadelphia_eagles
-      - sensor.nhl_philadelphia_flyers
-      - sensor.nba_philadelphia_76ers
+    - sensor.mlb_philadelphia_phillies
+    - sensor.nfl_philadelphia_eagles
+    - sensor.nhl_philadelphia_flyers
+    - sensor.nba_philadelphia_76ers
       # Very chatty sensors that are of little to no use
-      - sensor.bambu_p1s_wi_fi_signal
-      - sensor.greenmeadowweatherstation_eventdate
+    - sensor.bambu_p1s_wi_fi_signal
+    - sensor.greenmeadowweatherstation_eventdate
 
 alert: !include alerts.yaml
 automation: !include automations.yaml
@@ -95,3 +95,4 @@ template: !include_dir_list templates/
 # Enable python scripts (built-in and pyscript)
 python_script:
 pyscript: !include pyscript/config.yaml
+shell_command: !include shell_commands.yaml

@@ -1187,7 +1187,19 @@
         target:
           entity_id: media_player.kitchen_echo_show
         action: media_player.play_media
-        enabled: false
+        enabled: true
+      - delay:
+          minutes: 2
+        alias: Let Echo Show stream run 2 min
+      - action: media_player.play_media
+        target:
+          entity_id: media_player.kitchen_echo_show
+        alias: Stop Echo Show stream
+        data:
+          media:
+            media_content_id: stop showing front door fluent
+            media_content_type: custom
+            metadata: {}
       alias: Notify with Echo
     - sequence:
       - data:
@@ -1213,6 +1225,13 @@
         enabled: true
         target:
           entity_id: camera.front_doorbell_fluent
+      - delay:
+          minutes: 2
+        alias: Let stream run 2 min
+      - action: media_player.media_stop
+        target:
+          entity_id: media_player.office_display
+        alias: Stop Google Home stream
       enabled: true
       alias: Notify via Google Home
     - sequence:
@@ -2507,3 +2526,89 @@
         target:
           entity_id: light.great_room_backlight
   mode: single
+- id: '1795385643226'
+  alias: 'Front House Accent: Dusk / Calendar Trigger'
+  description: Turns on front accent lighting (or re-applies the highest-priority
+    active LED Schedule event) at dusk-minus-1h, or whenever a calendar event starts
+    or ends. The shared sun condition (sunset, offset -1h) is anchored to sunset rather
+    than dusk specifically so it can never be false at the moment the dusk trigger
+    itself fires -- sunset always precedes dusk, so sunset-1h <= dusk-1h on every
+    day of the year. This also gates the calendar-event path so a timed event scheduled
+    during full daylight doesn't turn the lights on early.
+  triggers:
+  - trigger: sun.dusk
+    options:
+      offset: -01:00:00
+  - trigger: calendar
+    entity_id: calendar.led_schedule
+    event: start
+  - trigger: calendar
+    entity_id: calendar.led_schedule
+    event: end
+  conditions:
+  - condition: sun
+    after: sunset
+    after_offset: -01:00:00
+  actions:
+  - action: pyscript.set_holiday_lighting
+  mode: single
+- id: '1795385644432'
+  alias: 'Front House Accent: Midnight Off'
+  description: Turns off the front accent lighting at midnight
+  triggers:
+  - trigger: time
+    at: 00:00:00
+  conditions: []
+  actions:
+  - action: pyscript.set_holiday_lighting_off
+  mode: single
+- id: '1795494070651'
+  alias: 'Front House Accent: Restore After Recovery'
+  description: 'Re-applies the LED Schedule show after the two events that silently
+    leave it un-applied: a Home Assistant restart (nothing re-triggers the dusk automation,
+    and pyscript''s file-defined services are not registered for the first minute
+    or two -- pyscript.reload succeeds while pyscript.set_holiday_lighting returns
+    400), and a WLED device reboot or Wi-Fi drop (the playlist is activated inline,
+    not saved as a preset, so the device comes back on its boot state). Each branch
+    re-checks the sun condition AFTER its delay so a daytime or post-midnight recovery
+    does not light the house. The sun condition is day-bounded, so it is false after
+    midnight until the next sunset.'
+  triggers:
+  - trigger: homeassistant
+    event: start
+    id: ha_start
+  - trigger: state
+    entity_id: light.outside_outside_led
+    from:
+    - unavailable
+    - unknown
+    not_to:
+    - unavailable
+    - unknown
+    id: wled_back
+  actions:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: ha_start
+      sequence:
+      - delay: 00:01:30
+        alias: Let HA finish starting and pyscript load its scripts
+      - action: pyscript.reload
+        alias: Force registration of file-defined pyscript services (they can be missing
+          after a restart)
+      - delay: 00:00:10
+    - conditions:
+      - condition: trigger
+        id: wled_back
+      sequence:
+      - delay: 00:00:15
+        alias: Let the WLED device settle before writing presets to it
+  - condition: sun
+    after: sunset
+    after_offset: -01:00:00
+    alias: Only light up once it is getting dark -- re-checked after the delay
+  - action: pyscript.set_holiday_lighting
+    alias: Rebuild presets and re-activate the WLED playlist
+  mode: queued
+  max: 3
