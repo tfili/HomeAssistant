@@ -85,6 +85,7 @@ backup/
 Thumbs.db
 *.swp
 *~
+*.bak
 
 #############################
 # Python artifacts

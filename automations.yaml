@@ -2612,3 +2612,71 @@
     alias: Rebuild presets and re-activate the WLED playlist
   mode: queued
   max: 3
+- id: '1795536971646'
+  alias: 'Shellies Discovery: Weekly Script Update'
+  description: 'Replaces the update path Marketplace/HACS used to provide for the
+    python_scripts category (HA repair python_scripts_not_supported). Each shell_command
+    downloads the latest GitHub release zip, extracts the .py, and only swaps it in
+    if it actually differs from what is installed, keeping a .bak. They echo ''updated''
+    or ''up-to-date''. This automation reloads python_script and raises a notification
+    only when something really changed, so a quiet week stays silent. hass_entities.py
+    is deliberately not covered: it was never Marketplace-managed and has no upstream
+    release, but it IS in use by automation.reset_motion_sensors, so do not delete
+    it.'
+  triggers:
+  - trigger: time
+    at: 04:30:00
+  conditions:
+  - condition: time
+    weekday:
+    - sun
+  actions:
+  - action: shell_command.update_shellies_discovery
+    response_variable: gen1
+    alias: Pull latest Shellies Discovery (gen1)
+  - action: shell_command.update_shellies_discovery_gen2
+    response_variable: gen2
+    alias: Pull latest Shellies Discovery Gen2
+  - if:
+    - condition: template
+      value_template: '{{ gen1.returncode != 0 or gen2.returncode != 0 }}'
+    then:
+    - action: persistent_notification.create
+      data:
+        notification_id: shellies_script_update
+        title: ⚠ Shellies script update FAILED
+        message: 'The download or extraction failed, so the installed scripts were
+          left untouched.
+
+
+          gen1 rc={{ gen1.returncode }} {{ gen1.stdout }} {{ gen1.stderr }}
+
+          gen2 rc={{ gen2.returncode }} {{ gen2.stdout }} {{ gen2.stderr }}'
+    - stop: Update failed; installed scripts untouched.
+    alias: Bail out loudly if a download failed
+  - if:
+    - condition: template
+      value_template: '{{ ''updated'' in gen1.stdout or ''updated'' in gen2.stdout
+        }}'
+    then:
+    - action: python_script.reload
+      alias: Load the new script code
+    - action: shell_command.shellies_script_versions
+      response_variable: vers
+    - action: persistent_notification.create
+      data:
+        notification_id: shellies_script_update
+        title: Shellies scripts updated
+        message: 'gen1: {{ gen1.stdout }}
+
+          gen2: {{ gen2.stdout }}
+
+
+          Now installed:
+
+          {{ vers.stdout }}
+
+
+          Previous files kept as .bak alongside each script.'
+    alias: Only reload and notify when a file actually changed
+  mode: single

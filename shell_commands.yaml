@@ -4,3 +4,45 @@ wled_set_state: "curl -s -X POST -H \"Content-Type: application/json\" -d '{{ pa
 # Read-only: returns the full presets.json (stage presets + any tb overrides).
 # Diagnostic use only -- nothing in holiday_lighting.py depends on this.
 wled_get_presets: "curl -s \"http://{{ host }}/presets.json\""
+
+# --- Shellies Discovery python_script updaters -------------------------------
+# Marketplace stopped managing the python_scripts category (HA repair
+# `python_scripts_not_supported`), so these reproduce what HACS used to do.
+#
+# Why the release ZIP and not the raw repo file: GitHub's
+# /releases/latest/download/ redirect always serves the newest release, and the
+# .py inside that zip has its real version substituted by the project's CI
+# (VERSION = "5.6.1"). The raw file in the repo tree reads VERSION = "0.0.0",
+# so installing from raw would lose version information entirely.
+#
+# `python3 -m zipfile` is stdlib, so there is no dependency on `unzip` being
+# present in the HA container.
+#
+# Each command: download -> extract -> sanity-check non-empty -> compare with
+# what is installed -> only on a real difference, back up the current file and
+# swap the new one in. Chained with && so a failure at any step leaves the live
+# file untouched. Echoes "updated" or "up-to-date" so the weekly automation
+# knows whether to reload python_script and notify.
+update_shellies_discovery: >-
+  curl -fsSL -o /tmp/sd1.zip https://github.com/bieniu/ha-shellies-discovery/releases/latest/download/shellies-discovery.zip
+  && rm -rf /tmp/sd1 && python3 -m zipfile -e /tmp/sd1.zip /tmp/sd1/
+  && test -s /tmp/sd1/shellies_discovery.py
+  && if cmp -s /tmp/sd1/shellies_discovery.py /config/python_scripts/shellies_discovery.py;
+  then echo up-to-date;
+  else cp /config/python_scripts/shellies_discovery.py /config/python_scripts/shellies_discovery.py.bak
+  && mv /tmp/sd1/shellies_discovery.py /config/python_scripts/shellies_discovery.py
+  && echo updated; fi
+
+update_shellies_discovery_gen2: >-
+  curl -fsSL -o /tmp/sd2.zip https://github.com/bieniu/ha-shellies-discovery-gen2/releases/latest/download/shellies-discovery-gen2.zip
+  && rm -rf /tmp/sd2 && python3 -m zipfile -e /tmp/sd2.zip /tmp/sd2/
+  && test -s /tmp/sd2/shellies_discovery_gen2.py
+  && if cmp -s /tmp/sd2/shellies_discovery_gen2.py /config/python_scripts/shellies_discovery_gen2.py;
+  then echo up-to-date;
+  else cp /config/python_scripts/shellies_discovery_gen2.py /config/python_scripts/shellies_discovery_gen2.py.bak
+  && mv /tmp/sd2/shellies_discovery_gen2.py /config/python_scripts/shellies_discovery_gen2.py
+  && echo updated; fi
+
+# Reports the installed versions of both scripts (reads the VERSION constant).
+shellies_script_versions: >-
+  grep -m1 -H ^VERSION /config/python_scripts/shellies_discovery.py /config/python_scripts/shellies_discovery_gen2.py

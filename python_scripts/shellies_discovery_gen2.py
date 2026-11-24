@@ -1,6 +1,6 @@
 """Adds MQTT discovery support for Shellies Gen2+ devices."""
 
-VERSION = "5.6.0"
+VERSION = "5.6.1"
 
 ATTR_BATTERY_POWERED = "battery_powered"
 ATTR_BINARY_SENSORS = "binary_sensors"
@@ -6853,9 +6853,14 @@ if "components" in device_config:
     if has_virtual_components:
         sys_config = components["sys"]["device"]
         mac = format_mac(mac_from_device_id).lower()
+        device_name = (
+            sys_config.get(ATTR_NAME)
+            or f"{SUPPORTED_MODELS[gateway_model][ATTR_NAME]} {mac.upper().replace(':', '')}"
+        ).replace("'", "_")
         device_info = {
             KEY_CONNECTIONS: [[KEY_MAC, mac]],
             KEY_IDENTIFIERS: [mac],
+            KEY_NAME: device_name,
         }
 
         config_data.update(get_virtual_components(components))
