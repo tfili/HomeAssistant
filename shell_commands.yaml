@@ -43,6 +43,30 @@ update_shellies_discovery_gen2: >-
   && mv /tmp/sd2/shellies_discovery_gen2.py /config/python_scripts/shellies_discovery_gen2.py
   && echo updated; fi
 
-# Reports the installed versions of both scripts (reads the VERSION constant).
+# hass_entities (pmazz/ps_hassio_entities) -- the third python_script. Differs
+# from the two above in three ways, all upstream's doing:
+#   1. No release assets, so this pulls the raw file from the default branch
+#      (master) rather than a release zip. HEAD and the latest tag v1.1.0 are
+#      byte-identical (7652), so that is currently a distinction without a
+#      difference -- but it does mean this one tracks commits, not releases.
+#   2. No VERSION constant in the file, so `cmp` is the only change detector
+#      and shellies_script_versions cannot report it.
+#   3. The repo has been dormant since 2021-03-07, so expect `up-to-date`
+#      indefinitely.
+# The grep guards against a truncated download: `delete_attribute` is the last
+# action the script defines, so its presence means the body arrived intact.
+# NOTE: hass_entities IS load-bearing -- automation.reset_motion_sensors calls
+# it five times. Do not delete it.
+update_hass_entities: >-
+  curl -fsSL -o /tmp/he.py https://raw.githubusercontent.com/pmazz/ps_hassio_entities/master/python_scripts/hass_entities.py
+  && test -s /tmp/he.py && grep -q delete_attribute /tmp/he.py
+  && if cmp -s /tmp/he.py /config/python_scripts/hass_entities.py;
+  then echo up-to-date;
+  else cp /config/python_scripts/hass_entities.py /config/python_scripts/hass_entities.py.bak
+  && mv /tmp/he.py /config/python_scripts/hass_entities.py
+  && echo updated; fi
+
+# Reports the installed versions of both Shellies scripts (reads the VERSION
+# constant). hass_entities has no VERSION constant, so it is not listed here.
 shellies_script_versions: >-
   grep -m1 -H ^VERSION /config/python_scripts/shellies_discovery.py /config/python_scripts/shellies_discovery_gen2.py

@@ -2613,16 +2613,17 @@
   mode: queued
   max: 3
 - id: '1795536971646'
-  alias: 'Shellies Discovery: Weekly Script Update'
-  description: 'Replaces the update path Marketplace/HACS used to provide for the
-    python_scripts category (HA repair python_scripts_not_supported). Each shell_command
-    downloads the latest GitHub release zip, extracts the .py, and only swaps it in
-    if it actually differs from what is installed, keeping a .bak. They echo ''updated''
-    or ''up-to-date''. This automation reloads python_script and raises a notification
-    only when something really changed, so a quiet week stays silent. hass_entities.py
-    is deliberately not covered: it was never Marketplace-managed and has no upstream
-    release, but it IS in use by automation.reset_motion_sensors, so do not delete
-    it.'
+  alias: 'Python Scripts: Weekly Update'
+  description: Replaces the update path Marketplace/HACS used to provide for the python_scripts
+    category (HA repair python_scripts_not_supported). Covers all three scripts in
+    /config/python_scripts. Each shell_command downloads upstream, sanity-checks it,
+    and only swaps the file in if it actually differs, keeping a .bak; they echo 'updated'
+    or 'up-to-date'. This automation reloads python_script and raises a persistent
+    notification only when something really changed, so a quiet week stays silent.
+    The two Shellies scripts track GitHub RELEASES (zip assets, with a real VERSION
+    constant); hass_entities has no release assets so it tracks the master branch
+    and has no VERSION constant. hass_entities is load-bearing for automation.reset_motion_sensors
+    -- do not delete it.
   triggers:
   - trigger: time
     at: 04:30:00
@@ -2637,27 +2638,36 @@
   - action: shell_command.update_shellies_discovery_gen2
     response_variable: gen2
     alias: Pull latest Shellies Discovery Gen2
+  - action: shell_command.update_hass_entities
+    response_variable: hassent
+    alias: Pull latest hass_entities
   - if:
     - condition: template
-      value_template: '{{ gen1.returncode != 0 or gen2.returncode != 0 }}'
+      value_template: '{{ gen1.returncode != 0 or gen2.returncode != 0 or hassent.returncode
+        != 0 }}'
     then:
     - action: persistent_notification.create
       data:
-        notification_id: shellies_script_update
-        title: ⚠ Shellies script update FAILED
-        message: 'The download or extraction failed, so the installed scripts were
-          left untouched.
+        notification_id: python_scripts_update
+        title: ⚠ python_scripts update FAILED
+        message: 'A download or sanity check failed, so that script''s installed file
+          was left untouched.
 
 
-          gen1 rc={{ gen1.returncode }} {{ gen1.stdout }} {{ gen1.stderr }}
+          shellies_discovery rc={{ gen1.returncode }} {{ gen1.stdout }} {{ gen1.stderr
+          }}
 
-          gen2 rc={{ gen2.returncode }} {{ gen2.stdout }} {{ gen2.stderr }}'
+          shellies_discovery_gen2 rc={{ gen2.returncode }} {{ gen2.stdout }} {{ gen2.stderr
+          }}
+
+          hass_entities rc={{ hassent.returncode }} {{ hassent.stdout }} {{ hassent.stderr
+          }}'
     - stop: Update failed; installed scripts untouched.
-    alias: Bail out loudly if a download failed
+    alias: Bail out loudly if any download failed
   - if:
     - condition: template
       value_template: '{{ ''updated'' in gen1.stdout or ''updated'' in gen2.stdout
-        }}'
+        or ''updated'' in hassent.stdout }}'
     then:
     - action: python_script.reload
       alias: Load the new script code
@@ -2665,18 +2675,21 @@
       response_variable: vers
     - action: persistent_notification.create
       data:
-        notification_id: shellies_script_update
-        title: Shellies scripts updated
-        message: 'gen1: {{ gen1.stdout }}
+        notification_id: python_scripts_update
+        title: python_scripts updated
+        message: 'shellies_discovery: {{ gen1.stdout }}
 
-          gen2: {{ gen2.stdout }}
+          shellies_discovery_gen2: {{ gen2.stdout }}
+
+          hass_entities: {{ hassent.stdout }}
 
 
-          Now installed:
+          Shellies versions now installed:
 
           {{ vers.stdout }}
 
 
-          Previous files kept as .bak alongside each script.'
+          Previous files kept as .bak alongside each script. hass_entities has no
+          VERSION constant, so it is not listed above.'
     alias: Only reload and notify when a file actually changed
   mode: single
